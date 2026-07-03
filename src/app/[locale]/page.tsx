@@ -211,7 +211,7 @@ export default function HomePage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1.2, delay: 2, ease: [0.16, 1, 0.3, 1] }}
-          className="mt-10 flex items-start gap-10 lg:gap-16"
+          className="mt-10 flex flex-col items-center gap-6 sm:flex-row sm:items-start sm:gap-10 lg:gap-16"
         >
           {heroNav.map((item) => (
             <a
