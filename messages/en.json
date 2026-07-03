@@ -1,0 +1,161 @@
+{
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "services": "Services",
+    "store": "Piano Store",
+    "gallery": "Gallery",
+    "contact": "Contact"
+  },
+  "hero": {
+    "badge": "Jerusalem's Premier Piano Workshop",
+    "title": "Where Pianos\nAre Reborn",
+    "subtitle": "Restoration · Sales · Japanese Imports",
+    "cta_store": "See Our Pianos",
+    "cta_services": "Our Services"
+  },
+  "features": {
+    "restoration": {
+      "title": "Piano Restoration",
+      "desc": "We breathe new life into aging instruments. From structural repairs to complete rebuilds, every piano leaves our workshop performing at its highest potential."
+    },
+    "sales": {
+      "title": "Premium Sales",
+      "desc": "A curated selection of restored and imported pianos, each one inspected and tuned to concert standards before reaching your home."
+    },
+    "imports": {
+      "title": "Japanese Imports",
+      "desc": "We source exceptional pianos directly from Japan — renowned for their craftsmanship, longevity, and tonal richness."
+    }
+  },
+  "about_teaser": {
+    "label": "Our Story",
+    "title": "A Passion for the Piano",
+    "body": "Trio Piano Workshop was born from a deep love for the instrument. Based in Jerusalem, we combine old-world craftsmanship with modern expertise to restore, curate, and offer the finest pianos in Israel. Every piano has a story — we make sure it continues.",
+    "cta": "Learn More About Us"
+  },
+  "featured": {
+    "label": "From Our Collection",
+    "title": "Featured Pianos",
+    "subtitle": "A selection of our finest instruments, ready to find their next home.",
+    "cta": "View All Pianos"
+  },
+  "testimonials": {
+    "label": "What Our Clients Say",
+    "title": "Stories of Transformation"
+  },
+  "cta_banner": {
+    "title": "Ready to Find Your Perfect Piano?",
+    "subtitle": "Visit our workshop in Jerusalem or get in touch — we'd love to help you find the instrument that speaks to you.",
+    "cta": "Contact Us"
+  },
+  "about": {
+    "hero_label": "Our Story",
+    "hero_title": "Passion, Craft & Sound",
+    "hero_subtitle": "We believe every piano deserves to be heard at its finest.",
+    "story_title": "The Trio Story",
+    "story_body1": "Trio Piano Workshop was founded with a single mission: to give pianos the care and craftsmanship they deserve. Located in the heart of Jerusalem, our workshop brings together master technicians, restorers, and passionate musicians.",
+    "story_body2": "We specialize in restoring vintage and modern pianos to concert-level performance, and we import select instruments from Japan — a country renowned for producing some of the world's finest pianos.",
+    "story_body3": "Whether you're searching for your first piano or looking to restore a family heirloom, we are here to guide you every step of the way.",
+    "values_label": "What Drives Us",
+    "values_title": "Our Values",
+    "value1_title": "Craftsmanship",
+    "value1_desc": "Every piano we touch receives our full attention. We use only the best materials and techniques.",
+    "value2_title": "Integrity",
+    "value2_desc": "We give honest assessments and fair prices. Your trust is the foundation of everything we do.",
+    "value3_title": "Passion",
+    "value3_desc": "We are musicians and craftspeople first. The love of the piano drives every decision we make.",
+    "location_label": "Find Us",
+    "location_title": "Visit Our Workshop",
+    "location_address": "Jerusalem, Israel",
+    "location_hours": "Sunday – Thursday: 10:00 – 18:00\nFriday: 10:00 – 13:00"
+  },
+  "services": {
+    "hero_label": "What We Do",
+    "hero_title": "Complete Piano Services",
+    "hero_subtitle": "From restoration to sales, we cover every aspect of the piano journey.",
+    "restoration_title": "Piano Restoration",
+    "restoration_subtitle": "From Forgotten to Flawless",
+    "restoration_body": "Our restoration service is the heart of what we do. We assess each piano individually and create a tailored restoration plan — addressing everything from soundboard repairs and string replacement to action rebuilds, refinishing, and voicing. The result: an instrument that plays and sounds like new.",
+    "restoration_includes": "What's included",
+    "restoration_list": [
+      "Full structural assessment",
+      "Soundboard and bridges repair",
+      "String and pin replacement",
+      "Action regulation and rebuilding",
+      "Damper and pedal service",
+      "Cabinet refinishing",
+      "Tuning and voicing to concert standard"
+    ],
+    "sales_title": "Piano Sales",
+    "sales_subtitle": "Instruments Worth Playing",
+    "sales_body": "Our showroom features a hand-picked selection of pianos at every price point — from fully restored vintage uprights to pristine Japanese grands. Each piano is thoroughly inspected, regulated, and tuned before being offered for sale.",
+    "import_title": "Japanese Piano Import",
+    "import_subtitle": "The Best of Japan, Delivered to Jerusalem",
+    "import_body": "Japan produces some of the world's most reliable and expressive pianos. We have established direct relationships with dealers and auction houses in Japan, allowing us to source exceptional instruments at competitive prices. Brands we work with include Yamaha, Kawai, and other Japanese manufacturers.",
+    "cta_title": "Have a Question About a Service?",
+    "cta_body": "We're happy to advise. Every situation is unique and we'll always give you an honest recommendation.",
+    "cta": "Get in Touch"
+  },
+  "store": {
+    "hero_label": "Our Collection",
+    "hero_title": "Pianos for Sale",
+    "hero_subtitle": "Each instrument has been personally selected, inspected, and prepared by our team.",
+    "filter_all": "All",
+    "filter_restored": "Restored",
+    "filter_imported": "Imported",
+    "filter_grand": "Grand",
+    "filter_upright": "Upright",
+    "contact_price": "Contact for Price",
+    "inquire": "Inquire",
+    "condition_restored": "Restored",
+    "condition_imported": "Imported from Japan",
+    "condition_new": "New",
+    "year": "Year",
+    "empty": "No pianos match your filter. Try a different category."
+  },
+  "gallery": {
+    "hero_label": "Our Work",
+    "hero_title": "Before & After",
+    "hero_subtitle": "See the transformation. Every piano tells a story of renewal.",
+    "before": "Before",
+    "after": "After",
+    "category_all": "All",
+    "category_restoration": "Restoration",
+    "category_grand": "Grand Pianos",
+    "category_upright": "Upright Pianos"
+  },
+  "contact": {
+    "hero_label": "Get in Touch",
+    "hero_title": "We'd Love to Hear From You",
+    "hero_subtitle": "Whether you have a piano that needs restoration, are looking to buy, or just have a question — we're here.",
+    "form_name": "Your Name",
+    "form_email": "Email Address",
+    "form_phone": "Phone Number",
+    "form_subject": "Subject",
+    "form_message": "Your Message",
+    "form_submit": "Send Message",
+    "form_sending": "Sending...",
+    "form_success": "Thank you! We'll be in touch shortly.",
+    "form_error": "Something went wrong. Please try again or call us directly.",
+    "info_address": "Yad Harutzim 16, Jerusalem",
+    "info_phone": "+972-54-333-7341",
+    "info_email": "trio.piano.studio@gmail.com",
+    "info_hours": "Sun–Thu: 10:00–18:00 | Fri: 10:00–13:00",
+    "whatsapp": "Chat on WhatsApp"
+  },
+  "footer": {
+    "tagline": "Expert piano restoration & premium sales in Jerusalem.",
+    "nav_title": "Navigation",
+    "contact_title": "Contact",
+    "rights": "All rights reserved.",
+    "address": "Jerusalem, Israel"
+  },
+  "common": {
+    "learn_more": "Learn More",
+    "view_all": "View All",
+    "contact_us": "Contact Us",
+    "ils": "₪",
+    "currency": "ILS"
+  }
+}

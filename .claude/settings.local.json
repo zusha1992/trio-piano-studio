@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem -Path \".\" -Recurse -File | Where-Object { $_.Extension -in @\\('.png', '.jpg', '.jpeg', '.svg', '.webp', '.pdf'\\) } | Select-Object FullName 2>&1)",
+      "PowerShell(npm install --save-dev @tailwindcss/postcss 2>&1)",
+      "PowerShell(npx next build 2>&1)",
+      "PowerShell(New-Item -Name \"next.config.mjs\" -ItemType File)",
+      "Skill(run)",
+      "Skill(run:*)",
+      "Bash(npm install *)",
+      "Bash(node -e ' *)",
+      "Bash(xargs sed -i -e 's/#0A0A0A/#16120E/g' -e 's/#080808/#11100C/g' -e 's/#0E0E0E/#1B1610/g' -e 's/#141414/#1F1912/g' -e 's/#1A1A1A/#28201A/g' -e 's/#1E1E1E/#2C241A/g' -e 's/#222222/#302818/g' -e 's/#2E2E2E/#3C2E20/g' -e 's/#3A3A3A/#4A3C2C/g' -e 's/#5C5C5C/#6A5C4A/g' -e 's/#6B6B6B/#796B58/g' -e 's/#7A7A7A/#887A66/g' -e 's/#8C8C8C/#948270/g' -e 's/#B8B8B8/#A08C7C/g')"
+    ]
+  }
+}
