@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { motion } from 'framer-motion';
 import { Mail, Phone, MapPin, Clock } from 'lucide-react';
@@ -22,6 +22,10 @@ export default function ContactPage() {
   const locale = useLocale();
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
 
+  useEffect(() => {
+    emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+  }, []);
+
   const headingFont =
     locale === 'he' ? 'var(--font-heebo), sans-serif' : 'var(--font-cormorant), serif';
 
@@ -42,8 +46,7 @@ export default function ContactPage() {
           phone: formData.get('phone') as string,
           subject: formData.get('subject') as string,
           message: formData.get('message') as string,
-        },
-        { publicKey: EMAILJS_PUBLIC_KEY }
+        }
       );
       setStatus('success');
       form.reset();
