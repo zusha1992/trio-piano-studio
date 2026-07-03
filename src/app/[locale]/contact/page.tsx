@@ -37,17 +37,18 @@ export default function ContactPage() {
         EMAILJS_SERVICE_ID,
         EMAILJS_TEMPLATE_ID,
         {
-          from_name: formData.get('name') as string,
-          from_email: formData.get('email') as string,
+          name: formData.get('name') as string,
+          email: formData.get('email') as string,
           phone: formData.get('phone') as string,
           subject: formData.get('subject') as string,
           message: formData.get('message') as string,
         },
-        EMAILJS_PUBLIC_KEY
+        { publicKey: EMAILJS_PUBLIC_KEY }
       );
       setStatus('success');
       form.reset();
-    } catch {
+    } catch (err) {
+      console.error('EmailJS error:', err);
       setStatus('error');
     }
   };
