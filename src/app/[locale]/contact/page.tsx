@@ -3,7 +3,13 @@
 import { useState, FormEvent } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { motion } from 'framer-motion';
-import { Mail, Phone, MapPin, Clock, Facebook } from 'lucide-react';
+import { Mail, Phone, MapPin, Clock } from 'lucide-react';
+
+const FacebookIcon = () => (
+  <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+  </svg>
+);
 import emailjs from '@emailjs/browser';
 
 // Replace these with your actual EmailJS credentials
@@ -51,7 +57,7 @@ export default function ContactPage() {
     { icon: Phone, label: t('info_phone'), href: `tel:+972543337341` },
     { icon: Mail, label: t('info_email'), href: `mailto:trio.piano.studio@gmail.com` },
     { icon: Clock, label: t('info_hours') },
-    { icon: Facebook, label: 'trio.piano.studio', href: 'https://www.facebook.com/profile.php?id=61590350696510' },
+    { icon: FacebookIcon, label: 'trio.piano.studio', href: 'https://www.facebook.com/profile.php?id=61590350696510' },
   ];
 
   return (
