@@ -26,10 +26,10 @@ export default function Button({
     'inline-flex items-center justify-center font-light tracking-[0.2em] uppercase transition-all duration-300 cursor-pointer';
 
   const variants = {
-    primary: 'bg-[#A08C7C] hover:bg-[#D4B96A] text-[#16120E]',
+    primary: 'bg-[var(--c-accent)] hover:bg-[#D4B96A] text-[var(--c-bg)]',
     outline:
-      'border border-[#A08C7C] text-[#A08C7C] hover:bg-[#A08C7C] hover:text-[#16120E]',
-    ghost: 'text-[#F0EAD6] hover:text-[#A08C7C]',
+      'border border-[var(--c-accent)] text-[var(--c-accent)] hover:bg-[var(--c-accent)] hover:text-[var(--c-bg)]',
+    ghost: 'text-[var(--c-text)] hover:text-[var(--c-accent)]',
   };
 
   const sizes = {

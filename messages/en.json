@@ -1,49 +1,4 @@
 {
-  "nav": {
-    "home": "Home",
-    "about": "About",
-    "services": "Services",
-    "store": "Piano Store",
-    "gallery": "Gallery",
-    "contact": "Contact"
-  },
-  "hero": {
-    "badge": "Jerusalem's Premier Piano Workshop",
-    "title": "Where Pianos\nAre Reborn",
-    "subtitle": "Restoration · Sales · Japanese Imports",
-    "cta_store": "See Our Pianos",
-    "cta_services": "Our Services"
-  },
-  "features": {
-    "restoration": {
-      "title": "Piano Restoration",
-      "desc": "We breathe new life into aging instruments. From structural repairs to complete rebuilds, every piano leaves our workshop performing at its highest potential."
-    },
-    "sales": {
-      "title": "Premium Sales",
-      "desc": "A curated selection of restored and imported pianos, each one inspected and tuned to concert standards before reaching your home."
-    },
-    "imports": {
-      "title": "Japanese Imports",
-      "desc": "We source exceptional pianos directly from Japan — renowned for their craftsmanship, longevity, and tonal richness."
-    }
-  },
-  "about_teaser": {
-    "label": "Our Story",
-    "title": "A Passion for the Piano",
-    "body": "Trio Piano Workshop was born from a deep love for the instrument. Based in Jerusalem, we combine old-world craftsmanship with modern expertise to restore, curate, and offer the finest pianos in Israel. Every piano has a story — we make sure it continues.",
-    "cta": "Learn More About Us"
-  },
-  "featured": {
-    "label": "From Our Collection",
-    "title": "Featured Pianos",
-    "subtitle": "A selection of our finest instruments, ready to find their next home.",
-    "cta": "View All Pianos"
-  },
-  "testimonials": {
-    "label": "What Our Clients Say",
-    "title": "Stories of Transformation"
-  },
   "cta_banner": {
     "title": "Ready to Find Your Perfect Piano?",
     "subtitle": "Visit our workshop in Jerusalem or get in touch — we'd love to help you find the instrument that speaks to you.",
@@ -143,19 +98,5 @@
     "info_email": "trio.piano.studio@gmail.com",
     "info_hours": "Sun–Thu: 10:00–18:00 | Fri: 10:00–13:00",
     "whatsapp": "Chat on WhatsApp"
-  },
-  "footer": {
-    "tagline": "Expert piano restoration & premium sales in Jerusalem.",
-    "nav_title": "Navigation",
-    "contact_title": "Contact",
-    "rights": "All rights reserved.",
-    "address": "Jerusalem, Israel"
-  },
-  "common": {
-    "learn_more": "Learn More",
-    "view_all": "View All",
-    "contact_us": "Contact Us",
-    "ils": "₪",
-    "currency": "ILS"
   }
 }

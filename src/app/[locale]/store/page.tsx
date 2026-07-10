@@ -35,7 +35,7 @@ export default function StorePage() {
   return (
     <>
       {/* Hero */}
-      <section className="relative min-h-[50vh] flex items-end bg-[#16120E] pt-20">
+      <section className="relative min-h-[50vh] flex items-end bg-[var(--c-bg)] pt-20">
         <div
           className="absolute inset-0"
           style={{
@@ -47,7 +47,7 @@ export default function StorePage() {
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="text-[10px] tracking-[0.4em] uppercase text-[#A08C7C] mb-4"
+            className="text-[10px] tracking-[0.4em] uppercase text-[var(--c-accent)] mb-4"
           >
             {t('hero_label')}
           </motion.p>
@@ -56,7 +56,7 @@ export default function StorePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="text-5xl lg:text-6xl font-light text-[#F0EAD6] leading-tight mb-4"
+            className="text-5xl lg:text-6xl font-light text-[var(--c-text)] leading-tight mb-4"
             style={{ fontFamily: headingFont }}
           >
             {t('hero_title')}
@@ -65,7 +65,7 @@ export default function StorePage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4 }}
-            className="text-base text-[#6A5C4A] max-w-xl"
+            className="text-base text-[var(--c-muted)] max-w-xl"
           >
             {t('hero_subtitle')}
           </motion.p>
@@ -73,7 +73,7 @@ export default function StorePage() {
       </section>
 
       {/* Filters + Grid */}
-      <section className="section-padding bg-[#16120E] border-t border-[#1F1912]">
+      <section className="section-padding bg-[var(--c-bg)] border-t border-[var(--c-card)]">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           {/* Filter bar */}
           <div className="flex flex-wrap gap-2 mb-12">
@@ -83,8 +83,8 @@ export default function StorePage() {
                 onClick={() => setFilter(f.key)}
                 className={`text-[10px] tracking-[0.2em] uppercase px-5 py-2.5 border transition-all duration-200 cursor-pointer ${
                   filter === f.key
-                    ? 'bg-[#A08C7C] text-[#16120E] border-[#A08C7C]'
-                    : 'border-[#302818] text-[#6A5C4A] hover:border-[#A08C7C] hover:text-[#A08C7C]'
+                    ? 'bg-[var(--c-accent)] text-[var(--c-bg)] border-[var(--c-accent)]'
+                    : 'border-[var(--c-border)] text-[var(--c-muted)] hover:border-[var(--c-accent)] hover:text-[var(--c-accent)]'
                 }`}
               >
                 {f.label}
@@ -95,7 +95,7 @@ export default function StorePage() {
           {/* Grid */}
           {filtered.length === 0 ? (
             <div className="text-center py-20">
-              <p className="text-[#4A3C2C] text-sm">{t('empty')}</p>
+              <p className="text-[var(--c-ultra-dim)] text-sm">{t('empty')}</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -29,8 +29,8 @@ export default function Navbar() {
   // On subpages the logo is always visible; on home it appears after scrolling past hero
   const showLogo = isHome ? pastHero : true;
 
-  // On home page use bare #anchor for smooth scroll; on subpages navigate back to home
-  const navHref = (key: string) => isHome ? `#${key}` : `/${locale}#${key}`;
+  // Each nav item is now its own page
+  const navHref = (key: string) => `/${locale}/${key}`;
 
   useEffect(() => {
     const onScroll = () => {
@@ -57,19 +57,21 @@ export default function Navbar() {
             <Logo />
           </div>
 
-          {/* Desktop links */}
-          <ul className="hidden lg:flex items-center gap-10">
-            {navItems.map(({ key, labelEn, labelHe }) => (
-              <li key={key}>
-                <a
-                  href={navHref(key)}
-                  className="text-[11px] tracking-[0.25em] uppercase text-[var(--c-dim)] hover:text-[var(--c-text)] transition-colors duration-300"
-                >
-                  {isHe ? labelHe : labelEn}
-                </a>
-              </li>
-            ))}
-          </ul>
+          {/* Desktop links — hidden on home since the hero already lists these options */}
+          {!isHome && (
+            <ul className="hidden lg:flex items-center gap-10">
+              {navItems.map(({ key, labelEn, labelHe }) => (
+                <li key={key}>
+                  <a
+                    href={navHref(key)}
+                    className="text-[11px] tracking-[0.25em] uppercase text-[var(--c-dim)] hover:text-[var(--c-text)] transition-colors duration-300"
+                  >
+                    {isHe ? labelHe : labelEn}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
 
           <div className="flex items-center gap-4">
             <ThemeToggle />
@@ -82,14 +84,16 @@ export default function Navbar() {
               {otherLocale === 'he' ? 'עב' : 'EN'}
             </Link>
 
-            {/* Mobile hamburger */}
-            <button
-              onClick={() => setMenuOpen(!menuOpen)}
-              className="lg:hidden text-[var(--c-dim)] hover:text-[var(--c-text)] transition-colors p-1"
-              aria-label="Toggle menu"
-            >
-              {menuOpen ? <X size={20} /> : <Menu size={20} />}
-            </button>
+            {/* Mobile hamburger — hidden on home since the hero already lists these options */}
+            {!isHome && (
+              <button
+                onClick={() => setMenuOpen(!menuOpen)}
+                className="lg:hidden text-[var(--c-dim)] hover:text-[var(--c-text)] transition-colors p-1"
+                aria-label="Toggle menu"
+              >
+                {menuOpen ? <X size={20} /> : <Menu size={20} />}
+              </button>
+            )}
           </div>
         </nav>
       </header>

@@ -91,7 +91,7 @@ export default function GalleryPage() {
   return (
     <>
       {/* Hero */}
-      <section className="relative min-h-[50vh] flex items-end bg-[#16120E] pt-20">
+      <section className="relative min-h-[50vh] flex items-end bg-[var(--c-bg)] pt-20">
         <div
           className="absolute inset-0"
           style={{
@@ -103,7 +103,7 @@ export default function GalleryPage() {
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="text-[10px] tracking-[0.4em] uppercase text-[#A08C7C] mb-4"
+            className="text-[10px] tracking-[0.4em] uppercase text-[var(--c-accent)] mb-4"
           >
             {t('hero_label')}
           </motion.p>
@@ -112,7 +112,7 @@ export default function GalleryPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="text-5xl lg:text-6xl font-light text-[#F0EAD6] leading-tight mb-4"
+            className="text-5xl lg:text-6xl font-light text-[var(--c-text)] leading-tight mb-4"
             style={{ fontFamily: headingFont }}
           >
             {t('hero_title')}
@@ -121,7 +121,7 @@ export default function GalleryPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4 }}
-            className="text-base text-[#6A5C4A] max-w-xl"
+            className="text-base text-[var(--c-muted)] max-w-xl"
           >
             {t('hero_subtitle')}
           </motion.p>
@@ -129,7 +129,7 @@ export default function GalleryPage() {
       </section>
 
       {/* Gallery */}
-      <section className="section-padding bg-[#16120E] border-t border-[#1F1912]">
+      <section className="section-padding bg-[var(--c-bg)] border-t border-[var(--c-card)]">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           {/* Filter */}
           <div className="flex flex-wrap gap-2 mb-12">
@@ -139,8 +139,8 @@ export default function GalleryPage() {
                 onClick={() => setActiveCategory(c.key)}
                 className={`text-[10px] tracking-[0.2em] uppercase px-5 py-2.5 border transition-all duration-200 cursor-pointer ${
                   activeCategory === c.key
-                    ? 'bg-[#A08C7C] text-[#16120E] border-[#A08C7C]'
-                    : 'border-[#302818] text-[#6A5C4A] hover:border-[#A08C7C] hover:text-[#A08C7C]'
+                    ? 'bg-[var(--c-accent)] text-[var(--c-bg)] border-[var(--c-accent)]'
+                    : 'border-[var(--c-border)] text-[var(--c-muted)] hover:border-[var(--c-accent)] hover:text-[var(--c-accent)]'
                 }`}
               >
                 {c.label}
@@ -159,7 +159,7 @@ export default function GalleryPage() {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ duration: 0.4, delay: i * 0.06 }}
-                  className="relative group h-72 overflow-hidden bg-[#1F1912] border border-[#2C241A] cursor-pointer"
+                  className="relative group h-72 overflow-hidden bg-[var(--c-card)] border border-[var(--c-border-lt)] cursor-pointer"
                   onMouseEnter={() => setHoveredId(item.id)}
                   onMouseLeave={() => setHoveredId(null)}
                 >
@@ -170,7 +170,7 @@ export default function GalleryPage() {
                       background:
                         hoveredId === item.id
                           ? 'linear-gradient(135deg, #1A1A0A 0%, #1C1500 100%)'
-                          : '#1F1912',
+                          : 'var(--c-card)',
                     }}
                   >
                     <div className="text-center">
@@ -182,26 +182,26 @@ export default function GalleryPage() {
                             style={{
                               height: `${h}px`,
                               backgroundColor:
-                                hoveredId === item.id ? '#A08C7C' : '#2A2A2A',
+                                hoveredId === item.id ? 'var(--c-accent)' : '#2A2A2A',
                               opacity: hoveredId === item.id ? 0.9 : 0.4,
                             }}
                           />
                         ))}
                       </div>
-                      <p className="text-[10px] tracking-[0.3em] uppercase text-[#4A3C2C] group-hover:text-[#A08C7C] transition-colors duration-300">
+                      <p className="text-[10px] tracking-[0.3em] uppercase text-[var(--c-ultra-dim)] group-hover:text-[var(--c-accent)] transition-colors duration-300">
                         {hoveredId === item.id ? t('after') : t('before')}
                       </p>
                     </div>
                   </div>
 
                   {/* Info overlay */}
-                  <div className="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-[#16120E] to-transparent">
-                    <p className="text-xs text-[#A08C7C] mb-1">{item.year}</p>
-                    <p className="text-sm text-[#F0EAD6] font-light">{item.title[locale]}</p>
+                  <div className="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-[var(--c-bg)] to-transparent">
+                    <p className="text-xs text-[var(--c-accent)] mb-1">{item.year}</p>
+                    <p className="text-sm text-[var(--c-text)] font-light">{item.title[locale]}</p>
                   </div>
 
                   {/* Hover indicator */}
-                  <div className="absolute top-4 end-4 text-[10px] tracking-[0.2em] uppercase text-[#4A3C2C] group-hover:text-[#A08C7C] transition-colors">
+                  <div className="absolute top-4 end-4 text-[10px] tracking-[0.2em] uppercase text-[var(--c-ultra-dim)] group-hover:text-[var(--c-accent)] transition-colors">
                     {hoveredId === item.id ? t('after') : t('before')}
                   </div>
                 </motion.div>
@@ -209,7 +209,7 @@ export default function GalleryPage() {
             </AnimatePresence>
           </div>
 
-          <p className="text-center text-xs text-[#4A3C2C] mt-12 tracking-[0.2em] uppercase">
+          <p className="text-center text-xs text-[var(--c-ultra-dim)] mt-12 tracking-[0.2em] uppercase">
             {locale === 'he'
               ? 'תמונות בפועל יתווספו בקרוב'
               : 'Real project photos coming soon'}

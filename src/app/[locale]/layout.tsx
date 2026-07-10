@@ -47,6 +47,7 @@ export default async function LocaleLayout({
       lang={locale}
       dir={locale === 'he' ? 'rtl' : 'ltr'}
       className={`${cormorant.variable} ${dmSans.variable} ${heebo.variable}`}
+      suppressHydrationWarning
     >
       <head>
         {/* Apply saved theme before first paint to prevent flash */}
