@@ -176,7 +176,7 @@ export default function HeroGate() {
           {/* ── Image panel (constrained to its half so the photo covers the
               half, not the full viewport width) ─────────────────────────── */}
           <motion.div
-            className={`absolute inset-y-0 ${imageHalfPos} w-1/2`}
+            className={`absolute inset-y-0 ${imageHalfPos} w-[calc(50%+1px)]`}
             variants={imageVariants}
             initial={skipIntro ? 'in' : 'off'}
             animate={target}
@@ -250,7 +250,7 @@ export default function HeroGate() {
                         onMouseEnter={() => setActive(c.key)}
                         onFocus={() => setActive(c.key)}
                         onClick={() => handleSelect(c.href)}
-                        className="block cursor-pointer text-start text-[3.375rem] lg:text-[4.05rem] xl:text-[5.4rem] tracking-tight leading-[1.02] transition-colors duration-300"
+                        className="block cursor-pointer text-start text-[3.75rem] tracking-tight leading-[1.02] transition-colors duration-300"
                         style={{
                           fontFamily: headingFont,
                           fontWeight: headingWeight,
@@ -265,19 +265,21 @@ export default function HeroGate() {
               </ul>
             </div>
 
-            {/* Contact footer — spread across the full container width */}
+            {/* Contact footer — one row centered within the categories half.
+                Kept compact (small text, tight gaps, modest padding) so the
+                four labels fit inside 50% width without overflowing. */}
             <div
               dir={isHe ? 'rtl' : 'ltr'}
-              className={`absolute bottom-[5vh] ${catHalfPos} flex items-center justify-center gap-8 px-[7vw]`}
+              className={`absolute bottom-[5vh] ${catHalfPos} flex items-center justify-center gap-x-5 gap-y-2 flex-wrap px-[3vw]`}
             >
               {CONTACTS.map((c) => (
                 <a
                   key={c.icon}
                   href={c.href}
                   {...(c.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-                  className={`flex items-center gap-2 text-sm ${scheme.sub} transition-colors duration-300`}
+                  className={`flex items-center gap-1.5 text-xs ${scheme.sub} transition-colors duration-300`}
                 >
-                  <ContactIcon src={`/assets/icons/${c.icon}`} />
+                  <ContactIcon src={`/assets/icons/${c.icon}`} size={13} />
                   <span className="whitespace-nowrap">{isHe ? c.labelHe : c.labelEn}</span>
                 </a>
               ))}

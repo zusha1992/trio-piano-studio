@@ -42,7 +42,6 @@ export default function HeroMobile() {
   const grad = negative ? '0, 0, 0' : '255, 255, 255';
   // Foreground (text/icons/dots) is the opposite: white in dark, near-black in light.
   const fg = negative ? '#ffffff' : '#09090b';
-  const fgRgb = negative ? '255, 255, 255' : '9, 9, 11';
 
   const [index, setIndex] = useState(0);
   // Distinguishes a real swipe from a tap so a tap-to-enter isn't swallowed.
@@ -88,14 +87,14 @@ export default function HeroMobile() {
 
   return (
     <div className="fixed inset-0 z-[100] overflow-hidden bg-black">
-      {/* Slides — crossfade, draggable, tap to enter */}
+      {/* Slides — crossfade + swipe (drag anywhere); tap-to-enter is a smaller
+          central zone so it doesn't steal taps from the top toolbar/footer. */}
       <motion.div
-        className="absolute inset-0 cursor-pointer"
+        className="absolute inset-0"
         drag="x"
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={0.18}
         onDragEnd={handleDragEnd}
-        onClick={handleEnter}
       >
         {CATEGORIES.map((c, i) => (
           <motion.div
@@ -110,7 +109,7 @@ export default function HeroMobile() {
         ))}
 
         {/* Top wash: fully matte theme color for the top 20% of the screen,
-            then a short 20% fade into the photo. No bottom gradient. */}
+            then a short fade into the photo. Bottom stays fully transparent. */}
         <div
           className="pointer-events-none absolute inset-0"
           style={{
@@ -118,12 +117,12 @@ export default function HeroMobile() {
           }}
         />
 
-        {/* Faint bottom wash — just enough that the dots/contacts stay legible. */}
-        <div
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-40"
-          style={{
-            background: `linear-gradient(to top, rgba(${grad},0.5) 0%, rgba(${grad},0) 100%)`,
-          }}
+        {/* Tap-to-enter zone — central band only, clear of the toolbar/footer. */}
+        <button
+          type="button"
+          aria-label={isHe ? current.labelHe : current.labelEn}
+          onClick={handleEnter}
+          className="absolute inset-x-0 top-[14%] bottom-[16%] z-[5] cursor-pointer"
         />
 
         {/* Title — sits inside the matte band */}
@@ -184,7 +183,8 @@ export default function HeroMobile() {
         </div>
       </header>
 
-      {/* Bottom chrome: slide dots + contacts (color follows the theme) */}
+      {/* Bottom chrome: slide dots + contacts. Always white — it sits over the
+          photo (transparent bottom), so white reads best in either theme. */}
       <div className="absolute inset-x-0 bottom-0 z-10 flex flex-col items-center gap-4 pb-6">
         <div className="flex items-center gap-2.5">
           {CATEGORIES.map((c, i) => (
@@ -196,13 +196,13 @@ export default function HeroMobile() {
               className="h-2 rounded-full transition-all duration-300"
               style={{
                 width: i === index ? 22 : 8,
-                background: i === index ? `rgba(${fgRgb},1)` : `rgba(${fgRgb},0.5)`,
+                background: i === index ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.5)',
               }}
             />
           ))}
         </div>
 
-        <div className="flex items-center justify-center gap-7" style={{ color: fg }}>
+        <div className="flex items-center justify-center gap-7 text-white">
           {CONTACTS.map((c) => (
             <a
               key={c.icon}

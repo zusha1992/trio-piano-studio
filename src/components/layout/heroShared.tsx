@@ -84,8 +84,8 @@ export const MAPS_URL =
 export const CONTACTS: Contact[] = [
   {
     icon: 'phone-solid-full.svg',
-    labelHe: '0543-337-341',
-    labelEn: '0543-337-341',
+    labelHe: '054-3337-341',
+    labelEn: '054-3337-341',
     href: 'https://wa.me/972543337341',
     external: true,
   },
