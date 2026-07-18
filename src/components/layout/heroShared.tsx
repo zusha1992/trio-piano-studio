@@ -83,7 +83,7 @@ export const MAPS_URL =
 
 export const CONTACTS: Contact[] = [
   {
-    icon: 'phone-solid-full.svg',
+    icon: 'whatsapp.svg',
     labelHe: '054-3337-341',
     labelEn: '054-3337-341',
     href: 'https://wa.me/972543337341',
