@@ -12,6 +12,36 @@
     "story_body1": "Trio Piano Workshop was founded with a single mission: to give pianos the care and craftsmanship they deserve. Located in the heart of Jerusalem, our workshop brings together master technicians, restorers, and passionate musicians.",
     "story_body2": "We specialize in restoring vintage and modern pianos to concert-level performance, and we import select instruments from Japan — a country renowned for producing some of the world's finest pianos.",
     "story_body3": "Whether you're searching for your first piano or looking to restore a family heirloom, we are here to guide you every step of the way.",
+    "intro_title": "Our Story",
+    "intro_body": [
+      "Trio Pianos was born out of a genuine love of music and a desire to create a place where craftsmanship, culture, and living music meet under one roof.",
+      "We believe pianos are meant to be heard, to move people, and to keep on living. That is why we don't see a piano as merely a product or an object, but as a musical instrument with its own character, history, and unique voice.",
+      "One of our central goals is to set a new standard in Israel for piano restoration. Our studio aspires to carry out complex, in-depth work that is rarely done in this country today — including the restoration of historic pianos, restringing, soundboard repair and restoration, and restoration work of the highest level. Out of respect for the craft and love for the instrument, we strive to return to every piano its sound, its character, and its life.",
+      "But Trio is much more than a piano workshop.",
+      "We want to create a place where music happens naturally. A place where restored pianos don't just stand on display, but also take the stage. A place that hosts intimate concerts, where musicians meet their audience up close, and people can sit, listen, talk, and experience music in a warm, personal, and immediate setting.",
+      "Some of the concerts will be built around the pianos themselves. A restored historic piano will get the chance to once again play the music written for it, the style it came from, and the story it carries. For us, this is the way to return to the instrument not only its sound, but also its place in the world of music.",
+      "Trio Pianos aspires to be a home for musicians, music lovers, artists, and anyone who believes that beauty, quality, and culture are created through attention to detail and a genuine love for what they do.",
+      "We are building a place that connects people — between art and craft, between the piano's past and its future, and between musicians and the community around them."
+    ],
+    "founders_label": "The People Behind Trio",
+    "founders_title": "The Founders",
+    "founders": [
+      {
+        "name": "Avi Cohen",
+        "role": "Co-founder · Head Technician",
+        "bio": "Leads the studio's restoration work, specializing in action rebuilding and concert-level voicing, with over a decade of experience."
+      },
+      {
+        "name": "Noa Levi",
+        "role": "Co-founder · Artistic Director",
+        "bio": "A pianist who curates the concert programs and connects musicians with the audience."
+      },
+      {
+        "name": "Daniel Mizrahi",
+        "role": "Co-founder · Restoration Specialist",
+        "bio": "An expert in wood and soundboard restoration, blending traditional craft with modern precision."
+      }
+    ],
     "values_label": "What Drives Us",
     "values_title": "Our Values",
     "value1_title": "Craftsmanship",

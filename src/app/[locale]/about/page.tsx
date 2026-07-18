@@ -2,6 +2,7 @@
 
 import { useTranslations, useLocale } from 'next-intl';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 import Button from '@/components/ui/Button';
 import ContactCTA from '@/components/sections/ContactCTA';
 
@@ -55,57 +56,80 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Story */}
-      <section className="section-padding bg-[var(--c-bg)] border-t border-[var(--c-card)]">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.7 }}
-            >
-              <p className="text-[10px] tracking-[0.4em] uppercase text-[var(--c-accent)] mb-6">
-                01
-              </p>
-              <h2
-                className="text-4xl font-light text-[var(--c-text)] mb-8 leading-tight"
-                style={{ fontFamily: headingFont }}
+      {/* Story / manifesto */}
+      <section className="section-padding bg-[var(--c-bg)] border-t border-[var(--c-border)]">
+        <div className="max-w-3xl mx-auto px-6 lg:px-8">
+          <motion.h2
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.5 }}
+            transition={{ duration: 0.7 }}
+            className="text-4xl lg:text-5xl font-light text-[var(--c-text)] leading-tight"
+            style={{ fontFamily: headingFont }}
+          >
+            {t('intro_title')}
+          </motion.h2>
+          <div className="gold-divider mt-6" />
+          <div className="space-y-6 mt-8">
+            {(t.raw('intro_body') as string[]).map((paragraph, i) => (
+              <motion.p
+                key={i}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.4 }}
+                transition={{ duration: 0.6, delay: Math.min(i * 0.04, 0.25) }}
+                className="text-base lg:text-lg text-[var(--c-dim)] leading-relaxed"
               >
-                {t('story_title')}
-              </h2>
-              <div className="space-y-5">
-                {(['story_body1', 'story_body2', 'story_body3'] as const).map((key) => (
-                  <p key={key} className="text-base text-[var(--c-dim)] leading-relaxed">
-                    {t(key)}
-                  </p>
-                ))}
-              </div>
-            </motion.div>
+                {paragraph}
+              </motion.p>
+            ))}
+          </div>
+        </div>
+      </section>
 
-            {/* Visual element */}
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.7, delay: 0.2 }}
-              className="relative"
+      {/* Founders */}
+      <section className="section-padding bg-[var(--c-bg-alt)] border-t border-[var(--c-border)]">
+        <div className="max-w-6xl mx-auto px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <p className="text-[10px] tracking-[0.4em] uppercase text-[var(--c-accent)] mb-4">
+              {t('founders_label')}
+            </p>
+            <h2
+              className="text-4xl font-light text-[var(--c-text)]"
+              style={{ fontFamily: headingFont }}
             >
-              <div className="bg-[var(--c-card)] border border-[var(--c-border-lt)] h-[400px] flex items-center justify-center">
-                <div className="text-center p-12">
-                  <p
-                    className="text-9xl font-light text-[var(--c-border-lt)]"
-                    style={{ fontFamily: 'var(--font-cormorant), serif' }}
-                  >
-                    ♩
+              {t('founders_title')}
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-16">
+            {(t.raw('founders') as { name: string; role: string; bio: string }[]).map(
+              (founder, i) => (
+                <motion.div
+                  key={founder.name}
+                  initial={{ opacity: 0, y: 24 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.3 }}
+                  transition={{ duration: 0.6, delay: i * 0.12 }}
+                  className="text-center"
+                >
+                  <div className="relative w-40 h-40 mx-auto mb-6 rounded-full overflow-hidden border border-[var(--c-border-lt)]">
+                    <Image
+                      src={`/images/founder-${i + 1}.jpg`}
+                      alt={founder.name}
+                      fill
+                      className="object-cover"
+                      sizes="160px"
+                    />
+                  </div>
+                  <h3 className="text-xl font-light text-[var(--c-text)]">{founder.name}</h3>
+                  <p className="text-xs tracking-[0.2em] uppercase text-[var(--c-accent)] mt-2 mb-4">
+                    {founder.role}
                   </p>
-                  <p className="text-xs tracking-[0.3em] uppercase text-[var(--c-accent)] mt-6">
-                    {locale === 'he' ? 'ירושלים, ישראל' : 'Jerusalem, Israel'}
-                  </p>
-                </div>
-              </div>
-              <div className="absolute -top-4 -start-4 w-16 h-16 border border-[var(--c-accent)] opacity-30" />
-            </motion.div>
+                  <p className="text-sm text-[var(--c-muted)] leading-relaxed">{founder.bio}</p>
+                </motion.div>
+              ),
+            )}
           </div>
         </div>
       </section>

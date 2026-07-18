@@ -6,7 +6,6 @@ import { useLocale } from 'next-intl';
 import { usePathname } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
 import Logo from '@/components/ui/Logo';
-import ThemeToggle from '@/components/ui/ThemeToggle';
 
 const navItems = [
   { key: 'services', labelEn: 'Workshop', labelHe: 'בית מלאכה' },
@@ -74,8 +73,6 @@ export default function Navbar() {
           )}
 
           <div className="flex items-center gap-4">
-            <ThemeToggle />
-
             {/* Language toggle */}
             <Link
               href={`/${otherLocale}`}

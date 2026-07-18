@@ -19,23 +19,6 @@
 
 /* ── Theme tokens ─────────────────────────── */
 :root {
-  --c-bg:        #16120E;
-  --c-bg-alt:    #11100C;
-  --c-card:      #1F1912;
-  --c-text:      #F0EAD6;
-  --c-muted:     #6A5C4A;
-  --c-dim:       #796B58;
-  --c-ultra-dim: #4A3C2C;
-  --c-ghost:     #2C2418;
-  --c-accent:    #A08C7C;
-  --c-border:    #28201A;
-  --c-border-lt: #3C2E20;
-  --c-nav-bg:     rgba(22,18,14,0.92);
-  --c-overlay-bg: rgba(22,18,14,0.98);
-  --logo-filter: invert(1);
-}
-
-html.light {
   --c-bg:        #F7F4EF;
   --c-bg-alt:    #EFECEA;
   --c-card:      #FFFFFF;
@@ -58,6 +41,13 @@ html.light {
 
 html {
   scroll-behavior: smooth;
+  /* Always render the scrollbar track (and reserve its gutter) so the viewport
+     width stays identical between short (home) and tall (sub) pages. Without
+     this, navigating from a scrollable page to the one-screen home removes the
+     6px scrollbar, and the fixed HeroGate — whose inner elements are positioned
+     with vw units — shifts a few pixels once the curtain animation settles. */
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
 }
 
 body {
@@ -93,8 +83,8 @@ body {
 }
 
 ::selection {
-  background-color: #A08C7C33;
-  color: #F0EAD6;
+  background-color: #7A6A5A33;
+  color: #1A1510;
 }
 
 ::-webkit-scrollbar {

@@ -4,6 +4,8 @@ import { getMessages } from 'next-intl/server';
 import { Cormorant_Garamond, DM_Sans, Heebo } from 'next/font/google';
 import Navbar from '@/components/layout/Navbar';
 import WhatsAppButton from '@/components/layout/WhatsAppButton';
+import HeroGate from '@/components/layout/HeroGate';
+import { GateProvider } from '@/components/layout/GateContext';
 import '../globals.css';
 
 const cormorant = Cormorant_Garamond({
@@ -49,19 +51,14 @@ export default async function LocaleLayout({
       className={`${cormorant.variable} ${dmSans.variable} ${heebo.variable}`}
       suppressHydrationWarning
     >
-      <head>
-        {/* Apply saved theme before first paint to prevent flash */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{if(localStorage.getItem('theme')==='light')document.documentElement.classList.add('light')}catch(e){}})()`,
-          }}
-        />
-      </head>
       <body>
         <NextIntlClientProvider messages={messages}>
-          <Navbar />
-          <main>{children}</main>
-          <WhatsAppButton />
+          <GateProvider>
+            <Navbar />
+            <main>{children}</main>
+            <WhatsAppButton />
+            <HeroGate />
+          </GateProvider>
         </NextIntlClientProvider>
       </body>
     </html>
