@@ -41,11 +41,9 @@
 
 html {
   scroll-behavior: smooth;
-  /* Always render the scrollbar track (and reserve its gutter) so the viewport
-     width stays identical between short (home) and tall (sub) pages. Without
-     this, navigating from a scrollable page to the one-screen home removes the
-     6px scrollbar, and the fixed HeroGate — whose inner elements are positioned
-     with vw units — shifts a few pixels once the curtain animation settles. */
+  /* Always render the scrollbar track so the viewport width stays identical
+     between short and tall pages, preventing fixed elements (navbar) and
+     centered content from shifting a few pixels on navigation. */
   overflow-y: scroll;
   scrollbar-gutter: stable;
 }

@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
-import { Cormorant_Garamond, DM_Sans, Heebo } from 'next/font/google';
+import { Arimo, Cormorant_Garamond, DM_Sans, Heebo, Rubik } from 'next/font/google';
 import Navbar from '@/components/layout/Navbar';
 import WhatsAppButton from '@/components/layout/WhatsAppButton';
-import HeroGate from '@/components/layout/HeroGate';
+import Hero from '@/components/layout/Hero';
 import { GateProvider } from '@/components/layout/GateContext';
 import '../globals.css';
 
@@ -24,6 +24,20 @@ const dmSans = DM_Sans({
 const heebo = Heebo({
   subsets: ['hebrew', 'latin'],
   variable: '--font-heebo',
+  display: 'swap',
+});
+
+const rubik = Rubik({
+  subsets: ['hebrew', 'latin'],
+  weight: ['300', '400', '500'],
+  variable: '--font-rubik',
+  display: 'swap',
+});
+
+const arimo = Arimo({
+  subsets: ['latin'],
+  weight: ['400', '500', '700'],
+  variable: '--font-arimo',
   display: 'swap',
 });
 
@@ -48,7 +62,7 @@ export default async function LocaleLayout({
     <html
       lang={locale}
       dir={locale === 'he' ? 'rtl' : 'ltr'}
-      className={`${cormorant.variable} ${dmSans.variable} ${heebo.variable}`}
+      className={`${cormorant.variable} ${dmSans.variable} ${heebo.variable} ${rubik.variable} ${arimo.variable}`}
       suppressHydrationWarning
     >
       <body>
@@ -57,7 +71,7 @@ export default async function LocaleLayout({
             <Navbar />
             <main>{children}</main>
             <WhatsAppButton />
-            <HeroGate />
+            <Hero />
           </GateProvider>
         </NextIntlClientProvider>
       </body>
