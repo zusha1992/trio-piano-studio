@@ -59,6 +59,12 @@ export default function StorePage() {
 
   const titleFont = isHe ? 'var(--font-rubik), sans-serif' : 'var(--font-arimo), sans-serif';
   // Delicate serif for the descriptor line (Hebrew has no serif → soft sans).
+  const allActive = types.length === 0 && regions.length === 0;
+  const clearAll = () => {
+    setTypes([]);
+    setRegions([]);
+  };
+
   // Which options still yield results given the *other* facet's selection, so we
   // can grey out (disable) combinations we don't stock — e.g. a region with no
   // grands once "Grand" is chosen.
@@ -138,12 +144,16 @@ export default function StorePage() {
             className="flex flex-wrap gap-2 md:max-w-[42rem] md:justify-end md:pb-3"
           >
             {[
+              // "All" is a desktop-only convenience — on mobile the chips are
+              // clear enough and deselecting everything already shows all.
+              { key: 'all', label: t('filter_all'), active: allActive, disabled: false, onClick: clearAll, extra: 'hidden lg:inline-block' },
               ...TYPES.map((tp) => ({
                 key: tp,
                 label: TYPE_LABEL[tp][locale],
                 active: types.includes(tp),
                 disabled: !availableTypes.has(tp),
                 onClick: () => toggleType(tp),
+                extra: '',
               })),
               ...REGIONS.map((r) => ({
                 key: r,
@@ -151,13 +161,14 @@ export default function StorePage() {
                 active: regions.includes(r),
                 disabled: !availableRegions.has(r),
                 onClick: () => toggleRegion(r),
+                extra: '',
               })),
             ].map((f) => (
               <button
                 key={f.key}
                 onClick={f.onClick}
                 disabled={f.disabled}
-                className={`rounded-full border px-4 py-1.5 text-[11px] uppercase tracking-[0.2em] transition-colors duration-300 ${
+                className={`rounded-full border px-4 py-1.5 text-[11px] uppercase tracking-[0.2em] transition-colors duration-300 ${f.extra} ${
                   f.disabled
                     ? 'cursor-not-allowed border-[var(--c-border-lt)] text-[var(--c-ultra-dim)] opacity-50'
                     : f.active
