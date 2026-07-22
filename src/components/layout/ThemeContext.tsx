@@ -10,7 +10,9 @@ import {
 } from 'react';
 import { SCHEMES, THEME_KEY } from '@/components/layout/heroShared';
 
-type Scheme = (typeof SCHEMES)['light'];
+// Either scheme — `SCHEMES` is `as const`, so light/dark have distinct literal
+// types; the union keeps both assignable to `scheme`.
+type Scheme = (typeof SCHEMES)[keyof typeof SCHEMES];
 
 interface ThemeValue {
   /** true = dark ("negative") scheme */
