@@ -1,11 +1,10 @@
 'use client';
 
-import { useCallback, useState } from 'react';
-
 /* ── Theme ─────────────────────────────────────────────────────────────
    Shared by the desktop gate and the mobile landing so a choice made on
    one persists on the other. `bg` is the panel/background color; `intro`
-   is the slightly different shade behind the closing curtain (desktop).  */
+   is the slightly different shade behind the closing curtain (desktop).
+   The live preference/toggle lives in ThemeContext (`useTheme`).           */
 export const SCHEMES = {
   light: {
     bg: '#ffffff',
@@ -26,27 +25,6 @@ export const SCHEMES = {
 } as const;
 
 export const THEME_KEY = 'heroTheme';
-
-// Light is the default; a stored 'dark' opts into the negative scheme.
-// Persisted so it survives navigations (e.g. switching language reloads).
-export function useHeroTheme() {
-  const [negative, setNegative] = useState<boolean>(() => {
-    if (typeof window === 'undefined') return false;
-    return window.localStorage.getItem(THEME_KEY) === 'dark';
-  });
-
-  const toggle = useCallback(() => {
-    setNegative((v) => {
-      const next = !v;
-      try {
-        window.localStorage.setItem(THEME_KEY, next ? 'dark' : 'light');
-      } catch {}
-      return next;
-    });
-  }, []);
-
-  return { negative, scheme: negative ? SCHEMES.dark : SCHEMES.light, toggle };
-}
 
 /* ── Categories ────────────────────────────────────────────────────── */
 export interface Category {

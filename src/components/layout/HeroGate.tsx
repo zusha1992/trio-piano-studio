@@ -8,14 +8,15 @@ import { Moon, Sun } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useGate } from '@/components/layout/GateContext';
+import { markGateReveal } from '@/components/layout/gateReveal';
 import {
   ALL_IMAGES,
   CATEGORIES,
   CONTACTS,
   ContactIcon,
   DEFAULT_IMG,
-  useHeroTheme,
 } from '@/components/layout/heroShared';
+import { useTheme } from '@/components/layout/ThemeContext';
 
 /* ── Straight vertical seam ─────────────────────────────────────────
    Image fills the left half, logo/categories the right half.          */
@@ -52,12 +53,15 @@ export default function HeroGate() {
   const [ready, setReady] = useState(skipIntro);
   const [opening, setOpening] = useState(false);
   const [active, setActive] = useState<string | null>(null);
+  // The image "sticks" to the last hovered category — it is NOT cleared on mouse
+  // leave. This keeps the backdrop stable (no flash back to the default image)
+  // when moving between categories, selecting one, or returning home.
+  const [imgKey, setImgKey] = useState<string | null>(null);
   // True once the panels have finished closing over the intro logo on first load.
   const [closed, setClosed] = useState(skipIntro);
-  const { negative, scheme, toggle: toggleTheme } = useHeroTheme();
+  const { negative, scheme, toggle: toggleTheme } = useTheme();
 
-  const activeCat = CATEGORIES.find((c) => c.key === active) ?? null;
-  const currentImg = activeCat?.img ?? DEFAULT_IMG;
+  const currentImg = CATEGORIES.find((c) => c.key === imgKey)?.img ?? DEFAULT_IMG;
 
   // Prefetch destination pages so the reveal shows a loaded page.
   useEffect(() => {
@@ -105,6 +109,13 @@ export default function HeroGate() {
 
   const handleSelect = useCallback(
     (href: string) => {
+      // The intro logo belongs to the very first load only. As soon as the user
+      // opens a category, retire it for good so the curtain reveals the page
+      // behind it — never the logo again.
+      setClosed(true);
+      introPlayed = true;
+      // Let the destination hold its entrance until the curtain has opened.
+      markGateReveal();
       setOpening(true);
       router.push(`/${locale}/${href}`);
     },
@@ -116,6 +127,13 @@ export default function HeroGate() {
 
   const target = opening ? 'off' : 'in';
   const gateDuration = target === 'in' ? GATE_CLOSE_DURATION : GATE_OPEN_DURATION;
+
+  // Start the panels already-closed ("in", no gate animation) ONLY on the home
+  // page when the intro already played this session (e.g. after a language
+  // switch). When closing the curtain over a subpage on the way home, always
+  // start open ("off") so the curtain actually animates shut before navigating.
+  const startClosed = isHome && skipIntro && !opening && !homeClosing;
+  const panelInitial = startClosed ? 'in' : 'off';
 
   // Mirror the whole layout by language: image fills the reading-start half
   // (right in Hebrew/RTL, left in English/LTR), categories fill the other half.
@@ -144,8 +162,11 @@ export default function HeroGate() {
   return (
     <div className="fixed inset-0 z-[100] overflow-hidden" aria-hidden={opening}>
       {/* Intro logo — fades in while loading and stays on screen (behind the
-          panels) until the two panels have closed over it on first load. */}
-      {!closed && (
+          panels) until the two panels have closed over it on first load. It is
+          strictly a first-load element: never shown while opening a category
+          (`opening`) or closing the curtain on the way home (`homeClosing`), so
+          those transitions only ever reveal/hide the page behind. */}
+      {!closed && !opening && !homeClosing && (
         <div
           className="absolute inset-0 flex items-center justify-center"
           style={{ background: scheme.intro }}
@@ -178,7 +199,7 @@ export default function HeroGate() {
           <motion.div
             className={`absolute inset-y-0 ${imageHalfPos} w-[calc(50%+1px)]`}
             variants={imageVariants}
-            initial={skipIntro ? 'in' : 'off'}
+            initial={panelInitial}
             animate={target}
             transition={{ duration: gateDuration, ease: GATE_EASE }}
           >
@@ -201,17 +222,16 @@ export default function HeroGate() {
             className="absolute inset-0"
             style={{ clipPath: catClip, filter: catShadow }}
             variants={catVariants}
-            initial={skipIntro ? 'in' : 'off'}
+            initial={panelInitial}
             animate={target}
             transition={{ duration: gateDuration, ease: GATE_EASE }}
             onAnimationComplete={(def) => {
               if (def === 'off') setOpening(false);
               else if (def === 'in') {
+                // Any completed curtain-close means the intro is over for good.
+                setClosed(true);
+                introPlayed = true;
                 if (homeClosing && !isHome) router.push(`/${locale}`);
-                else if (isHome) {
-                  setClosed(true);
-                  introPlayed = true;
-                }
               }
             }}
           >
@@ -247,8 +267,14 @@ export default function HeroGate() {
                     <li key={c.key}>
                       <button
                         type="button"
-                        onMouseEnter={() => setActive(c.key)}
-                        onFocus={() => setActive(c.key)}
+                        onMouseEnter={() => {
+                          setActive(c.key);
+                          setImgKey(c.key);
+                        }}
+                        onFocus={() => {
+                          setActive(c.key);
+                          setImgKey(c.key);
+                        }}
                         onClick={() => handleSelect(c.href)}
                         className="block cursor-pointer text-start text-[3.75rem] tracking-tight leading-[1.02] transition-colors duration-300"
                         style={{
@@ -266,11 +292,12 @@ export default function HeroGate() {
             </div>
 
             {/* Contact footer — one row centered within the categories half.
-                Kept compact (small text, tight gaps, modest padding) so the
-                four labels fit inside 50% width without overflowing. */}
+                Kept compact (small text, tight gaps, no side padding) so the
+                four labels use the full 50% width and stay on a single line.
+                flex-wrap is only a graceful fallback for very narrow screens. */}
             <div
               dir={isHe ? 'rtl' : 'ltr'}
-              className={`absolute bottom-[5vh] ${catHalfPos} flex items-center justify-center gap-x-5 gap-y-2 flex-wrap px-[3vw]`}
+              className={`absolute bottom-[5vh] ${catHalfPos} flex items-center justify-center gap-x-4 gap-y-2 flex-wrap px-4`}
             >
               {CONTACTS.map((c) => (
                 <a

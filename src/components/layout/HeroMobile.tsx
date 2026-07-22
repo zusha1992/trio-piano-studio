@@ -12,8 +12,8 @@ import {
   CATEGORIES,
   CONTACTS,
   ContactIcon,
-  useHeroTheme,
 } from '@/components/layout/heroShared';
+import { useTheme } from '@/components/layout/ThemeContext';
 
 const AUTO_MS = 4000;
 const SWIPE_THRESHOLD = 50;
@@ -34,7 +34,7 @@ export default function HeroMobile() {
 
   const isHome = pathname === `/${locale}` || pathname === `/${locale}/`;
 
-  const { negative, toggle: toggleTheme } = useHeroTheme();
+  const { negative, toggle: toggleTheme } = useTheme();
 
   const headingFont = isHe ? 'var(--font-rubik), sans-serif' : 'var(--font-arimo), sans-serif';
 

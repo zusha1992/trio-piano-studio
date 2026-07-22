@@ -36,12 +36,12 @@ export default function Logo({ className = '' }: LogoProps) {
       className={`inline-flex items-center ${className}`}
     >
       <Image
-        src="/images/logo.png"
+        src="/images/logo-toolbar.png"
         alt="Trio Piano Workshop"
-        width={2199}
-        height={734}
+        width={1933}
+        height={544}
         style={{
-          height: '32px',
+          height: '30px',
           width: 'auto',
           filter: 'var(--logo-filter)',
         }}

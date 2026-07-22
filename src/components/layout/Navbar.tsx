@@ -4,16 +4,15 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useLocale } from 'next-intl';
 import { usePathname } from 'next/navigation';
-import { Menu, X } from 'lucide-react';
+import { Menu, Moon, Sun, X } from 'lucide-react';
 import Logo from '@/components/ui/Logo';
+import { CATEGORIES } from '@/components/layout/heroShared';
+import { useTheme } from '@/components/layout/ThemeContext';
 
-const navItems = [
-  { key: 'about', labelEn: 'About', labelHe: 'על הסטודיו' },
-  { key: 'services', labelEn: 'Workshop', labelHe: 'בית מלאכה' },
-  { key: 'store', labelEn: 'Piano Store', labelHe: 'חנות פסנתרים' },
-  { key: 'concerts', labelEn: 'Concerts', labelHe: 'קונצרטים' },
-  { key: 'contact', labelEn: 'Contact', labelHe: 'צור קשר' },
-] as const;
+// The landing page surfaces contact details in its footer; the subpages don't,
+// so the toolbar carries a dedicated contact link after the categories.
+const CONTACT_ITEM = { key: 'contact', href: 'contact', labelHe: 'צור קשר', labelEn: 'Contact' };
+const NAV_ITEMS = [...CATEGORIES, CONTACT_ITEM];
 
 export default function Navbar() {
   const locale = useLocale();
@@ -22,9 +21,18 @@ export default function Navbar() {
   const isHome = pathname === `/${locale}` || pathname === `/${locale}/`;
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const { negative, toggle: toggleTheme } = useTheme();
 
   const otherLocale = isHe ? 'en' : 'he';
   const navHref = (key: string) => `/${locale}/${key}`;
+
+  // Switch language in place: keep the current path, just swap the locale
+  // segment (e.g. /en/store → /he/store) so we don't bounce back to home.
+  const restOfPath = pathname.replace(/^\/[a-z]{2}(?=\/|$)/, '');
+  const switchLocaleHref = `/${otherLocale}${restOfPath}`;
+
+  // Same typeface as the home-screen category headers.
+  const headingFont = isHe ? 'var(--font-rubik), sans-serif' : 'var(--font-arimo), sans-serif';
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -40,45 +48,66 @@ export default function Navbar() {
     <>
       <header
         className={`fixed top-0 left-0 right-0 z-50 border-b transition-shadow duration-300 ${
-          scrolled ? 'border-[var(--c-border)] shadow-sm' : 'border-[var(--c-border-lt)]'
+          scrolled ? 'border-[var(--c-border)] shadow-sm' : 'border-transparent'
         }`}
-        style={{ backgroundColor: 'var(--c-nav-bg)', backdropFilter: 'blur(8px)' }}
+        style={{ backgroundColor: 'var(--c-bg)' }}
       >
-        <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 lg:px-10">
+        <nav className="mx-auto flex h-16 max-w-[100rem] items-center justify-between px-6 sm:px-10 lg:px-16">
           {/* Logo */}
           <Logo />
 
-          {/* Desktop links */}
-          <ul className="hidden items-center gap-8 lg:flex">
-            {navItems.map(({ key, labelEn, labelHe }) => (
-              <li key={key}>
-                <Link
-                  href={navHref(key)}
-                  className="text-[11px] uppercase tracking-[0.25em] text-[var(--c-dim)] transition-colors duration-300 hover:text-[var(--c-text)]"
-                >
-                  {isHe ? labelHe : labelEn}
-                </Link>
-              </li>
-            ))}
-          </ul>
+          {/* Everything else sits together on the reading-end side */}
+          <div className="flex items-center gap-12">
+            {/* Desktop links — same categories, labels and order as the home screen */}
+            <ul className="hidden items-center gap-8 lg:flex">
+              {NAV_ITEMS.map((c) => {
+                const active = pathname === navHref(c.href);
+                return (
+                  <li key={c.key}>
+                    <Link
+                      href={navHref(c.href)}
+                      className={`text-[15px] tracking-tight transition-colors duration-300 ${
+                        active
+                          ? 'text-[color:var(--c-cat-active)]'
+                          : 'text-[color:var(--c-cat)] hover:text-[color:var(--c-cat-active)]'
+                      }`}
+                      style={{ fontFamily: headingFont, fontWeight: 400 }}
+                    >
+                      {isHe ? c.labelHe : c.labelEn}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
 
-          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4">
             {/* Language toggle */}
             <Link
-              href={`/${otherLocale}`}
-              className="text-[11px] uppercase tracking-[0.2em] text-[var(--c-dim)] transition-colors duration-300 hover:text-[var(--c-text)]"
+              href={switchLocaleHref}
+              className="text-[11px] uppercase tracking-[0.2em] text-[color:var(--c-cat)] transition-colors duration-300 hover:text-[color:var(--c-cat-active)]"
             >
               {otherLocale === 'he' ? 'עב' : 'EN'}
             </Link>
 
+            {/* Theme toggle — shares the home screen's persisted preference */}
+            <button
+              type="button"
+              onClick={toggleTheme}
+              aria-label="Toggle theme"
+              className="text-[color:var(--c-cat)] transition-colors duration-300 hover:text-[color:var(--c-cat-active)]"
+            >
+              {negative ? <Sun size={15} strokeWidth={1.5} /> : <Moon size={15} strokeWidth={1.5} />}
+            </button>
+
             {/* Mobile hamburger */}
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className="p-1 text-[var(--c-dim)] transition-colors hover:text-[var(--c-text)] lg:hidden"
+              className="p-1 text-[color:var(--c-cat)] transition-colors hover:text-[color:var(--c-cat-active)] lg:hidden"
               aria-label="Toggle menu"
             >
               {menuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
+            </div>
           </div>
         </nav>
       </header>
@@ -86,20 +115,28 @@ export default function Navbar() {
       {/* Mobile menu */}
       {menuOpen && (
         <div
-          className="fixed inset-0 z-40 flex flex-col items-center justify-center gap-10 backdrop-blur-md lg:hidden"
+          className="fixed inset-0 z-40 flex flex-col items-center justify-center gap-8 backdrop-blur-md lg:hidden"
           style={{ backgroundColor: 'var(--c-overlay-bg)' }}
           onClick={() => setMenuOpen(false)}
         >
-          {navItems.map(({ key, labelEn, labelHe }) => (
-            <Link
-              key={key}
-              href={navHref(key)}
-              className="text-2xl font-light uppercase tracking-[0.15em] text-[var(--c-text)] transition-colors hover:text-[var(--c-accent)]"
-              onClick={() => setMenuOpen(false)}
-            >
-              {isHe ? labelHe : labelEn}
-            </Link>
-          ))}
+          {NAV_ITEMS.map((c) => {
+            const active = pathname === navHref(c.href);
+            return (
+              <Link
+                key={c.key}
+                href={navHref(c.href)}
+                onClick={() => setMenuOpen(false)}
+                className={`text-4xl tracking-tight transition-colors duration-300 ${
+                  active
+                    ? 'text-[color:var(--c-cat-active)]'
+                    : 'text-[color:var(--c-cat)] hover:text-[color:var(--c-cat-active)]'
+                }`}
+                style={{ fontFamily: headingFont, fontWeight: 400 }}
+              >
+                {isHe ? c.labelHe : c.labelEn}
+              </Link>
+            );
+          })}
         </div>
       )}
     </>

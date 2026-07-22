@@ -1,7 +1,6 @@
 {
   "cta_banner": {
-    "title": "מוכן למצוא את הפסנתר המושלם שלך?",
-    "subtitle": "בקר בסדנה שלנו בירושלים או צור קשר — נשמח לעזור לך למצוא את הכלי שמדבר אליך.",
+    "title": "בקרו בסדנה שלנו בירושלים",
     "cta": "צור קשר"
   },
   "about": {
@@ -83,16 +82,17 @@
     "cta": "צור קשר"
   },
   "store": {
-    "hero_label": "האוסף שלנו",
-    "hero_title": "פסנתרים למכירה",
+    "hero_label": "החנות",
+    "hero_title": "האוסף שלנו",
     "hero_subtitle": "כל כלי נבחר, נבדק והוכן אישית על ידי הצוות שלנו.",
     "filter_all": "הכל",
     "filter_restored": "משוחזר",
     "filter_imported": "מיובא",
-    "filter_grand": "גרנד",
+    "filter_grand": "כנף",
     "filter_upright": "קיר",
     "contact_price": "צור קשר למחיר",
     "inquire": "לפרטים",
+    "learn_more": "פרטים נוספים",
     "condition_restored": "משוחזר",
     "condition_imported": "מיובא מיפן",
     "condition_new": "חדש",

@@ -19,20 +19,48 @@
 
 /* ── Theme tokens ─────────────────────────── */
 :root {
-  --c-bg:        #F7F4EF;
-  --c-bg-alt:    #EFECEA;
+  /* Near-white background — kept ~1% darker than the pure-white (#ffffff)
+     landing panels so the panels stay visible as they slide open. */
+  --c-bg:        #FCFCFC;
+  --c-bg-alt:    #F4F4F4;
   --c-card:      #FFFFFF;
   --c-text:      #1A1510;
   --c-muted:     #6B6258;
   --c-dim:       #9E968C;
   --c-ultra-dim: #C4BEB8;
-  --c-ghost:     #DDD9D4;
+  --c-ghost:     #E4E4E4;
   --c-accent:    #7A6A5A;
-  --c-border:    #DDD8D2;
-  --c-border-lt: #EAE6E0;
-  --c-nav-bg:     rgba(247,244,239,0.92);
-  --c-overlay-bg: rgba(247,244,239,0.98);
+  --c-border:    #E2E2E2;
+  --c-border-lt: #EDEDED;
+  --c-nav-bg:     rgba(255,255,255,0.9);
+  --c-overlay-bg: rgba(255,255,255,0.98);
   --logo-filter: none;
+  /* Navigation / category labels — mirror the home-screen scheme */
+  --c-cat:        #3a3a3c;
+  --c-cat-active: #09090b;
+}
+
+/* ── Dark theme ───────────────────────────────
+   Applied by toggling the `dark` class on <html> (see ThemeProvider). A tiny
+   inline script in the layout sets it before paint to avoid a flash. Warm,
+   near-black palette that keeps the brand's cream accents. */
+html.dark {
+  --c-bg:        #14100c;
+  --c-bg-alt:    #1b1610;
+  --c-card:      #1c1712;
+  --c-text:      #f2ede3;
+  --c-muted:     #b3a898;
+  --c-dim:       #8f8478;
+  --c-ultra-dim: #5c534c;
+  --c-ghost:     #2a231d;
+  --c-accent:    #c4a882;
+  --c-border:    #2e2620;
+  --c-border-lt: #3a302a;
+  --c-nav-bg:     rgba(20,16,12,0.9);
+  --c-overlay-bg: rgba(20,16,12,0.98);
+  --logo-filter: brightness(0) invert(1);
+  --c-cat:        #8a8a8f;
+  --c-cat-active: #ffffff;
 }
 
 * {
@@ -82,7 +110,7 @@ body {
 
 ::selection {
   background-color: #7A6A5A33;
-  color: #1A1510;
+  color: var(--c-text);
 }
 
 ::-webkit-scrollbar {

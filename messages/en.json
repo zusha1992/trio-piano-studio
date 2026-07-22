@@ -1,7 +1,6 @@
 {
   "cta_banner": {
-    "title": "Ready to Find Your Perfect Piano?",
-    "subtitle": "Visit our workshop in Jerusalem or get in touch — we'd love to help you find the instrument that speaks to you.",
+    "title": "Visit our workshop in Jerusalem",
     "cta": "Contact Us"
   },
   "about": {
@@ -83,8 +82,8 @@
     "cta": "Get in Touch"
   },
   "store": {
-    "hero_label": "Our Collection",
-    "hero_title": "Pianos for Sale",
+    "hero_label": "The Store",
+    "hero_title": "Our Collection",
     "hero_subtitle": "Each instrument has been personally selected, inspected, and prepared by our team.",
     "filter_all": "All",
     "filter_restored": "Restored",
@@ -93,6 +92,7 @@
     "filter_upright": "Upright",
     "contact_price": "Contact for Price",
     "inquire": "Inquire",
+    "learn_more": "Learn More",
     "condition_restored": "Restored",
     "condition_imported": "Imported from Japan",
     "condition_new": "New",
