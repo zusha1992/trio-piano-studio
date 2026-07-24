@@ -174,7 +174,7 @@ export default function StorePage() {
         </div>
 
         {/* Editorial asymmetric gallery */}
-        <div className="mt-12 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 md:auto-rows-[24rem] lg:auto-rows-[30rem]">
+        <div className="mt-12 grid grid-cols-2 gap-3 sm:gap-4 md:mt-16 md:grid-cols-3 md:auto-rows-[24rem] lg:auto-rows-[30rem]">
           <AnimatePresence mode="popLayout">
             {items.map((item, i) => (
               <motion.button
@@ -201,7 +201,7 @@ export default function StorePage() {
 
                 {/* Minimal details + reveal-up CTA */}
                 <div className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col items-center px-3 pb-7 text-center">
-                  <div className="transition-transform duration-500 ease-out group-hover:-translate-y-14">
+                  <div className="transition-transform duration-500 ease-out md:group-hover:-translate-y-14">
                     <h3
                       className="text-base uppercase leading-tight tracking-[0.15em] text-white md:text-lg"
                       style={{ fontFamily: titleFont, fontWeight: 400 }}
@@ -218,7 +218,7 @@ export default function StorePage() {
 
                   {/* Button revealed upward from behind, using our slide-in reveal */}
                   <div className="absolute bottom-7 overflow-hidden">
-                    <span className="block translate-y-full bg-white px-6 py-2.5 text-[10px] uppercase tracking-[0.25em] text-black opacity-0 transition-all duration-500 ease-out group-hover:translate-y-0 group-hover:opacity-100">
+                    <span className="block translate-y-full bg-white px-6 py-2.5 text-[10px] uppercase tracking-[0.25em] text-black opacity-0 transition-all duration-500 ease-out md:group-hover:translate-y-0 md:group-hover:opacity-100">
                       {t('learn_more')}
                     </span>
                   </div>

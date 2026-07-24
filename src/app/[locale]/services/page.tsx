@@ -1,247 +1,209 @@
 'use client';
 
+import { useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
 import { motion } from 'framer-motion';
-import { CheckCircle2 } from 'lucide-react';
-import Button from '@/components/ui/Button';
+import { Search, X } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { workshopCategories } from '@/data/workshopServices';
 import ContactCTA from '@/components/sections/ContactCTA';
 
-export default function ServicesPage() {
+const EASE = [0.16, 1, 0.3, 1] as const;
+
+const MotionLink = motion(Link);
+
+const norm = (s: string) => s.toLowerCase().trim();
+
+export default function WorkshopPage() {
   const t = useTranslations('services');
-  const locale = useLocale();
+  const locale = useLocale() as 'en' | 'he';
+  const isHe = locale === 'he';
+  const router = useRouter();
+  const titleFont = isHe ? 'var(--font-rubik), sans-serif' : 'var(--font-arimo), sans-serif';
 
-  const headingFont =
-    locale === 'he' ? 'var(--font-heebo), sans-serif' : 'var(--font-cormorant), serif';
+  // Free-text search over the individual fixes (both languages), narrowing the
+  // grid to the categories that contain a matching fix.
+  const [query, setQuery] = useState('');
+  const [open, setOpen] = useState(false);
 
-  const restorationList = t.raw('restoration_list') as string[];
+  // Match on fix names only (in either language) so the filtered categories
+  // stay in sync with the autocomplete suggestions below.
+  const nameMatches = (s: { name: { en: string; he: string } }, q: string) =>
+    norm(s.name.en).includes(q) || norm(s.name.he).includes(q);
+
+  const visible = useMemo(() => {
+    const q = norm(query);
+    if (!q) return workshopCategories;
+    return workshopCategories.filter((c) => c.services.some((s) => nameMatches(s, q)));
+  }, [query]);
+
+  // Autocomplete: matching fixes (in either language, displayed in the current
+  // locale), each carrying its category so a selection navigates straight there.
+  // A fix name that appears in more than one category is disambiguated by
+  // appending the category name.
+  const suggestions = useMemo(() => {
+    const q = norm(query);
+    if (!q) return [] as { key: string; label: string; catId: string }[];
+    const matches: { name: string; catId: string; catName: string }[] = [];
+    const seen = new Set<string>();
+    for (const c of workshopCategories) {
+      for (const s of c.services) {
+        const key = `${s.name[locale]}|${c.id}`;
+        if (nameMatches(s, q) && !seen.has(key)) {
+          seen.add(key);
+          matches.push({ name: s.name[locale], catId: c.id, catName: c.name[locale] });
+        }
+      }
+    }
+    const nameCount = matches.reduce<Record<string, number>>((a, m) => {
+      a[m.name] = (a[m.name] || 0) + 1;
+      return a;
+    }, {});
+    return matches.slice(0, 6).map((m) => ({
+      key: `${m.name}|${m.catId}`,
+      label: nameCount[m.name] > 1 ? `${m.name} · ${m.catName}` : m.name,
+      catId: m.catId,
+    }));
+  }, [query, locale]);
+
+  const goToCategory = (catId: string) => {
+    setOpen(false);
+    router.push(`/${locale}/services/${catId}`);
+  };
 
   return (
     <>
-      {/* Hero */}
-      <section className="relative min-h-[55vh] flex items-center bg-[var(--c-bg)] pt-20">
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage:
-              'radial-gradient(ellipse 80% 60% at 70% 50%, rgba(201,168,76,0.05) 0%, transparent 60%)',
-          }}
-        />
-        <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 py-20">
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-[10px] tracking-[0.4em] uppercase text-[var(--c-accent)] mb-6"
-          >
-            {t('hero_label')}
-          </motion.p>
-          <div className="gold-divider" />
+      <section className="mx-auto max-w-[100rem] px-6 pb-24 pt-32 sm:px-10 md:pt-44 lg:px-16 lg:pt-52">
+        {/* Title row — heading left, search bottom-aligned at the end of the
+            line (same slot the store uses for its filters). */}
+        <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="text-5xl lg:text-7xl font-light text-[var(--c-text)] max-w-3xl leading-tight"
-            style={{ fontFamily: headingFont }}
+            transition={{ delay: 0.1, duration: 0.7, ease: EASE }}
+            className="ms-4 text-6xl leading-[0.95] tracking-tight text-[var(--c-text)] sm:ms-8 sm:text-7xl md:ms-14 lg:ms-24 lg:text-8xl"
+            style={{ fontFamily: titleFont, fontWeight: 500 }}
           >
             {t('hero_title')}
           </motion.h1>
-          <motion.p
+
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-            className="text-lg text-[var(--c-muted)] mt-6 max-w-xl"
+            transition={{ delay: 0.25 }}
+            className="relative w-full md:w-80 md:pb-3"
           >
-            {t('hero_subtitle')}
-          </motion.p>
-        </div>
-      </section>
+            <div className="flex items-center gap-2.5 rounded-full border border-[var(--c-border)] px-4 py-2.5 transition-colors focus-within:border-[var(--c-text)]">
+              <Search size={16} className="shrink-0 text-[var(--c-dim)]" />
+              <input
+                value={query}
+                onChange={(e) => {
+                  setQuery(e.target.value);
+                  setOpen(true);
+                }}
+                onFocus={() => setOpen(true)}
+                onBlur={() => setTimeout(() => setOpen(false), 120)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && suggestions[0]) {
+                    e.preventDefault();
+                    goToCategory(suggestions[0].catId);
+                  }
+                }}
+                placeholder={t('search_placeholder')}
+                className="w-full bg-transparent text-sm text-[var(--c-text)] placeholder:text-[var(--c-ultra-dim)] focus:outline-none"
+              />
+              {query && (
+                <button
+                  type="button"
+                  aria-label="Clear"
+                  onClick={() => {
+                    setQuery('');
+                    setOpen(false);
+                  }}
+                  className="shrink-0 text-[var(--c-dim)] transition-colors hover:text-[var(--c-text)]"
+                >
+                  <X size={15} />
+                </button>
+              )}
+            </div>
 
-      {/* Restoration */}
-      <section className="section-padding bg-[var(--c-bg)] border-t border-[var(--c-card)]">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.7 }}
-            >
-              <p className="text-[10px] tracking-[0.4em] uppercase text-[var(--c-accent)] mb-4">
-                01
-              </p>
-              <h2
-                className="text-4xl font-light text-[var(--c-text)] mb-2"
-                style={{ fontFamily: headingFont }}
-              >
-                {t('restoration_title')}
-              </h2>
-              <p className="text-xl font-light text-[var(--c-accent)] italic mb-8">
-                {t('restoration_subtitle')}
-              </p>
-              <p className="text-base text-[var(--c-dim)] leading-relaxed mb-8">
-                {t('restoration_body')}
-              </p>
-              <Button href={`/${locale}/contact`} variant="outline" size="sm">
-                {t('cta')}
-              </Button>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.7, delay: 0.2 }}
-              className="bg-[var(--c-card)] border border-[var(--c-border)] p-8"
-            >
-              <h3 className="text-sm tracking-[0.2em] uppercase text-[var(--c-accent)] mb-6">
-                {t('restoration_includes')}
-              </h3>
-              <ul className="space-y-4">
-                {restorationList.map((item: string, i: number) => (
-                  <li key={i} className="flex items-start gap-3">
-                    <CheckCircle2
-                      size={16}
-                      className="mt-0.5 shrink-0"
-                      style={{ color: 'var(--c-accent)' }}
-                    />
-                    <span className="text-sm text-[var(--c-dim)]">{item}</span>
+            {open && suggestions.length > 0 && (
+              <ul className="absolute z-20 mt-2 w-full overflow-hidden rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg)] py-1 shadow-lg">
+                {suggestions.map((s) => (
+                  <li key={s.key}>
+                    <button
+                      type="button"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        goToCategory(s.catId);
+                      }}
+                      className="block w-full px-4 py-2 text-start text-sm text-[var(--c-dim)] transition-colors hover:bg-[var(--c-bg-alt)] hover:text-[var(--c-text)]"
+                    >
+                      {s.label}
+                    </button>
                   </li>
                 ))}
               </ul>
-            </motion.div>
-          </div>
+            )}
+          </motion.div>
         </div>
-      </section>
 
-      {/* Sales */}
-      <section className="section-padding bg-[var(--c-bg-alt)] border-t border-[var(--c-card)]">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            {/* Visual */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              className="relative h-80 bg-[var(--c-card)] border border-[var(--c-border-lt)] flex items-center justify-center order-2 lg:order-1"
+        {/* 4×2 grid of category tiles — square image + title, description
+            revealed on hover. Clicking will open a full category page later. */}
+        <div className="mt-16 grid grid-cols-2 gap-3 sm:gap-4 md:mt-24 md:grid-cols-4">
+          {visible.map((cat, i) => (
+            <MotionLink
+              key={cat.id}
+              href={`/${locale}/services/${cat.id}`}
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.6, ease: EASE, delay: (i % 4) * 0.08 }}
+              className="group relative aspect-square cursor-pointer overflow-hidden rounded-2xl bg-[var(--c-bg-alt)] text-start"
             >
-              <div className="flex gap-3 items-end">
-                {[60, 90, 75, 80, 100, 70, 85].map((h, i) => (
-                  <div
-                    key={i}
-                    className="w-8 rounded-t-sm"
-                    style={{
-                      height: `${h}px`,
-                      backgroundColor: i === 4 ? 'var(--c-accent)' : 'var(--c-border-lt)',
-                    }}
-                  />
-                ))}
-              </div>
-              <div className="absolute top-4 start-4">
-                <p className="text-[10px] tracking-[0.3em] uppercase text-[var(--c-ultra-dim)]">
-                  {locale === 'he' ? 'מבחר אוסף' : 'Curated Selection'}
-                </p>
-              </div>
-            </motion.div>
+              <Image
+                src={cat.image}
+                alt={cat.name[locale]}
+                fill
+                sizes="(max-width: 768px) 50vw, 25vw"
+                className="object-cover object-center"
+              />
 
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.7 }}
-              className="order-1 lg:order-2"
-            >
-              <p className="text-[10px] tracking-[0.4em] uppercase text-[var(--c-accent)] mb-4">
-                02
-              </p>
-              <h2
-                className="text-4xl font-light text-[var(--c-text)] mb-2"
-                style={{ fontFamily: headingFont }}
-              >
-                {t('sales_title')}
-              </h2>
-              <p className="text-xl font-light text-[var(--c-accent)] italic mb-8">
-                {t('sales_subtitle')}
-              </p>
-              <p className="text-base text-[var(--c-dim)] leading-relaxed mb-8">
-                {t('sales_body')}
-              </p>
-              <Button href={`/${locale}/store`} variant="outline" size="sm">
-                {locale === 'he' ? 'צפה בפסנתרים' : 'View Pianos'}
-              </Button>
-            </motion.div>
-          </div>
-        </div>
-      </section>
+              {/* Base scrim keeps the title readable. A second bottom gradient
+                  fades in on hover (desktop only) to cover the revealed text —
+                  only the lower area, not the whole square. */}
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent" />
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-transparent opacity-0 transition-opacity duration-500 md:group-hover:opacity-100" />
 
-      {/* Japanese Import */}
-      <section className="section-padding bg-[var(--c-bg)] border-t border-[var(--c-card)]">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.7 }}
-            >
-              <p className="text-[10px] tracking-[0.4em] uppercase text-[var(--c-accent)] mb-4">
-                03
-              </p>
-              <h2
-                className="text-4xl font-light text-[var(--c-text)] mb-2"
-                style={{ fontFamily: headingFont }}
-              >
-                {t('import_title')}
-              </h2>
-              <p className="text-xl font-light text-[var(--c-accent)] italic mb-8">
-                {t('import_subtitle')}
-              </p>
-              <p className="text-base text-[var(--c-dim)] leading-relaxed mb-8">
-                {t('import_body')}
-              </p>
-              <Button href={`/${locale}/contact`} variant="outline" size="sm">
-                {t('cta')}
-              </Button>
-            </motion.div>
-
-            {/* Brands */}
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.7, delay: 0.2 }}
-              className="grid grid-cols-2 gap-4"
-            >
-              {['Yamaha', 'Kawai', 'Steinway', 'Bösendorfer'].map((brand) => (
-                <div
-                  key={brand}
-                  className="bg-[var(--c-card)] border border-[var(--c-border)] p-8 flex items-center justify-center"
+              <div className="absolute inset-x-0 bottom-0 p-5 md:p-6">
+                <h3
+                  className="text-xl leading-tight tracking-tight text-white sm:text-2xl"
+                  style={{ fontFamily: titleFont, fontWeight: 400 }}
                 >
-                  <p
-                    className="text-lg font-light text-[var(--c-ultra-dim)]"
-                    style={{ fontFamily: 'var(--font-cormorant), serif' }}
-                  >
-                    {brand}
-                  </p>
-                </div>
-              ))}
-            </motion.div>
-          </div>
-        </div>
-      </section>
+                  {cat.name[locale]}
+                </h3>
 
-      {/* CTA */}
-      <section className="section-padding bg-[var(--c-bg-alt)] border-t border-[var(--c-card)]">
-        <div className="max-w-3xl mx-auto px-6 text-center">
-          <h2
-            className="text-4xl font-light text-[var(--c-text)] mb-6"
-            style={{ fontFamily: headingFont }}
-          >
-            {t('cta_title')}
-          </h2>
-          <p className="text-base text-[var(--c-dim)] mb-10">{t('cta_body')}</p>
-          <Button href={`/${locale}/contact`} size="lg">
-            {t('cta')}
-          </Button>
+                {/* Desktop only: description + Learn More revealed on hover.
+                    Mobile shows just the title (no hover gestures there). */}
+                <div className="hidden max-h-0 overflow-hidden opacity-0 transition-all duration-500 ease-out md:block md:group-hover:mt-3 md:group-hover:max-h-60 md:group-hover:opacity-100">
+                  <p className="text-sm leading-relaxed text-white/85">{cat.description[locale]}</p>
+                  <span
+                    className="mt-4 inline-block bg-white px-5 py-2 text-[10px] uppercase tracking-[0.25em] text-black"
+                    style={{ fontFamily: titleFont, fontWeight: 400 }}
+                  >
+                    {t('learn_more')}
+                  </span>
+                </div>
+              </div>
+            </MotionLink>
+          ))}
         </div>
+
+        {visible.length === 0 && (
+          <p className="py-20 text-center text-sm text-[var(--c-ultra-dim)]">{t('empty')}</p>
+        )}
       </section>
 
       <ContactCTA />

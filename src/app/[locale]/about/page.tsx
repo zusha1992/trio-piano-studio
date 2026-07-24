@@ -3,205 +3,173 @@
 import { useTranslations, useLocale } from 'next-intl';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
-import Button from '@/components/ui/Button';
 import ContactCTA from '@/components/sections/ContactCTA';
 
-const values = ['value1', 'value2', 'value3'] as const;
+// Each founder's photo is bound to their id (not a positional index), so the
+// name, bio and image can never drift apart regardless of order or locale.
+const FOUNDERS = [
+  { id: 'gadi', image: '/images/About/Gadi.png' },
+  { id: 'nethanel', image: '/images/About/Fastman.png' },
+  { id: 'noam', image: '/images/About/Noam.jpg' },
+] as const;
+
+const EASE = [0.16, 1, 0.3, 1] as const;
+
+// Bottom scrim so overlaid text stays readable on the mobile banners.
+const SCRIM =
+  'pointer-events-none absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent md:hidden';
 
 export default function AboutPage() {
   const t = useTranslations('about');
-  const locale = useLocale();
+  const locale = useLocale() as 'en' | 'he';
+  const isHe = locale === 'he';
+  const titleFont = isHe ? 'var(--font-rubik), sans-serif' : 'var(--font-arimo), sans-serif';
 
-  const headingFont =
-    locale === 'he' ? 'var(--font-heebo), sans-serif' : 'var(--font-cormorant), serif';
+  const aboutBody = t.raw('about_trio_body') as string[];
+  const whoBody = t.raw('who_body') as string[];
+
+  const reveal = {
+    initial: { opacity: 0, y: 24 },
+    whileInView: { opacity: 1, y: 0 },
+    viewport: { once: true, amount: 0.25 },
+    transition: { duration: 0.7, ease: EASE },
+  };
+
+  const heading = 'text-3xl tracking-tight text-[var(--c-text)] sm:text-4xl';
+  const paragraph = 'max-w-md text-[15px] leading-relaxed text-[var(--c-dim)]';
+  // Full-bleed banner on mobile (breaks out of the section padding), tidy
+  // rounded card sitting inside the grid column on desktop.
+  const banner =
+    'relative -mx-8 aspect-[4/3] overflow-hidden bg-[var(--c-bg-alt)] sm:-mx-10 md:mx-0 md:aspect-[12/13] md:rounded-2xl';
+  const bannerTitle =
+    'absolute bottom-0 start-0 p-5 text-3xl tracking-tight text-white drop-shadow md:hidden';
 
   return (
     <>
-      {/* Hero */}
-      <section className="relative min-h-[55vh] flex items-center bg-[var(--c-bg)] pt-20">
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage:
-              'radial-gradient(ellipse 70% 70% at 30% 50%, rgba(201,168,76,0.05) 0%, transparent 60%)',
-          }}
-        />
-        <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 py-20">
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6 }}
-            className="text-[10px] tracking-[0.4em] uppercase text-[var(--c-accent)] mb-6"
-          >
-            {t('hero_label')}
-          </motion.p>
-          <div className="gold-divider" />
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-5xl lg:text-7xl font-light text-[var(--c-text)] max-w-3xl leading-tight"
-            style={{ fontFamily: headingFont }}
-          >
-            {t('hero_title')}
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-            className="text-lg text-[var(--c-muted)] mt-6 max-w-xl"
-          >
-            {t('hero_subtitle')}
-          </motion.p>
-        </div>
-      </section>
+      <section className="mx-auto max-w-6xl px-8 pb-24 pt-32 sm:px-10 md:pt-44 lg:px-12 lg:pt-52">
+        {/* Page title — same treatment as the store */}
+        <motion.h1
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.7, ease: EASE }}
+          className="ms-4 text-6xl leading-[0.95] tracking-tight text-[var(--c-text)] sm:ms-8 sm:text-7xl md:ms-14 lg:ms-20 lg:text-8xl"
+          style={{ fontFamily: titleFont, fontWeight: 500 }}
+        >
+          {t('hero_title')}
+        </motion.h1>
 
-      {/* Story / manifesto */}
-      <section className="section-padding bg-[var(--c-bg)] border-t border-[var(--c-border)]">
-        <div className="max-w-3xl mx-auto px-6 lg:px-8">
-          <motion.h2
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.5 }}
-            transition={{ duration: 0.7 }}
-            className="text-4xl lg:text-5xl font-light text-[var(--c-text)] leading-tight"
-            style={{ fontFamily: headingFont }}
-          >
-            {t('intro_title')}
-          </motion.h2>
-          <div className="gold-divider mt-6" />
-          <div className="space-y-6 mt-8">
-            {(t.raw('intro_body') as string[]).map((paragraph, i) => (
-              <motion.p
-                key={i}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.4 }}
-                transition={{ duration: 0.6, delay: Math.min(i * 0.04, 0.25) }}
-                className="text-base lg:text-lg text-[var(--c-dim)] leading-relaxed"
-              >
-                {paragraph}
-              </motion.p>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Founders */}
-      <section className="section-padding bg-[var(--c-bg-alt)] border-t border-[var(--c-border)]">
-        <div className="max-w-6xl mx-auto px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <p className="text-[10px] tracking-[0.4em] uppercase text-[var(--c-accent)] mb-4">
-              {t('founders_label')}
-            </p>
-            <h2
-              className="text-4xl font-light text-[var(--c-text)]"
-              style={{ fontFamily: headingFont }}
-            >
-              {t('founders_title')}
+        {/* Section 1 — The Studio / Who We Are.
+            Desktop: alternating text + image. Mobile: full-width image banners
+            with the title overlaid, followed by the paragraphs. */}
+        <div className="mt-16 grid grid-cols-1 gap-x-12 gap-y-10 md:mt-24 md:grid-cols-2 md:items-center md:gap-y-24">
+          {/* The Studio — text */}
+          <motion.div {...reveal} className="order-2 md:order-1">
+            <h2 className={`hidden md:block ${heading}`} style={{ fontFamily: titleFont, fontWeight: 400 }}>
+              {t('about_trio_title')}
             </h2>
-          </div>
+            <div className="space-y-4 md:mt-6">
+              {aboutBody.map((p, i) => (
+                <p key={i} className={paragraph}>
+                  {p}
+                </p>
+              ))}
+            </div>
+          </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-16">
-            {(t.raw('founders') as { name: string; role: string; bio: string }[]).map(
-              (founder, i) => (
+          {/* The Studio — image / mobile banner */}
+          <motion.div {...reveal} className={`order-1 md:order-2 ${banner}`}>
+            <Image
+              src="/images/About/about-trio.jpg"
+              alt=""
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 45vw"
+            />
+            <div className={SCRIM} />
+            <h2 className={bannerTitle} style={{ fontFamily: titleFont, fontWeight: 400 }}>
+              {t('about_trio_title')}
+            </h2>
+          </motion.div>
+
+          {/* Who We Are — image / mobile banner (left on desktop) */}
+          <motion.div {...reveal} className={`order-3 ${banner}`}>
+            <Image
+              src="/images/About/who-we-are.jpeg"
+              alt=""
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 45vw"
+            />
+            <div className={SCRIM} />
+            <h2 className={bannerTitle} style={{ fontFamily: titleFont, fontWeight: 400 }}>
+              {t('who_title')}
+            </h2>
+          </motion.div>
+
+          {/* Who We Are — text (right on desktop) */}
+          <motion.div {...reveal} className="order-4">
+            <h2 className={`hidden md:block ${heading}`} style={{ fontFamily: titleFont, fontWeight: 400 }}>
+              {t('who_title')}
+            </h2>
+            <div className="space-y-4 md:mt-6">
+              {whoBody.map((p, i) => (
+                <p key={i} className={paragraph}>
+                  {p}
+                </p>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Section 2 — Founders */}
+        <div className="mt-24 md:mt-40">
+          <motion.h2
+            {...reveal}
+            className={`text-center ${heading}`}
+            style={{ fontFamily: titleFont, fontWeight: 400 }}
+          >
+            {t('founders_title')}
+          </motion.h2>
+
+          <div className="mt-12 grid grid-cols-1 gap-y-10 sm:grid-cols-3 sm:gap-x-10 sm:gap-y-14 lg:gap-x-16">
+            {FOUNDERS.map((f, i) => {
+              const name = t(`founders.${f.id}.name`);
+              const bio = t(`founders.${f.id}.bio`);
+              return (
                 <motion.div
-                  key={founder.name}
+                  key={f.id}
                   initial={{ opacity: 0, y: 24 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, amount: 0.3 }}
-                  transition={{ duration: 0.6, delay: i * 0.12 }}
-                  className="text-center"
+                  viewport={{ once: true, amount: 0.25 }}
+                  transition={{ duration: 0.7, ease: EASE, delay: i * 0.1 }}
+                  className="flex w-full flex-col text-start sm:mx-auto sm:max-w-[18rem]"
                 >
-                  <div className="relative w-40 h-40 mx-auto mb-6 rounded-full overflow-hidden border border-[var(--c-border-lt)]">
+                  <div className="relative aspect-square overflow-hidden rounded-2xl bg-[var(--c-bg-alt)]">
                     <Image
-                      src={`/images/founder-${i + 1}.jpg`}
-                      alt={founder.name}
+                      src={f.image}
+                      alt={name}
                       fill
                       className="object-cover"
-                      sizes="160px"
+                      sizes="(max-width: 640px) 100vw, 30vw"
                     />
+                    <div className={SCRIM} />
+                    <h3
+                      className="absolute bottom-0 start-0 p-4 text-2xl tracking-tight text-white drop-shadow md:hidden"
+                      style={{ fontFamily: titleFont, fontWeight: 500 }}
+                    >
+                      {name}
+                    </h3>
                   </div>
-                  <h3 className="text-xl font-light text-[var(--c-text)]">{founder.name}</h3>
-                  <p className="text-xs tracking-[0.2em] uppercase text-[var(--c-accent)] mt-2 mb-4">
-                    {founder.role}
-                  </p>
-                  <p className="text-sm text-[var(--c-muted)] leading-relaxed">{founder.bio}</p>
+                  <h3
+                    className="mt-5 hidden text-xl tracking-tight text-[var(--c-text)] md:block"
+                    style={{ fontFamily: titleFont, fontWeight: 500 }}
+                  >
+                    {name}
+                  </h3>
+                  <p className="mt-3 text-sm leading-relaxed text-[var(--c-muted)] md:mt-2">{bio}</p>
                 </motion.div>
-              ),
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* Values */}
-      <section className="section-padding bg-[var(--c-bg-alt)] border-t border-[var(--c-card)]">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <p className="text-[10px] tracking-[0.4em] uppercase text-[var(--c-accent)] mb-4">
-              {t('values_label')}
-            </p>
-            <h2
-              className="text-4xl font-light text-[var(--c-text)]"
-              style={{ fontFamily: headingFont }}
-            >
-              {t('values_title')}
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {values.map((key, i) => (
-              <motion.div
-                key={key}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: i * 0.15 }}
-                className="bg-[var(--c-card)] border border-[var(--c-border)] p-8"
-              >
-                <p className="text-3xl font-light text-[var(--c-accent)] mb-4"
-                  style={{ fontFamily: 'var(--font-cormorant), serif' }}>
-                  0{i + 1}
-                </p>
-                <h3 className="text-xl font-light text-[var(--c-text)] mb-4">
-                  {t(`${key}_title`)}
-                </h3>
-                <p className="text-sm text-[var(--c-muted)] leading-relaxed">
-                  {t(`${key}_desc`)}
-                </p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Location */}
-      <section className="section-padding bg-[var(--c-bg)] border-t border-[var(--c-card)]">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div>
-              <p className="text-[10px] tracking-[0.4em] uppercase text-[var(--c-accent)] mb-4">
-                {t('location_label')}
-              </p>
-              <h2
-                className="text-4xl font-light text-[var(--c-text)] mb-6"
-                style={{ fontFamily: headingFont }}
-              >
-                {t('location_title')}
-              </h2>
-              <p className="text-base text-[var(--c-dim)] mb-4">{t('location_address')}</p>
-              <p className="text-sm text-[var(--c-muted)] whitespace-pre-line mb-8">
-                {t('location_hours')}
-              </p>
-              <Button href={`/${locale}/contact`} variant="outline">
-                {locale === 'he' ? 'צור קשר' : 'Get Directions'}
-              </Button>
-            </div>
-            <div className="h-80 bg-[var(--c-card)] border border-[var(--c-border-lt)] flex items-center justify-center">
-              <p className="text-xs tracking-[0.3em] uppercase text-[var(--c-ultra-dim)]">
-                {locale === 'he' ? 'מפה תתווסף בקרוב' : 'Map Coming Soon'}
-              </p>
-            </div>
+              );
+            })}
           </div>
         </div>
       </section>

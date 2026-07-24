@@ -2,53 +2,51 @@
 
 import { useState, useEffect, FormEvent } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
-import { motion } from 'framer-motion';
-import { Mail, Phone, MapPin, Clock } from 'lucide-react';
-
-const FacebookIcon = () => (
-  <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
-  </svg>
-);
+import { AnimatePresence, motion } from 'framer-motion';
 import emailjs from '@emailjs/browser';
+import { CONTACTS, ContactIcon } from '@/components/layout/heroShared';
 
-// Replace these with your actual EmailJS credentials
 const EMAILJS_SERVICE_ID = 'service_52uluqq';
 const EMAILJS_TEMPLATE_ID = 'template_8ozp076';
 const EMAILJS_PUBLIC_KEY = 'FsgqljsX-d4Ea9-Ai';
 
+const EASE = [0.16, 1, 0.3, 1] as const;
+
+// Values that should always read left-to-right, even in Hebrew.
+const LTR_ICONS = [
+  'whatsapp.svg',
+  'envelope-solid-full.svg',
+  'instagram-logo-fill-svgrepo-com.svg',
+];
+
 export default function ContactPage() {
   const t = useTranslations('contact');
-  const locale = useLocale();
+  const locale = useLocale() as 'en' | 'he';
+  const isHe = locale === 'he';
+  const titleFont = isHe ? 'var(--font-rubik), sans-serif' : 'var(--font-arimo), sans-serif';
+
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
+  // Which contact icon is hovered/focused — drives the reveal text to its side.
+  const [active, setActive] = useState<string | null>(null);
 
   useEffect(() => {
     emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
   }, []);
 
-  const headingFont =
-    locale === 'he' ? 'var(--font-heebo), sans-serif' : 'var(--font-cormorant), serif';
-
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setStatus('sending');
-
     const form = e.currentTarget;
     const formData = new FormData(form);
-
     try {
-      await emailjs.send(
-        EMAILJS_SERVICE_ID,
-        EMAILJS_TEMPLATE_ID,
-        {
-          name: formData.get('name') as string,
-          email: formData.get('email') as string,
-          phone: formData.get('phone') as string,
-          title: formData.get('subject') as string,
-          subject: formData.get('subject') as string,
-          message: formData.get('message') as string,
-        }
-      );
+      await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+        name: formData.get('name') as string,
+        email: formData.get('email') as string,
+        phone: formData.get('phone') as string,
+        title: formData.get('subject') as string,
+        subject: formData.get('subject') as string,
+        message: formData.get('message') as string,
+      });
       setStatus('success');
       form.reset();
     } catch (err) {
@@ -57,203 +55,171 @@ export default function ContactPage() {
     }
   };
 
-  const contactInfo = [
-    { icon: MapPin, label: t('info_address') },
-    { icon: Phone, label: t('info_phone'), href: `tel:+972543337341` },
-    { icon: Mail, label: t('info_email'), href: `mailto:trio.piano.studio@gmail.com` },
-    { icon: Clock, label: t('info_hours') },
-    { icon: FacebookIcon, label: 'trio.piano.studio', href: 'https://www.facebook.com/profile.php?id=61590350696510' },
+  const label = 'mb-2.5 block text-[11px] uppercase tracking-[0.18em] text-[var(--c-muted)]';
+  const field =
+    'w-full rounded-lg border border-[var(--c-border)] bg-transparent px-4 py-3.5 text-[15px] text-[var(--c-text)] transition-colors focus:border-[var(--c-cat)] focus:outline-none';
+
+  // Same details/icons/actions as the home-page footer, plus opening hours.
+  // Hours collapse to one line for the inline reveal.
+  const details = [
+    ...CONTACTS.map((c) => ({
+      icon: c.icon,
+      text: isHe ? c.labelHe : c.labelEn,
+      href: c.href,
+      external: c.external ?? false,
+    })),
+    {
+      icon: 'clock.svg',
+      text: t('info_hours').replace(/\n/g, '  ·  '),
+      href: '',
+      external: false,
+    },
   ];
 
   return (
-    <>
-      {/* Hero */}
-      <section className="relative min-h-[45vh] flex items-end bg-[var(--c-bg)] pt-20">
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage:
-              'radial-gradient(ellipse 70% 60% at 50% 0%, rgba(201,168,76,0.04) 0%, transparent 60%)',
-          }}
-        />
-        <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 pb-16 w-full">
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-[10px] tracking-[0.4em] uppercase text-[var(--c-accent)] mb-4"
-          >
-            {t('hero_label')}
-          </motion.p>
-          <div className="gold-divider" />
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="text-5xl lg:text-6xl font-light text-[var(--c-text)] leading-tight mb-4"
-            style={{ fontFamily: headingFont }}
-          >
-            {t('hero_title')}
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-            className="text-base text-[var(--c-muted)] max-w-xl"
-          >
-            {t('hero_subtitle')}
-          </motion.p>
-        </div>
-      </section>
+    <section className="mx-auto max-w-[100rem] px-6 pb-24 pt-32 sm:px-10 md:pt-44 lg:px-16 lg:pt-52">
+      {/* Title row — big heading (left) with the contact icons bottom-aligned
+          at the end of the line, exactly like the store's title + filters. */}
+      <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
+        <motion.h1
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.7, ease: EASE }}
+          className="ms-4 text-6xl leading-[0.95] tracking-tight text-[var(--c-text)] sm:ms-8 sm:text-7xl md:ms-14 lg:ms-24 lg:text-8xl"
+          style={{ fontFamily: titleFont, fontWeight: 500 }}
+        >
+          {t('hero_title')}
+        </motion.h1>
 
-      {/* Form + Info */}
-      <section className="section-padding bg-[var(--c-bg)] border-t border-[var(--c-card)]">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-16">
-            {/* Form */}
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.7 }}
-              className="lg:col-span-3"
-            >
-              {status === 'success' ? (
-                <div className="bg-[var(--c-card)] border border-[var(--c-accent)]/30 p-12 text-center">
-                  <p className="text-3xl mb-4">✓</p>
-                  <p className="text-[var(--c-accent)] text-lg mb-2">{t('form_success')}</p>
-                </div>
-              ) : (
-                <form onSubmit={handleSubmit} className="space-y-5">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                    <div>
-                      <label className="block text-[10px] tracking-[0.2em] uppercase text-[var(--c-muted)] mb-2">
-                        {t('form_name')} *
-                      </label>
-                      <input
-                        name="name"
-                        required
-                        className="w-full bg-[var(--c-card)] border border-[var(--c-border-lt)] text-[var(--c-text)] px-4 py-3 text-sm focus:outline-none focus:border-[var(--c-accent)] transition-colors placeholder-[var(--c-ultra-dim)]"
-                        placeholder={t('form_name')}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] tracking-[0.2em] uppercase text-[var(--c-muted)] mb-2">
-                        {t('form_phone')}
-                      </label>
-                      <input
-                        name="phone"
-                        type="tel"
-                        className="w-full bg-[var(--c-card)] border border-[var(--c-border-lt)] text-[var(--c-text)] px-4 py-3 text-sm focus:outline-none focus:border-[var(--c-accent)] transition-colors placeholder-[var(--c-ultra-dim)]"
-                        placeholder={t('form_phone')}
-                        dir="ltr"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] tracking-[0.2em] uppercase text-[var(--c-muted)] mb-2">
-                      {t('form_email')} *
-                    </label>
-                    <input
-                      name="email"
-                      type="email"
-                      required
-                      className="w-full bg-[var(--c-card)] border border-[var(--c-border-lt)] text-[var(--c-text)] px-4 py-3 text-sm focus:outline-none focus:border-[var(--c-accent)] transition-colors placeholder-[var(--c-ultra-dim)]"
-                      placeholder={t('form_email')}
-                      dir="ltr"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] tracking-[0.2em] uppercase text-[var(--c-muted)] mb-2">
-                      {t('form_subject')}
-                    </label>
-                    <input
-                      name="subject"
-                      className="w-full bg-[var(--c-card)] border border-[var(--c-border-lt)] text-[var(--c-text)] px-4 py-3 text-sm focus:outline-none focus:border-[var(--c-accent)] transition-colors placeholder-[var(--c-ultra-dim)]"
-                      placeholder={t('form_subject')}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] tracking-[0.2em] uppercase text-[var(--c-muted)] mb-2">
-                      {t('form_message')} *
-                    </label>
-                    <textarea
-                      name="message"
-                      required
-                      rows={6}
-                      className="w-full bg-[var(--c-card)] border border-[var(--c-border-lt)] text-[var(--c-text)] px-4 py-3 text-sm focus:outline-none focus:border-[var(--c-accent)] transition-colors resize-none placeholder-[var(--c-ultra-dim)]"
-                      placeholder={t('form_message')}
-                    />
-                  </div>
-
-                  {status === 'error' && (
-                    <p className="text-red-400 text-sm">{t('form_error')}</p>
-                  )}
-
-                  <button
-                    type="submit"
-                    disabled={status === 'sending'}
-                    className="w-full sm:w-auto bg-[var(--c-accent)] hover:bg-[#D4B96A] disabled:opacity-60 text-[var(--c-bg)] text-xs tracking-[0.2em] uppercase px-10 py-4 transition-all duration-300 cursor-pointer"
-                  >
-                    {status === 'sending' ? t('form_sending') : t('form_submit')}
-                  </button>
-                </form>
-              )}
-            </motion.div>
-
-            {/* Contact info */}
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.7, delay: 0.2 }}
-              className="lg:col-span-2 space-y-8"
-            >
-              {contactInfo.map(({ icon: Icon, label, href }, i) => (
-                <div key={i} className="flex items-start gap-4">
-                  <div className="w-10 h-10 border border-[var(--c-border-lt)] flex items-center justify-center shrink-0">
-                    <Icon size={16} style={{ color: 'var(--c-accent)' }} />
-                  </div>
-                  {href ? (
-                    <a
-                      href={href}
-                      className="text-sm text-[var(--c-dim)] hover:text-[var(--c-text)] transition-colors leading-relaxed mt-2"
-                      dir="ltr"
-                    >
-                      {label}
-                    </a>
-                  ) : (
-                    <p className="text-sm text-[var(--c-dim)] leading-relaxed mt-2 whitespace-pre-line">
-                      {label}
-                    </p>
-                  )}
-                </div>
-              ))}
-
-              {/* WhatsApp link */}
-              <a
-                href="https://wa.me/972543337341"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-3 border border-[#25D366]/30 hover:border-[#25D366] p-4 transition-all duration-300 group"
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="#25D366"
-                  className="w-5 h-5 shrink-0"
+        {/* Icons sit at the end of the line; hovering one reveals its detail
+            inline, emerging from the icons' side — from the right in English,
+            from the left in Hebrew. */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25, duration: 0.7, ease: EASE }}
+          className="flex items-center gap-5 sm:gap-6 md:pb-2"
+          onMouseLeave={() => setActive(null)}
+        >
+          {/* Reveal area — inline next to the icons (desktop only) */}
+          <div className="relative hidden h-7 w-[min(60vw,26rem)] overflow-hidden md:block">
+            <AnimatePresence mode="wait">
+              {active && (
+                <motion.div
+                  key={active}
+                  initial={{ opacity: 0, x: isHe ? -24 : 24 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: isHe ? -24 : 24 }}
+                  transition={{ duration: 0.4, ease: EASE }}
+                  className="absolute inset-0 flex items-center justify-end whitespace-nowrap text-lg text-[var(--c-text)]"
                 >
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-                </svg>
-                <span className="text-sm text-[var(--c-dim)] group-hover:text-[#25D366] transition-colors">
-                  {t('whatsapp')}
-                </span>
-              </a>
-            </motion.div>
+                  {LTR_ICONS.includes(active) ? (
+                    <span dir="ltr">{details.find((d) => d.icon === active)?.text}</span>
+                  ) : (
+                    details.find((d) => d.icon === active)?.text
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
-        </div>
-      </section>
-    </>
+
+          <div className="flex items-center gap-5 sm:gap-6">
+            {details.map((c) => {
+              const inner = (
+                <ContactIcon src={`/assets/icons/${c.icon}`} size={c.icon === 'clock.svg' ? 24 : 30} />
+              );
+              const common =
+                'flex items-center text-[color:var(--c-cat)] transition-colors duration-300 hover:text-[color:var(--c-cat-active)]';
+              const on = () => setActive(c.icon);
+              return c.href ? (
+                <a
+                  key={c.icon}
+                  href={c.href}
+                  target={c.external ? '_blank' : undefined}
+                  rel={c.external ? 'noopener noreferrer' : undefined}
+                  aria-label={c.text}
+                  className={common}
+                  onMouseEnter={on}
+                  onFocus={on}
+                >
+                  {inner}
+                </a>
+              ) : (
+                <span
+                  key={c.icon}
+                  aria-label={c.text}
+                  className={`${common} cursor-default`}
+                  onMouseEnter={on}
+                  onFocus={on}
+                  tabIndex={0}
+                >
+                  {inner}
+                </span>
+              );
+            })}
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Full-width message form */}
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.15 }}
+        transition={{ duration: 0.7, ease: EASE, delay: 0.1 }}
+        className="mt-12 md:mt-16"
+      >
+        {status === 'success' ? (
+          <p className="text-[15px] leading-relaxed text-[var(--c-dim)]">{t('form_success')}</p>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-8">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-3 md:gap-12">
+              {/* Left column (1/3): name, phone, email stacked */}
+              <div className="space-y-5">
+                <div>
+                  <label className={label}>{t('form_name')} *</label>
+                  <input name="name" required className={field} />
+                </div>
+                <div>
+                  <label className={label}>{t('form_phone')}</label>
+                  <input name="phone" type="tel" dir="ltr" className={field} />
+                </div>
+                <div>
+                  <label className={label}>{t('form_email')} *</label>
+                  <input name="email" type="email" required dir="ltr" className={field} />
+                </div>
+              </div>
+
+              {/* Right column (2/3): subject + message, message fills height */}
+              <div className="flex flex-col gap-5 md:col-span-2">
+                <div>
+                  <label className={label}>{t('form_subject')}</label>
+                  <input name="subject" className={field} />
+                </div>
+                <div className="flex flex-1 flex-col">
+                  <label className={label}>{t('form_message')} *</label>
+                  <textarea
+                    name="message"
+                    required
+                    className={`${field} min-h-[9rem] flex-1 resize-none`}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {status === 'error' && <p className="text-sm text-red-500">{t('form_error')}</p>}
+
+            <button
+              type="submit"
+              disabled={status === 'sending'}
+              className="inline-block rounded-full bg-[color:var(--c-cat)] px-8 py-3 text-[11px] uppercase tracking-[0.25em] text-[var(--c-bg)] transition-colors duration-300 hover:bg-[color:var(--c-cat-active)] disabled:opacity-60"
+              style={{ fontFamily: titleFont, fontWeight: 400 }}
+            >
+              {status === 'sending' ? t('form_sending') : t('form_submit')}
+            </button>
+          </form>
+        )}
+      </motion.div>
+    </section>
   );
 }
