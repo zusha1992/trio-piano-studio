@@ -2,24 +2,23 @@
 
 import { useTranslations, useLocale } from 'next-intl';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { displayFont } from '@/lib/fonts';
 
 export default function ContactCTA() {
   const t = useTranslations('cta_banner');
   const locale = useLocale();
   const isHe = locale === 'he';
   // Same header typeface as the store title / home-screen categories.
-  const titleFont = isHe ? 'var(--font-rubik), sans-serif' : 'var(--font-arimo), sans-serif';
+  const titleFont = displayFont(isHe);
 
   return (
     <section className="mx-auto max-w-[100rem] px-6 py-16 text-center sm:px-10 lg:px-16 lg:py-20">
-      <motion.h2
-        initial={false}
+      <h2
         className="text-2xl leading-tight tracking-tight text-[var(--c-text)] sm:text-3xl lg:text-4xl"
         style={{ fontFamily: titleFont, fontWeight: 400 }}
       >
         {t('title')}
-      </motion.h2>
+      </h2>
 
       <div className="mt-8">
         <Link

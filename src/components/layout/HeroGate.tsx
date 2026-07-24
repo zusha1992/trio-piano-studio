@@ -16,6 +16,7 @@ import {
   DEFAULT_IMG,
 } from '@/components/layout/heroShared';
 import { useTheme } from '@/components/layout/ThemeContext';
+import { EASE } from '@/lib/motion';
 
 /* ── Straight vertical seam ─────────────────────────────────────────
    Image fills the left half, logo/categories the right half.          */
@@ -32,7 +33,6 @@ const GATE_CLOSE_DURATION = 2.3;
 const GATE_OPEN_DURATION = 1.5;
 
 const SWAP_DURATION = 0.6;
-const SWAP_EASE = [0.16, 1, 0.3, 1] as const;
 
 export default function HeroGate() {
   const locale = useLocale();
@@ -171,7 +171,7 @@ export default function HeroGate() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 1.6, ease: SWAP_EASE }}
+            transition={{ duration: 1.6, ease: EASE }}
           >
             <Image
               src="/images/logo.png"
@@ -206,7 +206,7 @@ export default function HeroGate() {
                 className="absolute inset-0"
                 initial={false}
                 animate={{ opacity: src === currentImg ? 1 : 0 }}
-                transition={{ duration: SWAP_DURATION, ease: SWAP_EASE }}
+                transition={{ duration: SWAP_DURATION, ease: EASE }}
               >
                 <Image src={src} alt="" fill priority sizes="50vw" className="object-cover" />
               </motion.div>

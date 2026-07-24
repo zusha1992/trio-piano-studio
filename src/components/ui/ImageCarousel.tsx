@@ -4,8 +4,7 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
-
-const EASE = [0.16, 1, 0.3, 1] as const;
+import { EASE } from '@/lib/motion';
 
 const slideVariants = {
   enter: (d: number) => ({ x: d > 0 ? '100%' : '-100%' }),

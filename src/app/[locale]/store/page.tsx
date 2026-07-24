@@ -7,6 +7,8 @@ import { useTranslations, useLocale } from 'next-intl';
 import { AnimatePresence, motion } from 'framer-motion';
 import { shopItems, ShopType, ShopRegion } from '@/data/shopItems';
 import ContactCTA from '@/components/sections/ContactCTA';
+import { EASE } from '@/lib/motion';
+import { displayFont } from '@/lib/fonts';
 
 const MotionLink = motion.create(Link);
 
@@ -49,7 +51,7 @@ export default function StorePage() {
   const [types, setTypes] = useState<ShopType[]>([]);
   const [regions, setRegions] = useState<ShopRegion[]>([]);
 
-  const titleFont = isHe ? 'var(--font-rubik), sans-serif' : 'var(--font-arimo), sans-serif';
+  const titleFont = displayFont(isHe);
   // Delicate serif for the descriptor line (Hebrew has no serif → soft sans).
   const allActive = types.length === 0 && regions.length === 0;
   const clearAll = () => {
@@ -166,7 +168,7 @@ export default function StorePage() {
                 layout
                 initial={false}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ duration: 0.3, ease: EASE }}
                 className={`group relative block aspect-[4/5] cursor-pointer overflow-hidden rounded-2xl bg-[var(--c-bg-alt)] md:aspect-auto ${
                   TILE_SPANS[i % TILE_SPANS.length]
                 }`}

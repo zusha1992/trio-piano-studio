@@ -5,12 +5,12 @@ import { useTranslations, useLocale } from 'next-intl';
 import { AnimatePresence, motion } from 'framer-motion';
 import emailjs from '@emailjs/browser';
 import { CONTACTS, ContactIcon } from '@/components/layout/heroShared';
+import { EASE } from '@/lib/motion';
+import { displayFont } from '@/lib/fonts';
 
 const EMAILJS_SERVICE_ID = 'service_52uluqq';
 const EMAILJS_TEMPLATE_ID = 'template_8ozp076';
 const EMAILJS_PUBLIC_KEY = 'FsgqljsX-d4Ea9-Ai';
-
-const EASE = [0.16, 1, 0.3, 1] as const;
 
 // Values that should always read left-to-right, even in Hebrew.
 const LTR_ICONS = [
@@ -23,7 +23,7 @@ export default function ContactPage() {
   const t = useTranslations('contact');
   const locale = useLocale() as 'en' | 'he';
   const isHe = locale === 'he';
-  const titleFont = isHe ? 'var(--font-rubik), sans-serif' : 'var(--font-arimo), sans-serif';
+  const titleFont = displayFont(isHe);
 
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
   // Which contact icon is hovered/focused — drives the reveal text to its side.

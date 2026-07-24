@@ -9,8 +9,8 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { shopItems, ShopRegion } from '@/data/shopItems';
 import ContactCTA from '@/components/sections/ContactCTA';
 import ImageCarousel from '@/components/ui/ImageCarousel';
-
-const EASE = [0.16, 1, 0.3, 1] as const;
+import { EASE } from '@/lib/motion';
+import { displayFont } from '@/lib/fonts';
 
 const REGION_LABEL: Record<ShopRegion, { en: string; he: string }> = {
   japan: { en: 'Japan', he: 'יפן' },
@@ -49,7 +49,7 @@ export default function PianoPage() {
   const t = useTranslations('store');
   const locale = useLocale() as 'en' | 'he';
   const isHe = locale === 'he';
-  const titleFont = isHe ? 'var(--font-rubik), sans-serif' : 'var(--font-arimo), sans-serif';
+  const titleFont = displayFont(isHe);
 
   const id = params.id as string;
   const index = shopItems.findIndex((p) => p.id === id);

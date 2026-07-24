@@ -7,12 +7,12 @@ import emailjs from '@emailjs/browser';
 import QRCode from 'qrcode';
 import { concerts, concertGallery } from '@/data/concerts';
 import ImageCarousel from '@/components/ui/ImageCarousel';
+import { EASE } from '@/lib/motion';
+import { displayFont } from '@/lib/fonts';
 
 const EMAILJS_SERVICE_ID = 'service_52uluqq';
 const EMAILJS_TEMPLATE_ID = 'template_8ozp076';
 const EMAILJS_PUBLIC_KEY = 'FsgqljsX-d4Ea9-Ai';
-
-const EASE = [0.16, 1, 0.3, 1] as const;
 
 // We assume a single upcoming concert at a time — show the soonest.
 const concert = concerts[0];
@@ -21,7 +21,7 @@ export default function ConcertsPage() {
   const t = useTranslations('concerts');
   const locale = useLocale() as 'en' | 'he';
   const isHe = locale === 'he';
-  const titleFont = isHe ? 'var(--font-rubik), sans-serif' : 'var(--font-arimo), sans-serif';
+  const titleFont = displayFont(isHe);
 
   // ── Registration ───────────────────────────────────────────────────
   const [showForm, setShowForm] = useState(false);

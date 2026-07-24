@@ -9,8 +9,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { workshopCategories } from '@/data/workshopServices';
 import ContactCTA from '@/components/sections/ContactCTA';
-
-const EASE = [0.16, 1, 0.3, 1] as const;
+import { EASE } from '@/lib/motion';
+import { displayFont } from '@/lib/fonts';
 
 const MotionLink = motion(Link);
 
@@ -21,7 +21,7 @@ export default function WorkshopPage() {
   const locale = useLocale() as 'en' | 'he';
   const isHe = locale === 'he';
   const router = useRouter();
-  const titleFont = isHe ? 'var(--font-rubik), sans-serif' : 'var(--font-arimo), sans-serif';
+  const titleFont = displayFont(isHe);
 
   // Free-text search over the individual fixes (both languages), narrowing the
   // grid to the categories that contain a matching fix.
@@ -153,7 +153,7 @@ export default function WorkshopPage() {
         {/* 4×2 grid of category tiles — square image + title, description
             revealed on hover. Clicking will open a full category page later. */}
         <div className="mt-16 grid grid-cols-2 gap-3 sm:gap-4 md:mt-24 md:grid-cols-4">
-          {visible.map((cat, i) => (
+          {visible.map((cat) => (
             <MotionLink
               key={cat.id}
               href={`/${locale}/services/${cat.id}`}

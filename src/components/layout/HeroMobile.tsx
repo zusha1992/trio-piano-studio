@@ -14,10 +14,11 @@ import {
   ContactIcon,
 } from '@/components/layout/heroShared';
 import { useTheme } from '@/components/layout/ThemeContext';
+import { EASE } from '@/lib/motion';
 
 const AUTO_MS = 4000;
 const SWIPE_THRESHOLD = 50;
-const SLIDE = { duration: 0.6, ease: [0.16, 1, 0.3, 1] } as const;
+const SLIDE = { duration: 0.6, ease: EASE } as const;
 
 // Horizontal slide so it reads like navigating between pages.
 const slideVariants = {
@@ -150,7 +151,7 @@ export default function HeroMobile() {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -12 }}
-              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 0.5, ease: EASE }}
               className="text-center text-[2.9rem] leading-none tracking-tight"
               style={{ fontFamily: headingFont, fontWeight: 400, color: fg }}
             >

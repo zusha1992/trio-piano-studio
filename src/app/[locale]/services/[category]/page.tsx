@@ -8,15 +8,15 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { workshopCategories } from '@/data/workshopServices';
 import ContactCTA from '@/components/sections/ContactCTA';
 import ImageCarousel from '@/components/ui/ImageCarousel';
-
-const EASE = [0.16, 1, 0.3, 1] as const;
+import { EASE } from '@/lib/motion';
+import { displayFont } from '@/lib/fonts';
 
 export default function CategoryPage() {
   const params = useParams();
   const t = useTranslations('services');
   const locale = useLocale() as 'en' | 'he';
   const isHe = locale === 'he';
-  const titleFont = isHe ? 'var(--font-rubik), sans-serif' : 'var(--font-arimo), sans-serif';
+  const titleFont = displayFont(isHe);
 
   const slug = params.category as string;
   const index = workshopCategories.findIndex((c) => c.id === slug);

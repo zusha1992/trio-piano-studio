@@ -4,6 +4,8 @@ import { useTranslations, useLocale } from 'next-intl';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import ContactCTA from '@/components/sections/ContactCTA';
+import { EASE } from '@/lib/motion';
+import { displayFont } from '@/lib/fonts';
 
 // Each founder's photo is bound to their id (not a positional index), so the
 // name, bio and image can never drift apart regardless of order or locale.
@@ -13,8 +15,6 @@ const FOUNDERS = [
   { id: 'noam', image: '/images/About/Noam.jpg' },
 ] as const;
 
-const EASE = [0.16, 1, 0.3, 1] as const;
-
 // Bottom scrim so overlaid text stays readable on the mobile banners.
 const SCRIM =
   'pointer-events-none absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent md:hidden';
@@ -23,7 +23,7 @@ export default function AboutPage() {
   const t = useTranslations('about');
   const locale = useLocale() as 'en' | 'he';
   const isHe = locale === 'he';
-  const titleFont = isHe ? 'var(--font-rubik), sans-serif' : 'var(--font-arimo), sans-serif';
+  const titleFont = displayFont(isHe);
 
   const aboutBody = t.raw('about_trio_body') as string[];
   const whoBody = t.raw('who_body') as string[];
@@ -129,7 +129,7 @@ export default function AboutPage() {
           </motion.h2>
 
           <div className="mt-12 grid grid-cols-1 gap-y-10 sm:grid-cols-3 sm:gap-x-10 sm:gap-y-14 lg:gap-x-16">
-            {FOUNDERS.map((f, i) => {
+            {FOUNDERS.map((f) => {
               const name = t(`founders.${f.id}.name`);
               const bio = t(`founders.${f.id}.bio`);
               return (
