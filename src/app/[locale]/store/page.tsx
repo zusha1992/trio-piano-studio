@@ -6,7 +6,6 @@ import { useTranslations, useLocale } from 'next-intl';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { shopItems, ShopType, ShopRegion } from '@/data/shopItems';
-import { consumeGateRevealDelay } from '@/components/layout/gateReveal';
 import ContactCTA from '@/components/sections/ContactCTA';
 
 // Organized-but-varied rhythm on the 3-col desktop grid. Purely positional so
@@ -48,14 +47,6 @@ export default function StorePage() {
   const [types, setTypes] = useState<ShopType[]>([]);
   const [regions, setRegions] = useState<ShopRegion[]>([]);
   const [lightbox, setLightbox] = useState<number | null>(null);
-  // Hold the gallery hidden until the home-screen curtain has finished opening
-  // (when arriving via the gate), then let the tiles fade in staggered.
-  const [revealed, setRevealed] = useState(false);
-
-  useEffect(() => {
-    const id = setTimeout(() => setRevealed(true), consumeGateRevealDelay());
-    return () => clearTimeout(id);
-  }, []);
 
   const titleFont = isHe ? 'var(--font-rubik), sans-serif' : 'var(--font-arimo), sans-serif';
   // Delicate serif for the descriptor line (Hebrew has no serif → soft sans).
@@ -182,21 +173,14 @@ export default function StorePage() {
           </motion.div>
         </div>
 
-        {/* Editorial asymmetric gallery — fades in as a whole once the
-            home-screen curtain has finished opening. */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: revealed ? 1 : 0 }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="mt-12 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 md:auto-rows-[24rem] lg:auto-rows-[30rem]"
-        >
+        {/* Editorial asymmetric gallery */}
+        <div className="mt-12 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 md:auto-rows-[24rem] lg:auto-rows-[30rem]">
           <AnimatePresence mode="popLayout">
             {items.map((item, i) => (
               <motion.button
                 key={item.id}
                 layout
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
+                initial={false}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                 onClick={() => setLightbox(i)}
@@ -242,7 +226,7 @@ export default function StorePage() {
               </motion.button>
             ))}
           </AnimatePresence>
-        </motion.div>
+        </div>
 
         {items.length === 0 && (
           <p className="py-20 text-center text-sm text-[var(--c-ultra-dim)]">{t('empty')}</p>

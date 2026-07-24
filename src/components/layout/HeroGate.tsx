@@ -8,7 +8,6 @@ import { Moon, Sun } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useGate } from '@/components/layout/GateContext';
-import { markGateReveal } from '@/components/layout/gateReveal';
 import {
   ALL_IMAGES,
   CATEGORIES,
@@ -114,8 +113,6 @@ export default function HeroGate() {
       // behind it — never the logo again.
       setClosed(true);
       introPlayed = true;
-      // Let the destination hold its entrance until the curtain has opened.
-      markGateReveal();
       setOpening(true);
       router.push(`/${locale}/${href}`);
     },
