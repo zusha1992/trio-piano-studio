@@ -200,6 +200,17 @@ export default function HeroGate() {
             animate={target}
             transition={{ duration: gateDuration, ease: GATE_EASE }}
           >
+            {/* Opaque base = the current image. Keeps a solid backdrop beneath the
+                cross-fading layers so the panel background never bleeds through
+                mid-transition (which read as a flash to white). */}
+            <Image
+              src={currentImg}
+              alt=""
+              fill
+              priority
+              sizes="50vw"
+              className="object-cover"
+            />
             {ALL_IMAGES.map((src) => (
               <motion.div
                 key={src}
