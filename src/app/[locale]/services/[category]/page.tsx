@@ -1,14 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useParams, notFound } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
-import { AnimatePresence, motion } from 'framer-motion';
-import Image from 'next/image';
+import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { workshopCategories } from '@/data/workshopServices';
 import ContactCTA from '@/components/sections/ContactCTA';
+import ImageCarousel from '@/components/ui/ImageCarousel';
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -30,43 +29,6 @@ export default function CategoryPage() {
   // Gallery images (falls back to the single tile image for now). Track the
   // travel direction so slides move in/out horizontally instead of fading.
   const images = cat.images?.length ? cat.images : [cat.image];
-  const [[slide, dir], setSlide] = useState<[number, number]>([0, 0]);
-  // Auto-advance stops for good once the visitor takes manual control.
-  const [paused, setPaused] = useState(false);
-  const [fullscreen, setFullscreen] = useState(false);
-  const paginate = (d: number) => {
-    setPaused(true);
-    setSlide([(slide + d + images.length) % images.length, d]);
-  };
-  const goTo = (i: number) => {
-    setPaused(true);
-    setSlide([i, i > slide ? 1 : -1]);
-  };
-
-  useEffect(() => {
-    if (paused || fullscreen || images.length <= 1) return;
-    const id = setInterval(() => setSlide(([s]) => [(s + 1) % images.length, 1]), 5000);
-    return () => clearInterval(id);
-  }, [paused, fullscreen, images.length]);
-
-  // Keyboard control while the fullscreen viewer is open.
-  useEffect(() => {
-    if (!fullscreen) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setFullscreen(false);
-      if (e.key === 'ArrowRight') paginate(isHe ? -1 : 1);
-      if (e.key === 'ArrowLeft') paginate(isHe ? 1 : -1);
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fullscreen, isHe, slide, images.length]);
-
-  const slideVariants = {
-    enter: (d: number) => ({ x: d > 0 ? '100%' : '-100%' }),
-    center: { x: '0%' },
-    exit: (d: number) => ({ x: d > 0 ? '-100%' : '100%' }),
-  };
 
   // Break the fixes into two columns once a single column would run taller
   // than the (square) image beside it.
@@ -147,66 +109,7 @@ export default function CategoryPage() {
 
           {/* Image gallery / carousel */}
           <motion.div {...reveal} className="order-1 md:order-2">
-            <div
-              className="group relative aspect-square cursor-pointer overflow-hidden rounded-2xl bg-[var(--c-bg-alt)]"
-              onClick={() => setFullscreen(true)}
-            >
-              <AnimatePresence initial={false} custom={dir}>
-                <motion.div
-                  key={slide}
-                  custom={dir}
-                  variants={slideVariants}
-                  initial="enter"
-                  animate="center"
-                  exit="exit"
-                  transition={{ duration: 0.5, ease: EASE }}
-                  className="absolute inset-0"
-                >
-                  <Image
-                    src={images[slide]}
-                    alt={cat.name[locale]}
-                    fill
-                    className="object-cover object-center"
-                    sizes="(max-width: 768px) 100vw, 45vw"
-                  />
-                </motion.div>
-              </AnimatePresence>
-
-              {images.length > 1 && (
-                <>
-                  <button
-                    type="button"
-                    aria-label="Previous"
-                    onClick={(e) => { e.stopPropagation(); paginate(-1); }}
-                    className="absolute start-3 top-1/2 -translate-y-1/2 cursor-pointer rounded-full bg-black/40 p-1.5 text-white backdrop-blur-sm transition-colors hover:bg-black/60"
-                  >
-                    <BackArrow size={20} />
-                  </button>
-                  <button
-                    type="button"
-                    aria-label="Next"
-                    onClick={(e) => { e.stopPropagation(); paginate(1); }}
-                    className="absolute end-3 top-1/2 -translate-y-1/2 cursor-pointer rounded-full bg-black/40 p-1.5 text-white backdrop-blur-sm transition-colors hover:bg-black/60"
-                  >
-                    <FwdArrow size={20} />
-                  </button>
-
-                  <div className="absolute inset-x-0 bottom-4 flex justify-center gap-2">
-                    {images.map((img, i) => (
-                      <button
-                        key={img}
-                        type="button"
-                        aria-label={`Go to image ${i + 1}`}
-                        onClick={(e) => { e.stopPropagation(); goTo(i); }}
-                        className={`h-1.5 cursor-pointer rounded-full transition-all ${
-                          i === slide ? 'w-5 bg-white' : 'w-1.5 bg-white/50 hover:bg-white/80'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
+            <ImageCarousel images={images} alt={cat.name[locale]} isHe={isHe} />
           </motion.div>
         </div>
 
@@ -239,71 +142,6 @@ export default function CategoryPage() {
           </Link>
         </div>
       </section>
-
-      {/* Fullscreen image viewer */}
-      <AnimatePresence>
-        {fullscreen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[120] flex items-center justify-center bg-black/95 p-4 backdrop-blur-sm"
-            onClick={() => setFullscreen(false)}
-          >
-            <button
-              onClick={() => setFullscreen(false)}
-              aria-label="Close"
-              className="absolute right-5 top-5 z-10 cursor-pointer text-white/70 transition-colors hover:text-white"
-            >
-              <X size={28} strokeWidth={1.5} />
-            </button>
-
-            {images.length > 1 && (
-              <>
-                <button
-                  onClick={(e) => { e.stopPropagation(); paginate(isHe ? 1 : -1); }}
-                  aria-label="Previous"
-                  className="absolute left-4 top-1/2 -translate-y-1/2 cursor-pointer text-white/60 transition-colors hover:text-white"
-                >
-                  <ChevronLeft size={38} strokeWidth={1.5} />
-                </button>
-                <button
-                  onClick={(e) => { e.stopPropagation(); paginate(isHe ? -1 : 1); }}
-                  aria-label="Next"
-                  className="absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer text-white/60 transition-colors hover:text-white"
-                >
-                  <ChevronRight size={38} strokeWidth={1.5} />
-                </button>
-              </>
-            )}
-
-            <motion.div
-              key={slide}
-              initial={{ opacity: 0, scale: 0.98 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.25 }}
-              drag="x"
-              dragConstraints={{ left: 0, right: 0 }}
-              dragElastic={0.2}
-              onDragEnd={(_, info) => {
-                if (info.offset.x < -60) paginate(1);
-                else if (info.offset.x > 60) paginate(-1);
-              }}
-              className="relative h-[85vh] w-full max-w-5xl touch-pan-y"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <Image
-                src={images[slide]}
-                alt={cat.name[locale]}
-                fill
-                sizes="90vw"
-                draggable={false}
-                className="pointer-events-none object-contain"
-              />
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       <ContactCTA />
     </>

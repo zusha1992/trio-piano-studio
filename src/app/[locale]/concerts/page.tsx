@@ -1,13 +1,12 @@
 'use client';
 
 import { useState, useEffect, useRef, FormEvent } from 'react';
-import Image from 'next/image';
 import { useTranslations, useLocale } from 'next-intl';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import emailjs from '@emailjs/browser';
 import QRCode from 'qrcode';
 import { concerts, concertGallery } from '@/data/concerts';
+import ImageCarousel from '@/components/ui/ImageCarousel';
 
 const EMAILJS_SERVICE_ID = 'service_52uluqq';
 const EMAILJS_TEMPLATE_ID = 'template_8ozp076';
@@ -23,47 +22,6 @@ export default function ConcertsPage() {
   const locale = useLocale() as 'en' | 'he';
   const isHe = locale === 'he';
   const titleFont = isHe ? 'var(--font-rubik), sans-serif' : 'var(--font-arimo), sans-serif';
-
-  // Gallery carousel + fullscreen viewer (works for gallery and the poster).
-  const [[slide, dir], setSlide] = useState<[number, number]>([0, 0]);
-  const [paused, setPaused] = useState(false);
-  const [fullscreen, setFullscreen] = useState(false);
-  const [fsImages, setFsImages] = useState<string[]>([]);
-  const [fsIndex, setFsIndex] = useState(0);
-
-  const paginate = (d: number) => {
-    setPaused(true);
-    setSlide(([s]) => [(s + d + concertGallery.length) % concertGallery.length, d]);
-  };
-  const goTo = (i: number) => {
-    setPaused(true);
-    setSlide(([s]) => [i, i > s ? 1 : -1]);
-  };
-  const openFullscreen = (images: string[], index: number) => {
-    setFsImages(images);
-    setFsIndex(index);
-    setFullscreen(true);
-  };
-  const fsPaginate = (d: number) =>
-    setFsIndex((i) => (fsImages.length ? (i + d + fsImages.length) % fsImages.length : 0));
-
-  useEffect(() => {
-    if (paused || fullscreen || concertGallery.length <= 1) return;
-    const id = setInterval(() => setSlide(([s]) => [(s + 1) % concertGallery.length, 1]), 5000);
-    return () => clearInterval(id);
-  }, [paused, fullscreen]);
-
-  useEffect(() => {
-    if (!fullscreen) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setFullscreen(false);
-      if (e.key === 'ArrowRight') fsPaginate(isHe ? -1 : 1);
-      if (e.key === 'ArrowLeft') fsPaginate(isHe ? 1 : -1);
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fullscreen, isHe, fsImages.length]);
 
   // ── Registration ───────────────────────────────────────────────────
   const [showForm, setShowForm] = useState(false);
@@ -236,17 +194,9 @@ export default function ConcertsPage() {
     a.click();
   };
 
-  const slideVariants = {
-    enter: (d: number) => ({ x: d > 0 ? '100%' : '-100%' }),
-    center: { x: '0%' },
-    exit: (d: number) => ({ x: d > 0 ? '-100%' : '100%' }),
-  };
   // Page entrance is handled once by the route template; in-page elements stay
   // static so they don't re-animate ("slide up") while scrolling.
   const reveal = { initial: false } as const;
-
-  const BackArrow = isHe ? ChevronRight : ChevronLeft;
-  const FwdArrow = isHe ? ChevronLeft : ChevronRight;
 
   const fmtDate = (iso: string) =>
     new Intl.DateTimeFormat(isHe ? 'he-IL' : 'en-GB', {
@@ -299,90 +249,21 @@ export default function ConcertsPage() {
             </div>
 
             {/* Poster (square) */}
-            <div
-              className="group relative mt-8 aspect-square w-full cursor-pointer overflow-hidden rounded-2xl bg-[var(--c-bg-alt)]"
-              onClick={() => openFullscreen([concert.poster], 0)}
-            >
-              <Image
-                src={concert.poster}
-                alt={concert.name[locale]}
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, 45vw"
-              />
-            </div>
+            <ImageCarousel
+              images={[concert.poster]}
+              alt={concert.name[locale]}
+              isHe={isHe}
+              frameClassName="mt-8 aspect-square w-full"
+            />
           </motion.div>
 
           {/* Right — photo gallery (matches the left column's height) */}
           <motion.div {...reveal} className="order-2 md:h-full">
-            <div
-              className="group relative aspect-[4/5] cursor-pointer overflow-hidden rounded-2xl bg-[var(--c-bg-alt)] md:aspect-auto md:h-full"
-              onClick={() => openFullscreen(concertGallery, slide)}
-            >
-              <AnimatePresence initial={false} custom={dir}>
-                <motion.div
-                  key={slide}
-                  custom={dir}
-                  variants={slideVariants}
-                  initial="enter"
-                  animate="center"
-                  exit="exit"
-                  transition={{ duration: 0.5, ease: EASE }}
-                  className="absolute inset-0"
-                >
-                  <Image
-                    src={concertGallery[slide]}
-                    alt=""
-                    fill
-                    className="object-cover object-center"
-                    sizes="(max-width: 768px) 100vw, 45vw"
-                  />
-                </motion.div>
-              </AnimatePresence>
-
-              {concertGallery.length > 1 && (
-                <>
-                  <button
-                    type="button"
-                    aria-label="Previous"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      paginate(-1);
-                    }}
-                    className="absolute start-3 top-1/2 -translate-y-1/2 cursor-pointer rounded-full bg-black/40 p-1.5 text-white backdrop-blur-sm transition-colors hover:bg-black/60"
-                  >
-                    <BackArrow size={20} />
-                  </button>
-                  <button
-                    type="button"
-                    aria-label="Next"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      paginate(1);
-                    }}
-                    className="absolute end-3 top-1/2 -translate-y-1/2 cursor-pointer rounded-full bg-black/40 p-1.5 text-white backdrop-blur-sm transition-colors hover:bg-black/60"
-                  >
-                    <FwdArrow size={20} />
-                  </button>
-                  <div className="absolute inset-x-0 bottom-4 flex justify-center gap-2">
-                    {concertGallery.map((img, i) => (
-                      <button
-                        key={img}
-                        type="button"
-                        aria-label={`Go to image ${i + 1}`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          goTo(i);
-                        }}
-                        className={`h-1.5 cursor-pointer rounded-full transition-all ${
-                          i === slide ? 'w-5 bg-white' : 'w-1.5 bg-white/50 hover:bg-white/80'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
+            <ImageCarousel
+              images={concertGallery}
+              isHe={isHe}
+              frameClassName="aspect-[4/5] md:aspect-auto md:h-full"
+            />
           </motion.div>
         </div>
 
@@ -545,77 +426,6 @@ export default function ConcertsPage() {
           )}
         </AnimatePresence>
       </section>
-
-      {/* Fullscreen image viewer */}
-      <AnimatePresence>
-        {fullscreen && fsImages.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[120] flex items-center justify-center bg-black/95 p-4 backdrop-blur-sm"
-            onClick={() => setFullscreen(false)}
-          >
-            <button
-              onClick={() => setFullscreen(false)}
-              aria-label="Close"
-              className="absolute right-5 top-5 z-10 cursor-pointer text-white/70 transition-colors hover:text-white"
-            >
-              <X size={28} strokeWidth={1.5} />
-            </button>
-
-            {fsImages.length > 1 && (
-              <>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    fsPaginate(isHe ? 1 : -1);
-                  }}
-                  aria-label="Previous"
-                  className="absolute left-4 top-1/2 -translate-y-1/2 cursor-pointer text-white/60 transition-colors hover:text-white"
-                >
-                  <ChevronLeft size={38} strokeWidth={1.5} />
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    fsPaginate(isHe ? -1 : 1);
-                  }}
-                  aria-label="Next"
-                  className="absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer text-white/60 transition-colors hover:text-white"
-                >
-                  <ChevronRight size={38} strokeWidth={1.5} />
-                </button>
-              </>
-            )}
-
-            <motion.div
-              key={fsIndex}
-              initial={{ opacity: 0, scale: 0.98 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.25 }}
-              drag="x"
-              dragConstraints={{ left: 0, right: 0 }}
-              dragElastic={0.2}
-              onDragEnd={(_, info) => {
-                if (info.offset.x < -60) fsPaginate(1);
-                else if (info.offset.x > 60) fsPaginate(-1);
-              }}
-              className="relative h-[85vh] w-full max-w-5xl touch-pan-y"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <Image
-                src={fsImages[fsIndex]}
-                alt=""
-                fill
-                sizes="90vw"
-                draggable={false}
-                className="pointer-events-none object-contain"
-              />
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </>
   );
 }
