@@ -108,12 +108,9 @@ export default function PianoPage() {
     exit: (d: number) => ({ x: d > 0 ? '-100%' : '100%' }),
   };
 
-  const reveal = {
-    initial: { opacity: 0, y: 24 },
-    whileInView: { opacity: 1, y: 0 },
-    viewport: { once: true, amount: 0.2 },
-    transition: { duration: 0.7, ease: EASE },
-  } as const;
+  // Page entrance is handled once by the route template; in-page elements stay
+  // static so they don't re-animate ("slide up") while scrolling.
+  const reveal = { initial: false } as const;
 
   const BackArrow = isHe ? ChevronRight : ChevronLeft;
   const FwdArrow = isHe ? ChevronLeft : ChevronRight;
@@ -227,13 +224,13 @@ export default function PianoPage() {
         {/* Main part: description + illustration | gallery */}
         <div className="mt-16 grid grid-cols-1 gap-x-14 gap-y-12 md:mt-24 md:grid-cols-2">
           {/* Left — description + size illustration */}
-          <motion.div {...reveal} className="order-2 md:order-1">
+          <motion.div {...reveal} className="order-1">
             <p className="text-base leading-relaxed text-[var(--c-text)]">
               {description}
             </p>
 
             {/* Size illustration with overlaid values */}
-            <div className="relative mt-10 aspect-[928/1131] w-full max-w-[15rem]">
+            <div className="relative mt-10 aspect-[928/1131] w-full max-w-[15rem] mx-auto md:mx-0">
                 <Image
                   src={item.type === 'grand' ? '/images/shop/Grand.png' : '/images/shop/Upright.png'}
                   alt=""
@@ -265,7 +262,7 @@ export default function PianoPage() {
           </motion.div>
 
           {/* Right column — carousel (click for fullscreen) */}
-          <motion.div {...reveal} className="order-1 md:order-2">
+          <motion.div {...reveal} className="order-2">
             <div
               className="group relative aspect-[4/5] cursor-pointer overflow-hidden rounded-2xl bg-[var(--c-bg-alt)] md:aspect-square"
               onClick={() => setFullscreen(true)}
@@ -395,7 +392,14 @@ export default function PianoPage() {
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.25 }}
-              className="relative h-[85vh] w-full max-w-5xl"
+              drag="x"
+              dragConstraints={{ left: 0, right: 0 }}
+              dragElastic={0.2}
+              onDragEnd={(_, info) => {
+                if (info.offset.x < -60) paginate(1);
+                else if (info.offset.x > 60) paginate(-1);
+              }}
+              className="relative h-[85vh] w-full max-w-5xl touch-pan-y"
               onClick={(e) => e.stopPropagation()}
             >
               <Image
@@ -403,7 +407,8 @@ export default function PianoPage() {
                 alt={`${item.brand} ${item.model}`}
                 fill
                 sizes="90vw"
-                className="object-contain"
+                draggable={false}
+                className="pointer-events-none object-contain"
               />
             </motion.div>
           </motion.div>

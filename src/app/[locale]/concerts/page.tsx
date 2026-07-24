@@ -8,7 +8,6 @@ import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import emailjs from '@emailjs/browser';
 import QRCode from 'qrcode';
 import { concerts, concertGallery } from '@/data/concerts';
-import ContactCTA from '@/components/sections/ContactCTA';
 
 const EMAILJS_SERVICE_ID = 'service_52uluqq';
 const EMAILJS_TEMPLATE_ID = 'template_8ozp076';
@@ -16,28 +15,21 @@ const EMAILJS_PUBLIC_KEY = 'FsgqljsX-d4Ea9-Ai';
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
+// We assume a single upcoming concert at a time — show the soonest.
+const concert = concerts[0];
+
 export default function ConcertsPage() {
   const t = useTranslations('concerts');
   const locale = useLocale() as 'en' | 'he';
   const isHe = locale === 'he';
   const titleFont = isHe ? 'var(--font-rubik), sans-serif' : 'var(--font-arimo), sans-serif';
 
-  // Browse vs. register: `selected` is the concert index being registered for.
-  const [selected, setSelected] = useState<number | null>(null);
-  const concert = selected !== null ? concerts[selected] : null;
-
-  // Poster shown in the browse view (defaults to the soonest concert).
-  const [hovered, setHovered] = useState<string | null>(null);
-  const posterConcert = concerts.find((c) => c.id === hovered) ?? concerts[0];
-
-  // Gallery carousel (browse) + shared fullscreen viewer.
+  // Gallery carousel + fullscreen viewer (works for gallery and the poster).
   const [[slide, dir], setSlide] = useState<[number, number]>([0, 0]);
   const [paused, setPaused] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
+  const [fsImages, setFsImages] = useState<string[]>([]);
   const [fsIndex, setFsIndex] = useState(0);
-
-  // In register mode the right side shows the single poster; otherwise gallery.
-  const rightImages = selected === null ? concertGallery : concert ? [concert.poster] : [];
 
   const paginate = (d: number) => {
     setPaused(true);
@@ -47,14 +39,19 @@ export default function ConcertsPage() {
     setPaused(true);
     setSlide(([s]) => [i, i > s ? 1 : -1]);
   };
+  const openFullscreen = (images: string[], index: number) => {
+    setFsImages(images);
+    setFsIndex(index);
+    setFullscreen(true);
+  };
   const fsPaginate = (d: number) =>
-    setFsIndex((i) => (rightImages.length ? (i + d + rightImages.length) % rightImages.length : 0));
+    setFsIndex((i) => (fsImages.length ? (i + d + fsImages.length) % fsImages.length : 0));
 
   useEffect(() => {
-    if (selected !== null || paused || fullscreen || concertGallery.length <= 1) return;
+    if (paused || fullscreen || concertGallery.length <= 1) return;
     const id = setInterval(() => setSlide(([s]) => [(s + 1) % concertGallery.length, 1]), 5000);
     return () => clearInterval(id);
-  }, [selected, paused, fullscreen]);
+  }, [paused, fullscreen]);
 
   useEffect(() => {
     if (!fullscreen) return;
@@ -66,17 +63,22 @@ export default function ConcertsPage() {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fullscreen, isHe, rightImages.length]);
+  }, [fullscreen, isHe, fsImages.length]);
 
-  // ── Registration form ──────────────────────────────────────────────
+  // ── Registration ───────────────────────────────────────────────────
+  const [showForm, setShowForm] = useState(false);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [spots, setSpots] = useState(1);
-  const [errors, setErrors] = useState<{ name?: string; phone?: string; email?: string }>({});
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
   const [ticketId, setTicketId] = useState('');
   const qrRef = useRef<HTMLCanvasElement>(null);
+  const formRef = useRef<HTMLDivElement>(null);
+
+  const emailOk = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
+  const phoneOk = /^[\d+\-()\s]{7,20}$/.test(phone);
+  const formValid = name.trim().length >= 2 && phoneOk && emailOk;
 
   useEffect(() => {
     emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
@@ -91,33 +93,14 @@ export default function ConcertsPage() {
     }).catch(() => {});
   }, [status, ticketId]);
 
-  const openRegister = (i: number) => {
-    setSelected(i);
+  const revealForm = () => {
+    setShowForm(true);
     setStatus('idle');
-    setErrors({});
-  };
-  const backToBrowse = () => {
-    setSelected(null);
-    setStatus('idle');
-  };
-  const gotoConcert = (d: number) => {
-    if (selected === null) return;
-    setSelected((selected + d + concerts.length) % concerts.length);
-    setStatus('idle');
-    setErrors({});
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!concert) return;
-    const errs: typeof errors = {};
-    if (name.trim().length < 2) errs.name = t('err_required');
-    if (!phone.trim()) errs.phone = t('err_required');
-    else if (!/^[\d+\-()\s]{7,20}$/.test(phone)) errs.phone = t('err_phone');
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) errs.email = t('err_email');
-    setErrors(errs);
-    if (Object.keys(errs).length) return;
-
+    if (!formValid) return;
     setStatus('sending');
     const id = (
       globalThis.crypto?.randomUUID?.() ??
@@ -152,12 +135,104 @@ export default function ConcertsPage() {
     }
   };
 
-  const downloadTicket = () => {
-    const c = qrRef.current;
-    if (!c) return;
+  // Build a printable ticket card (event details + registration summary + QR)
+  // rather than downloading a bare QR image.
+  const downloadTicket = async () => {
+    const S = 2;
+    const W = 720;
+    const H = 1040;
+    const cx = W / 2;
+    const cv = document.createElement('canvas');
+    cv.width = W * S;
+    cv.height = H * S;
+    const ctx = cv.getContext('2d');
+    if (!ctx) return;
+    ctx.scale(S, S);
+
+    // High-resolution QR for crisp printing.
+    const qrCv = document.createElement('canvas');
+    try {
+      await QRCode.toCanvas(qrCv, ticketId, {
+        width: 600,
+        margin: 1,
+        color: { dark: '#111111', light: '#ffffff' },
+      });
+    } catch {
+      return;
+    }
+
+    // Header logo.
+    const logo = new window.Image();
+    logo.src = '/images/ticket-logo.png';
+    await new Promise<void>((res) => {
+      logo.onload = () => res();
+      logo.onerror = () => res();
+    });
+
+    // Card background + frame.
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, W, H);
+    ctx.strokeStyle = '#e2e2e2';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(22, 22, W - 44, H - 44);
+
+    ctx.textAlign = 'center';
+    ctx.direction = isHe ? 'rtl' : 'ltr';
+
+    // Logo (preserve aspect ratio).
+    if (logo.width) {
+      const lw = 260;
+      const lh = lw * (logo.height / logo.width);
+      ctx.drawImage(logo, cx - lw / 2, 70, lw, lh);
+    }
+
+    ctx.fillStyle = '#111111';
+    ctx.font = '600 42px Arial';
+    ctx.fillText(concert.name[locale], cx, 232);
+
+    ctx.fillStyle = '#3a3a3c';
+    ctx.font = '400 19px Arial';
+    ctx.direction = 'ltr';
+    ctx.fillText(`${fmtDate(concert.date)}  ·  ${concert.time}`, cx, 272);
+    ctx.direction = isHe ? 'rtl' : 'ltr';
+    ctx.fillText(concert.venue[locale], cx, 302);
+
+    // QR
+    const qrSize = 300;
+    ctx.drawImage(qrCv, cx - qrSize / 2, 340, qrSize, qrSize);
+
+    // Reference id
+    ctx.fillStyle = '#111111';
+    ctx.font = '500 20px monospace';
+    ctx.direction = 'ltr';
+    ctx.fillText(ticketId, cx, 340 + qrSize + 44);
+    ctx.direction = isHe ? 'rtl' : 'ltr';
+
+    // Divider
+    ctx.strokeStyle = '#ededed';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(96, 758);
+    ctx.lineTo(W - 96, 758);
+    ctx.stroke();
+
+    // Registration summary
+    ctx.fillStyle = '#111111';
+    ctx.font = '400 21px Arial';
+    let y = 802;
+    [`${t('form_name')}: ${name}`, `${t('form_spots')}: ${spots}`].forEach((line) => {
+      ctx.fillText(line, cx, y);
+      y += 34;
+    });
+
+    // Footer note
+    ctx.fillStyle = '#8a8a8f';
+    ctx.font = '400 16px Arial';
+    ctx.fillText(t('done_desc'), cx, H - 78);
+
     const a = document.createElement('a');
-    a.href = c.toDataURL('image/png');
-    a.download = `trio-${concert?.id ?? 'ticket'}.png`;
+    a.href = cv.toDataURL('image/png');
+    a.download = `trio-${concert.id}-ticket.png`;
     a.click();
   };
 
@@ -166,12 +241,9 @@ export default function ConcertsPage() {
     center: { x: '0%' },
     exit: (d: number) => ({ x: d > 0 ? '-100%' : '100%' }),
   };
-  const reveal = {
-    initial: { opacity: 0, y: 24 },
-    whileInView: { opacity: 1, y: 0 },
-    viewport: { once: true, amount: 0.15 },
-    transition: { duration: 0.7, ease: EASE },
-  } as const;
+  // Page entrance is handled once by the route template; in-page elements stay
+  // static so they don't re-animate ("slide up") while scrolling.
+  const reveal = { initial: false } as const;
 
   const BackArrow = isHe ? ChevronRight : ChevronLeft;
   const FwdArrow = isHe ? ChevronLeft : ChevronRight;
@@ -183,361 +255,300 @@ export default function ConcertsPage() {
       year: 'numeric',
     }).format(new Date(iso));
 
-  const label = 'mb-2 block text-[11px] uppercase tracking-[0.18em] text-[var(--c-muted)]';
+  const label = 'mb-2 block text-[11px] uppercase tracking-[0.18em] text-[var(--c-text)]';
   const field =
     'w-full rounded-lg border border-[var(--c-border)] bg-transparent px-4 py-3 text-[15px] text-[var(--c-text)] transition-colors focus:border-[var(--c-cat)] focus:outline-none';
 
   return (
     <>
       <section className="mx-auto max-w-[100rem] px-6 pb-24 pt-32 sm:px-10 md:pt-44 lg:px-16 lg:pt-52">
-        {/* Kicker (register mode only) */}
-        {concert && (
-          <motion.button
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: EASE }}
-            onClick={backToBrowse}
-            className="ms-4 flex cursor-pointer items-center gap-1.5 text-[11px] uppercase tracking-[0.25em] text-[color:var(--c-cat)] transition-colors hover:text-[color:var(--c-cat-active)] sm:ms-8 md:ms-14 lg:ms-24"
-          >
-            <BackArrow size={15} />
-            {t('back')}
-          </motion.button>
-        )}
-
         {/* Title */}
         <motion.h1
-          key={concert ? concert.id : 'browse'}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: concert ? 0.05 : 0.1, duration: 0.7, ease: EASE }}
-          className="ms-4 mt-2 text-6xl leading-[0.95] tracking-tight text-[var(--c-text)] sm:ms-8 sm:text-7xl md:ms-14 lg:ms-24 lg:text-8xl"
+          transition={{ delay: 0.1, duration: 0.7, ease: EASE }}
+          className="ms-4 text-6xl leading-[0.95] tracking-tight text-[var(--c-text)] sm:ms-8 sm:text-7xl md:ms-14 lg:ms-24 lg:text-8xl"
           style={{ fontFamily: titleFont, fontWeight: 500 }}
         >
-          {concert ? concert.name[locale] : t('hero_title')}
+          {t('hero_title')}
         </motion.h1>
 
-        {/* Main split */}
+        {/* Top split: concert + poster | gallery */}
         <div className="mt-16 grid grid-cols-1 gap-x-14 gap-y-12 md:mt-20 md:grid-cols-2">
-          {/* Left — list + poster (browse) or form/confirmation (register) */}
-          <motion.div {...reveal} className="order-2 md:order-1">
-            {selected === null ? (
-              <>
-                {/* Concert list */}
-                <ul onMouseLeave={() => setHovered(null)}>
-                  {concerts.map((c, i) => (
-                    <li key={c.id}>
-                      <button
-                        onMouseEnter={() => setHovered(c.id)}
-                        onClick={() => openRegister(i)}
-                        className="group flex w-full cursor-pointer items-center justify-between gap-4 border-b border-[var(--c-border-lt)] py-5 text-start"
-                      >
-                        <span className="block">
-                          <span className="block text-[11px] uppercase tracking-[0.25em] text-[var(--c-ultra-dim)]">
-                            {fmtDate(c.date)} · {c.time}
-                          </span>
-                          <span
-                            className="mt-1 block text-2xl tracking-tight text-[var(--c-text)] sm:text-3xl"
-                            style={{ fontFamily: titleFont, fontWeight: 400 }}
-                          >
-                            {c.name[locale]}
-                          </span>
-                        </span>
-                        <span
-                          className="shrink-0 rounded-full bg-[color:var(--c-cat)] px-5 py-2 text-[11px] uppercase tracking-[0.2em] text-[var(--c-bg)] transition-colors duration-300 group-hover:bg-[color:var(--c-cat-active)]"
-                          style={{ fontFamily: titleFont, fontWeight: 400 }}
-                        >
-                          {t('register')}
-                        </span>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-
-                {/* Poster — one at a time, switches with the hovered concert */}
-                <div className="relative mt-10 aspect-[3/4] w-full max-w-[18rem] overflow-hidden rounded-2xl bg-[var(--c-bg-alt)]">
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={posterConcert.id}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.4, ease: EASE }}
-                      className="absolute inset-0"
-                    >
-                      <Image
-                        src={posterConcert.poster}
-                        alt={posterConcert.name[locale]}
-                        fill
-                        className="object-contain"
-                        sizes="18rem"
-                      />
-                    </motion.div>
-                  </AnimatePresence>
-                </div>
-              </>
-            ) : status === 'success' ? (
-              /* Confirmation + barcode */
+          {/* Left — the single upcoming concert + its poster */}
+          <motion.div {...reveal} className="order-1">
+            <div className="flex items-center justify-between gap-4">
               <div>
+                <p className="text-[11px] uppercase tracking-[0.25em] text-[var(--c-text)]">
+                  {fmtDate(concert.date)} · {concert.time}
+                </p>
                 <h2
-                  className="text-2xl tracking-tight text-[var(--c-text)] sm:text-3xl"
+                  className="mt-1.5 text-3xl tracking-tight text-[var(--c-text)] sm:text-4xl"
                   style={{ fontFamily: titleFont, fontWeight: 400 }}
                 >
-                  {t('done_title')}
+                  {concert.name[locale]}
                 </h2>
-                <p className="mt-3 max-w-md text-[15px] leading-relaxed text-[var(--c-dim)]">
-                  {t('done_desc')}
-                </p>
-                <div className="mt-8 inline-block rounded-2xl bg-white p-4 shadow-sm">
-                  <canvas ref={qrRef} className="block h-[210px] w-[210px]" />
-                </div>
-                <p className="mt-5 text-sm text-[var(--c-dim)]">
-                  {t('done_email')} <span dir="ltr">{email}</span>
-                </p>
-                <button
-                  onClick={downloadTicket}
-                  className="mt-6 inline-block cursor-pointer rounded-full bg-[color:var(--c-cat)] px-7 py-3 text-[11px] uppercase tracking-[0.25em] text-[var(--c-bg)] transition-colors duration-300 hover:bg-[color:var(--c-cat-active)]"
-                  style={{ fontFamily: titleFont, fontWeight: 400 }}
-                >
-                  {t('download')}
-                </button>
               </div>
-            ) : (
-              /* Registration form */
-              <div>
-                {/* How it works */}
-                <div className="mb-8 rounded-2xl border border-[var(--c-border)] p-6">
-                  <h2
-                    className="mb-4 text-sm uppercase tracking-[0.2em] text-[var(--c-text)]"
-                    style={{ fontFamily: titleFont, fontWeight: 400 }}
-                  >
-                    {t('how_title')}
-                  </h2>
-                  <ul className="space-y-2.5 text-sm leading-relaxed text-[var(--c-dim)]">
-                    {[t('note1'), t('note2', { price: concert!.price }), t('note3')].map((n, i) => (
-                      <li key={i} className="flex gap-2.5">
-                        <span className="mt-1 text-[color:var(--c-cat)]">✦</span>
-                        <span>{n}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+              <button
+                onClick={revealForm}
+                className="shrink-0 cursor-pointer rounded-full bg-[color:var(--c-cat)] px-6 py-2.5 text-[11px] uppercase tracking-[0.2em] text-[var(--c-bg)] transition-colors duration-300 hover:bg-[color:var(--c-cat-active)]"
+                style={{ fontFamily: titleFont, fontWeight: 400 }}
+              >
+                {t('register')}
+              </button>
+            </div>
 
-                <form onSubmit={handleSubmit} noValidate className="space-y-5">
-                  <div>
-                    <label className={label}>{t('form_name')} *</label>
-                    <input value={name} onChange={(e) => setName(e.target.value)} className={field} />
-                    {errors.name && <p className="mt-1.5 text-xs text-red-500">{errors.name}</p>}
-                  </div>
-                  <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                    <div>
-                      <label className={label}>{t('form_phone')} *</label>
-                      <input
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        type="tel"
-                        dir="ltr"
-                        className={field}
-                      />
-                      {errors.phone && <p className="mt-1.5 text-xs text-red-500">{errors.phone}</p>}
-                    </div>
-                    <div>
-                      <label className={label}>{t('form_email')} *</label>
-                      <input
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        type="email"
-                        dir="ltr"
-                        className={field}
-                      />
-                      {errors.email && <p className="mt-1.5 text-xs text-red-500">{errors.email}</p>}
-                    </div>
-                  </div>
-
-                  {/* Seats */}
-                  <div>
-                    <label className={label}>
-                      {t('form_spots')}
-                      <span className="ms-2 lowercase tracking-normal text-[var(--c-ultra-dim)]">
-                        · {t('form_spots_hint')}
-                      </span>
-                    </label>
-                    <div className="flex gap-3">
-                      {[1, 2, 3, 4].map((n) => (
-                        <button
-                          type="button"
-                          key={n}
-                          onClick={() => setSpots(n)}
-                          className={`h-11 w-11 cursor-pointer rounded-full border text-sm transition-colors ${
-                            spots === n
-                              ? 'border-[var(--c-text)] bg-[var(--c-text)] text-[var(--c-bg)]'
-                              : 'border-[var(--c-border)] text-[var(--c-dim)] hover:border-[var(--c-text)]'
-                          }`}
-                        >
-                          {n}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Total */}
-                  <div className="flex items-baseline justify-between border-t border-[var(--c-border-lt)] pt-5">
-                    <span className="text-[11px] uppercase tracking-[0.2em] text-[var(--c-muted)]">
-                      {t('form_total')}
-                    </span>
-                    <span
-                      className="text-xl text-[var(--c-text)]"
-                      style={{ fontFamily: titleFont, fontWeight: 400 }}
-                      dir="ltr"
-                    >
-                      {spots * concert!.price} ₪
-                    </span>
-                  </div>
-
-                  {status === 'error' && (
-                    <p className="text-sm text-red-500">{t('err_general')}</p>
-                  )}
-
-                  <button
-                    type="submit"
-                    disabled={status === 'sending'}
-                    className="inline-block cursor-pointer rounded-full bg-[color:var(--c-cat)] px-8 py-3 text-[11px] uppercase tracking-[0.25em] text-[var(--c-bg)] transition-colors duration-300 hover:bg-[color:var(--c-cat-active)] disabled:opacity-60"
-                    style={{ fontFamily: titleFont, fontWeight: 400 }}
-                  >
-                    {status === 'sending' ? t('form_sending') : t('form_submit')}
-                  </button>
-                </form>
-              </div>
-            )}
+            {/* Poster (square) */}
+            <div
+              className="group relative mt-8 aspect-square w-full cursor-pointer overflow-hidden rounded-2xl bg-[var(--c-bg-alt)]"
+              onClick={() => openFullscreen([concert.poster], 0)}
+            >
+              <Image
+                src={concert.poster}
+                alt={concert.name[locale]}
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 45vw"
+              />
+            </div>
           </motion.div>
 
-          {/* Right — gallery (browse) or poster (register) */}
-          <motion.div {...reveal} className="order-1 md:order-2">
-            {selected === null ? (
-              <div
-                className="group relative aspect-[4/5] cursor-pointer overflow-hidden rounded-2xl bg-[var(--c-bg-alt)] md:aspect-square"
-                onClick={() => {
-                  setFsIndex(slide);
-                  setFullscreen(true);
-                }}
-              >
-                <AnimatePresence initial={false} custom={dir}>
-                  <motion.div
-                    key={slide}
-                    custom={dir}
-                    variants={slideVariants}
-                    initial="enter"
-                    animate="center"
-                    exit="exit"
-                    transition={{ duration: 0.5, ease: EASE }}
-                    className="absolute inset-0"
-                  >
-                    <Image
-                      src={concertGallery[slide]}
-                      alt=""
-                      fill
-                      className="object-cover object-center"
-                      sizes="(max-width: 768px) 100vw, 45vw"
-                    />
-                  </motion.div>
-                </AnimatePresence>
+          {/* Right — photo gallery (matches the left column's height) */}
+          <motion.div {...reveal} className="order-2 md:h-full">
+            <div
+              className="group relative aspect-[4/5] cursor-pointer overflow-hidden rounded-2xl bg-[var(--c-bg-alt)] md:aspect-auto md:h-full"
+              onClick={() => openFullscreen(concertGallery, slide)}
+            >
+              <AnimatePresence initial={false} custom={dir}>
+                <motion.div
+                  key={slide}
+                  custom={dir}
+                  variants={slideVariants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  transition={{ duration: 0.5, ease: EASE }}
+                  className="absolute inset-0"
+                >
+                  <Image
+                    src={concertGallery[slide]}
+                    alt=""
+                    fill
+                    className="object-cover object-center"
+                    sizes="(max-width: 768px) 100vw, 45vw"
+                  />
+                </motion.div>
+              </AnimatePresence>
 
-                {concertGallery.length > 1 && (
-                  <>
-                    <button
-                      type="button"
-                      aria-label="Previous"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        paginate(-1);
-                      }}
-                      className="absolute start-3 top-1/2 -translate-y-1/2 cursor-pointer rounded-full bg-black/40 p-1.5 text-white backdrop-blur-sm transition-colors hover:bg-black/60"
-                    >
-                      <BackArrow size={20} />
-                    </button>
-                    <button
-                      type="button"
-                      aria-label="Next"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        paginate(1);
-                      }}
-                      className="absolute end-3 top-1/2 -translate-y-1/2 cursor-pointer rounded-full bg-black/40 p-1.5 text-white backdrop-blur-sm transition-colors hover:bg-black/60"
-                    >
-                      <FwdArrow size={20} />
-                    </button>
-                    <div className="absolute inset-x-0 bottom-4 flex justify-center gap-2">
-                      {concertGallery.map((img, i) => (
-                        <button
-                          key={img}
-                          type="button"
-                          aria-label={`Go to image ${i + 1}`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            goTo(i);
-                          }}
-                          className={`h-1.5 cursor-pointer rounded-full transition-all ${
-                            i === slide ? 'w-5 bg-white' : 'w-1.5 bg-white/50 hover:bg-white/80'
-                          }`}
-                        />
-                      ))}
-                    </div>
-                  </>
-                )}
-              </div>
-            ) : (
-              <div
-                className="group relative aspect-[3/4] cursor-pointer overflow-hidden rounded-2xl bg-[var(--c-bg-alt)] md:aspect-[4/5]"
-                onClick={() => {
-                  setFsIndex(0);
-                  setFullscreen(true);
-                }}
-              >
-                <Image
-                  src={concert!.poster}
-                  alt={concert!.name[locale]}
-                  fill
-                  className="object-contain"
-                  sizes="(max-width: 768px) 100vw, 45vw"
-                />
-              </div>
-            )}
+              {concertGallery.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    aria-label="Previous"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      paginate(-1);
+                    }}
+                    className="absolute start-3 top-1/2 -translate-y-1/2 cursor-pointer rounded-full bg-black/40 p-1.5 text-white backdrop-blur-sm transition-colors hover:bg-black/60"
+                  >
+                    <BackArrow size={20} />
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="Next"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      paginate(1);
+                    }}
+                    className="absolute end-3 top-1/2 -translate-y-1/2 cursor-pointer rounded-full bg-black/40 p-1.5 text-white backdrop-blur-sm transition-colors hover:bg-black/60"
+                  >
+                    <FwdArrow size={20} />
+                  </button>
+                  <div className="absolute inset-x-0 bottom-4 flex justify-center gap-2">
+                    {concertGallery.map((img, i) => (
+                      <button
+                        key={img}
+                        type="button"
+                        aria-label={`Go to image ${i + 1}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          goTo(i);
+                        }}
+                        className={`h-1.5 cursor-pointer rounded-full transition-all ${
+                          i === slide ? 'w-5 bg-white' : 'w-1.5 bg-white/50 hover:bg-white/80'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
           </motion.div>
         </div>
 
-        {/* Prev / next concert (register mode) */}
-        {concert && (
-          <div className="mt-20 flex items-stretch justify-between gap-4 md:mt-24">
-            <button
-              onClick={() => gotoConcert(-1)}
-              className="group flex cursor-pointer items-center gap-2 text-[color:var(--c-cat)] transition-colors hover:text-[color:var(--c-cat-active)]"
+        {/* Registration — revealed below on demand */}
+        <AnimatePresence initial={false}>
+          {showForm && (
+            <motion.div
+              ref={formRef}
+              key="register"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.5, ease: EASE }}
+              onAnimationComplete={() =>
+                showForm && formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+              }
+              className="overflow-hidden"
             >
-              <BackArrow size={18} className="shrink-0" />
-              <span
-                className="text-sm tracking-tight sm:text-base"
-                style={{ fontFamily: titleFont, fontWeight: 400 }}
-              >
-                {concerts[(selected! - 1 + concerts.length) % concerts.length].name[locale]}
-              </span>
-            </button>
-            <button
-              onClick={() => gotoConcert(1)}
-              className="group flex cursor-pointer items-center gap-2 text-end text-[color:var(--c-cat)] transition-colors hover:text-[color:var(--c-cat-active)]"
-            >
-              <span
-                className="text-sm tracking-tight sm:text-base"
-                style={{ fontFamily: titleFont, fontWeight: 400 }}
-              >
-                {concerts[(selected! + 1) % concerts.length].name[locale]}
-              </span>
-              <FwdArrow size={18} className="shrink-0" />
-            </button>
-          </div>
-        )}
+              <div className="mt-12 md:mt-16">
+                {status === 'success' ? (
+                  /* Confirmation + barcode */
+                  <div className="flex flex-col items-center text-center">
+                    <h2
+                      className="text-3xl tracking-tight text-[var(--c-text)] sm:text-4xl"
+                      style={{ fontFamily: titleFont, fontWeight: 400 }}
+                    >
+                      {t('done_title')}
+                    </h2>
+                    <p
+                      className="mt-3 max-w-md text-[15px] leading-relaxed text-[var(--c-text)]"
+                      style={{ fontFamily: titleFont, fontWeight: 400 }}
+                    >
+                      {t('done_desc')}
+                    </p>
+                    <div className="mt-8 inline-block rounded-2xl bg-white p-4 shadow-sm">
+                      <canvas ref={qrRef} className="block h-[210px] w-[210px]" />
+                    </div>
+                    <p
+                      className="mt-5 text-[15px] text-[var(--c-text)]"
+                      style={{ fontFamily: titleFont, fontWeight: 400 }}
+                    >
+                      {t('done_email')} <span dir="ltr">{email}</span>
+                    </p>
+                    <button
+                      onClick={downloadTicket}
+                      className="mt-6 inline-block cursor-pointer rounded-full bg-[color:var(--c-cat)] px-7 py-3 text-[11px] uppercase tracking-[0.25em] text-[var(--c-bg)] transition-colors duration-300 hover:bg-[color:var(--c-cat-active)]"
+                      style={{ fontFamily: titleFont, fontWeight: 400 }}
+                    >
+                      {t('download')}
+                    </button>
+                  </div>
+                ) : (
+                  <form onSubmit={handleSubmit} noValidate>
+                    <div className="grid grid-cols-1 gap-x-14 gap-y-8 md:grid-cols-2">
+                      {/* Details */}
+                      <div className="space-y-5">
+                        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                          <div>
+                            <label className={label}>{t('form_name')} *</label>
+                            <input
+                              value={name}
+                              onChange={(e) => setName(e.target.value)}
+                              className={field}
+                            />
+                          </div>
+                          <div>
+                            <label className={label}>{t('form_phone')} *</label>
+                            <input
+                              value={phone}
+                              onChange={(e) => setPhone(e.target.value)}
+                              type="tel"
+                              dir="ltr"
+                              className={field}
+                            />
+                          </div>
+                          <div>
+                            <label className={label}>{t('form_email')} *</label>
+                            <input
+                              value={email}
+                              onChange={(e) => setEmail(e.target.value)}
+                              type="email"
+                              dir="ltr"
+                              className={field}
+                            />
+                          </div>
+                          <div>
+                            <label className={label}>{t('form_spots')}</label>
+                            <div className="flex flex-wrap gap-2.5">
+                              {[1, 2, 3, 4].map((n) => (
+                                <button
+                                  type="button"
+                                  key={n}
+                                  onClick={() => setSpots(n)}
+                                  className={`h-11 w-11 cursor-pointer rounded-full border text-sm transition-colors ${
+                                    spots === n
+                                    ? 'border-[var(--c-text)] bg-[var(--c-text)] text-[var(--c-bg)]'
+                                    : 'border-[var(--c-border)] text-[var(--c-text)] hover:border-[var(--c-text)]'
+                                  }`}
+                                >
+                                  {n}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-baseline justify-between border-t border-[var(--c-border-lt)] pt-5">
+                          <span className="text-[11px] uppercase tracking-[0.2em] text-[var(--c-text)]">
+                            {t('form_total')}
+                          </span>
+                          <span
+                            className="text-xl text-[var(--c-text)]"
+                            style={{ fontFamily: titleFont, fontWeight: 400 }}
+                            dir="ltr"
+                          >
+                            {spots * concert.price} ₪
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Notes */}
+                      <div className="rounded-2xl border border-[var(--c-border)] p-6">
+                        <h3
+                          className="mb-3 text-[15px] font-semibold text-[var(--c-text)]"
+                          style={{ fontFamily: 'var(--font-dm-sans), var(--font-heebo), sans-serif' }}
+                        >
+                          {t('how_title')}
+                        </h3>
+                        <ul className="space-y-2.5 text-sm leading-relaxed text-[var(--c-text)]">
+                          {[t('note1'), t('note2', { price: concert.price }), t('note3')].map(
+                            (n, i) => (
+                              <li key={i} className="ps-5 -indent-5">
+                                <span className="me-2 text-[color:var(--c-cat)]">✦</span>
+                                {n}
+                              </li>
+                            ),
+                          )}
+                        </ul>
+                      </div>
+                    </div>
+
+                    {status === 'error' && (
+                      <p className="mt-6 text-center text-sm text-red-500">{t('err_general')}</p>
+                    )}
+
+                    {/* One register button, enabled only when the form is complete */}
+                    <div className="mt-10 flex justify-center">
+                      <button
+                        type="submit"
+                        disabled={!formValid || status === 'sending'}
+                        className="inline-block cursor-pointer rounded-full bg-[color:var(--c-cat)] px-10 py-3.5 text-[11px] uppercase tracking-[0.25em] text-[var(--c-bg)] transition-colors duration-300 hover:bg-[color:var(--c-cat-active)] disabled:cursor-not-allowed disabled:opacity-40"
+                        style={{ fontFamily: titleFont, fontWeight: 400 }}
+                      >
+                        {status === 'sending' ? t('form_sending') : t('form_submit')}
+                      </button>
+                    </div>
+                  </form>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </section>
 
       {/* Fullscreen image viewer */}
       <AnimatePresence>
-        {fullscreen && rightImages.length > 0 && (
+        {fullscreen && fsImages.length > 0 && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -553,7 +564,7 @@ export default function ConcertsPage() {
               <X size={28} strokeWidth={1.5} />
             </button>
 
-            {rightImages.length > 1 && (
+            {fsImages.length > 1 && (
               <>
                 <button
                   onClick={(e) => {
@@ -583,22 +594,28 @@ export default function ConcertsPage() {
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.25 }}
-              className="relative h-[85vh] w-full max-w-5xl"
+              drag="x"
+              dragConstraints={{ left: 0, right: 0 }}
+              dragElastic={0.2}
+              onDragEnd={(_, info) => {
+                if (info.offset.x < -60) fsPaginate(1);
+                else if (info.offset.x > 60) fsPaginate(-1);
+              }}
+              className="relative h-[85vh] w-full max-w-5xl touch-pan-y"
               onClick={(e) => e.stopPropagation()}
             >
               <Image
-                src={rightImages[fsIndex]}
+                src={fsImages[fsIndex]}
                 alt=""
                 fill
                 sizes="90vw"
-                className="object-contain"
+                draggable={false}
+                className="pointer-events-none object-contain"
               />
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
-
-      <ContactCTA />
     </>
   );
 }

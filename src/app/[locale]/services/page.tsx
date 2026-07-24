@@ -95,8 +95,8 @@ export default function WorkshopPage() {
             transition={{ delay: 0.25 }}
             className="relative w-full md:w-80 md:pb-3"
           >
-            <div className="flex items-center gap-2.5 rounded-full border border-[var(--c-border)] px-4 py-2.5 transition-colors focus-within:border-[var(--c-text)]">
-              <Search size={16} className="shrink-0 text-[var(--c-dim)]" />
+            <div className="flex items-center gap-2.5 rounded-full border border-[var(--c-text)] px-4 py-2.5">
+              <Search size={16} className="shrink-0 text-[var(--c-text)]" />
               <input
                 value={query}
                 onChange={(e) => {
@@ -157,10 +157,7 @@ export default function WorkshopPage() {
             <MotionLink
               key={cat.id}
               href={`/${locale}/services/${cat.id}`}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={{ duration: 0.6, ease: EASE, delay: (i % 4) * 0.08 }}
+              initial={false}
               className="group relative aspect-square cursor-pointer overflow-hidden rounded-2xl bg-[var(--c-bg-alt)] text-start"
             >
               <Image

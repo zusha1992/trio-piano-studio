@@ -28,15 +28,12 @@ export default function AboutPage() {
   const aboutBody = t.raw('about_trio_body') as string[];
   const whoBody = t.raw('who_body') as string[];
 
-  const reveal = {
-    initial: { opacity: 0, y: 24 },
-    whileInView: { opacity: 1, y: 0 },
-    viewport: { once: true, amount: 0.25 },
-    transition: { duration: 0.7, ease: EASE },
-  };
+  // Page entrance is handled once by the route template; in-page elements stay
+  // static so they don't re-animate ("slide up") while scrolling.
+  const reveal = { initial: false as const };
 
   const heading = 'text-3xl tracking-tight text-[var(--c-text)] sm:text-4xl';
-  const paragraph = 'max-w-md text-[15px] leading-relaxed text-[var(--c-dim)]';
+  const paragraph = 'max-w-md text-[15px] leading-relaxed text-[var(--c-text)]';
   // Rounded square card on mobile (matching the founder images), taller
   // portrait card sitting inside the grid column on desktop.
   const banner =
@@ -138,10 +135,7 @@ export default function AboutPage() {
               return (
                 <motion.div
                   key={f.id}
-                  initial={{ opacity: 0, y: 24 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, amount: 0.25 }}
-                  transition={{ duration: 0.7, ease: EASE, delay: i * 0.1 }}
+                  initial={false}
                   className="flex w-full flex-col text-start sm:mx-auto sm:max-w-[18rem]"
                 >
                   <div className="relative aspect-square overflow-hidden rounded-2xl bg-[var(--c-bg-alt)]">
@@ -166,7 +160,7 @@ export default function AboutPage() {
                   >
                     {name}
                   </h3>
-                  <p className="mt-3 text-sm leading-relaxed text-[var(--c-muted)] md:mt-2">{bio}</p>
+                  <p className="mt-3 text-sm leading-relaxed text-[var(--c-text)] md:mt-2">{bio}</p>
                 </motion.div>
               );
             })}

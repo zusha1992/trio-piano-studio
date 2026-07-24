@@ -24,7 +24,7 @@
     "err_phone": "Invalid phone number",
     "err_general": "Something went wrong. Please try again.",
     "done_title": "Registration confirmed",
-    "done_desc": "Your registration is confirmed. Save this barcode — you'll need to present it at the entrance on the day of the event.",
+    "done_desc": "Save this barcode as your confirmation for the day of the event",
     "done_email": "A confirmation was sent to",
     "download": "Download barcode"
   },

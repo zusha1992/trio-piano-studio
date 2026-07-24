@@ -12,7 +12,13 @@ import { useTheme } from '@/components/layout/ThemeContext';
 // The landing page surfaces contact details in its footer; the subpages don't,
 // so the toolbar carries a dedicated contact link after the categories.
 const CONTACT_ITEM = { key: 'contact', href: 'contact', labelHe: 'צור קשר', labelEn: 'Contact' };
-const NAV_ITEMS = [...CATEGORIES, CONTACT_ITEM];
+// Explicit toolbar order (reads left→right in LTR, mirrored in RTL):
+// About · The Store · The Workshop · Concerts · Contact.
+const NAV_ORDER = ['about', 'store', 'services', 'concerts'];
+const NAV_ITEMS = [
+  ...NAV_ORDER.map((k) => CATEGORIES.find((c) => c.key === k)!),
+  CONTACT_ITEM,
+];
 
 export default function Navbar() {
   const locale = useLocale();

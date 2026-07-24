@@ -72,12 +72,9 @@ export default function CategoryPage() {
   // than the (square) image beside it.
   const twoCols = cat.services.length > 4;
 
-  const reveal = {
-    initial: { opacity: 0, y: 24 },
-    whileInView: { opacity: 1, y: 0 },
-    viewport: { once: true, amount: 0.2 },
-    transition: { duration: 0.7, ease: EASE },
-  };
+  // Page entrance is handled once by the route template; in-page elements stay
+  // static so they don't re-animate ("slide up") while scrolling.
+  const reveal = { initial: false as const };
 
   // Reading-direction aware arrows: "previous" points to the start of the line.
   const BackArrow = isHe ? ChevronRight : ChevronLeft;
@@ -285,7 +282,14 @@ export default function CategoryPage() {
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.25 }}
-              className="relative h-[85vh] w-full max-w-5xl"
+              drag="x"
+              dragConstraints={{ left: 0, right: 0 }}
+              dragElastic={0.2}
+              onDragEnd={(_, info) => {
+                if (info.offset.x < -60) paginate(1);
+                else if (info.offset.x > 60) paginate(-1);
+              }}
+              className="relative h-[85vh] w-full max-w-5xl touch-pan-y"
               onClick={(e) => e.stopPropagation()}
             >
               <Image
@@ -293,7 +297,8 @@ export default function CategoryPage() {
                 alt={cat.name[locale]}
                 fill
                 sizes="90vw"
-                className="object-contain"
+                draggable={false}
+                className="pointer-events-none object-contain"
               />
             </motion.div>
           </motion.div>

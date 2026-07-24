@@ -55,7 +55,7 @@ export default function ContactPage() {
     }
   };
 
-  const label = 'mb-2.5 block text-[11px] uppercase tracking-[0.18em] text-[var(--c-muted)]';
+  const label = 'mb-2.5 block text-[11px] uppercase tracking-[0.18em] text-[var(--c-text)]';
   const field =
     'w-full rounded-lg border border-[var(--c-border)] bg-transparent px-4 py-3.5 text-[15px] text-[var(--c-text)] transition-colors focus:border-[var(--c-cat)] focus:outline-none';
 
@@ -175,10 +175,7 @@ export default function ContactPage() {
 
       {/* Full-width message form */}
       <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.15 }}
-        transition={{ duration: 0.7, ease: EASE, delay: 0.1 }}
+        initial={false}
         className="mt-12 md:mt-16"
       >
         {status === 'success' ? (

@@ -14,10 +14,7 @@ export default function ContactCTA() {
   return (
     <section className="mx-auto max-w-[100rem] px-6 py-16 text-center sm:px-10 lg:px-16 lg:py-20">
       <motion.h2
-        initial={{ opacity: 0, y: 16 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        initial={false}
         className="text-2xl leading-tight tracking-tight text-[var(--c-text)] sm:text-3xl lg:text-4xl"
         style={{ fontFamily: titleFont, fontWeight: 400 }}
       >
