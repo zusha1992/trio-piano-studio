@@ -18,9 +18,9 @@ const REGION_LABEL: Record<ShopRegion, { en: string; he: string }> = {
   usa: { en: 'USA', he: 'ארה"ב' },
 };
 const ORIGIN_ICON: Record<ShopRegion, string> = {
-  japan: '/images/shop/icons/japan_icon.png',
-  europe: '/images/shop/icons/eu_icon.png',
-  usa: '/images/shop/icons/usa_icon.png',
+  japan: '/images/shop/icons/japan_icon.webp',
+  europe: '/images/shop/icons/eu_icon.webp',
+  usa: '/images/shop/icons/usa_icon.webp',
 };
 
 // Diameter matches the color swatch, bumped by 5px of radius (i.e. +10px).
@@ -28,9 +28,9 @@ const SPEC_ICON = 26;
 
 function brandIcon(brand: string): string {
   const b = brand.toLowerCase();
-  if (b.includes('yamaha')) return '/images/shop/icons/yamaha_icon.png';
-  if (b.includes('kawai')) return '/images/shop/icons/kawai_icon.png';
-  return '/images/shop/icons/steinwey_icon.png';
+  if (b.includes('yamaha')) return '/images/shop/icons/yamaha_icon.webp';
+  if (b.includes('kawai')) return '/images/shop/icons/kawai_icon.webp';
+  return '/images/shop/icons/steinwey_icon.webp';
 }
 
 // Overlay positions (in % of the illustration box) for the width / height / depth
@@ -232,7 +232,7 @@ export default function PianoPage() {
             {/* Size illustration with overlaid values */}
             <div className="relative mt-10 aspect-[928/1131] w-full max-w-[15rem] mx-auto md:mx-0">
                 <Image
-                  src={item.type === 'grand' ? '/images/shop/Grand.png' : '/images/shop/Upright.png'}
+                  src={item.type === 'grand' ? '/images/shop/Grand.webp' : '/images/shop/Upright.webp'}
                   alt=""
                   fill
                   sizes="19rem"

@@ -97,17 +97,6 @@
     "next": "Next",
     "desc_fallback": "The {brand} {model} is a {type} that has been fully inspected, restored, and prepared in our Jerusalem workshop. From the soundboard and action to the finish of its cabinet, every component has been brought back to life so the instrument plays and looks its very best. It is tuned, regulated, and ready to find its place in a new home — whether a concert hall, a recording studio, or a living room."
   },
-  "gallery": {
-    "hero_label": "Our Work",
-    "hero_title": "Before & After",
-    "hero_subtitle": "See the transformation. Every piano tells a story of renewal.",
-    "before": "Before",
-    "after": "After",
-    "category_all": "All",
-    "category_restoration": "Restoration",
-    "category_grand": "Grand Pianos",
-    "category_upright": "Upright Pianos"
-  },
   "contact": {
     "hero_label": "Get in Touch",
     "hero_title": "Contact",
@@ -121,10 +110,6 @@
     "form_sending": "Sending...",
     "form_success": "Thank you! We'll be in touch shortly.",
     "form_error": "Something went wrong. Please try again or call us directly.",
-    "info_address": "Yad Harutzim 16, Jerusalem",
-    "info_phone": "+972-54-333-7341",
-    "info_email": "trio.piano.studio@gmail.com",
-    "info_hours": "Sun–Thu: 10:00–18:00\nFri: 10:00–13:00",
-    "whatsapp": "Chat on WhatsApp"
+    "info_hours": "Sun–Thu: 10:00–18:00\nFri: 10:00–13:00"
   }
 }

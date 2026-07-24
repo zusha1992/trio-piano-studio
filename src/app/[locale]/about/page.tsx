@@ -8,8 +8,8 @@ import ContactCTA from '@/components/sections/ContactCTA';
 // Each founder's photo is bound to their id (not a positional index), so the
 // name, bio and image can never drift apart regardless of order or locale.
 const FOUNDERS = [
-  { id: 'gadi', image: '/images/About/Gadi.png' },
-  { id: 'nethanel', image: '/images/About/Fastman.png' },
+  { id: 'gadi', image: '/images/About/Gadi.jpg' },
+  { id: 'nethanel', image: '/images/About/Fastman.jpg' },
   { id: 'noam', image: '/images/About/Noam.jpg' },
 ] as const;
 
