@@ -37,10 +37,10 @@ export default function AboutPage() {
 
   const heading = 'text-3xl tracking-tight text-[var(--c-text)] sm:text-4xl';
   const paragraph = 'max-w-md text-[15px] leading-relaxed text-[var(--c-dim)]';
-  // Full-bleed banner on mobile (breaks out of the section padding), tidy
-  // rounded card sitting inside the grid column on desktop.
+  // Rounded square card on mobile (matching the founder images), taller
+  // portrait card sitting inside the grid column on desktop.
   const banner =
-    'relative -mx-8 aspect-[4/3] overflow-hidden bg-[var(--c-bg-alt)] sm:-mx-10 md:mx-0 md:aspect-[12/13] md:rounded-2xl';
+    'relative aspect-square overflow-hidden rounded-2xl bg-[var(--c-bg-alt)] md:aspect-[12/13]';
   const bannerTitle =
     'absolute bottom-0 start-0 p-5 text-3xl tracking-tight text-white drop-shadow md:hidden';
 

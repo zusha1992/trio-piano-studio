@@ -17,7 +17,14 @@ import { useTheme } from '@/components/layout/ThemeContext';
 
 const AUTO_MS = 4000;
 const SWIPE_THRESHOLD = 50;
-const FADE = { duration: 0.8, ease: [0.16, 1, 0.3, 1] } as const;
+const SLIDE = { duration: 0.6, ease: [0.16, 1, 0.3, 1] } as const;
+
+// Horizontal slide so it reads like navigating between pages.
+const slideVariants = {
+  enter: (d: number) => ({ x: d >= 0 ? '100%' : '-100%' }),
+  center: { x: '0%' },
+  exit: (d: number) => ({ x: d >= 0 ? '-100%' : '100%' }),
+};
 
 /**
  * Mobile landing (< lg) — concept B. A full-screen showcase that displays one
@@ -43,14 +50,19 @@ export default function HeroMobile() {
   // Foreground (text/icons/dots) is the opposite: white in dark, near-black in light.
   const fg = negative ? '#ffffff' : '#09090b';
 
-  const [index, setIndex] = useState(0);
+  // Track the slide index together with the travel direction so slides move
+  // in/out horizontally instead of crossfading.
+  const [[index, dir], setSlide] = useState<[number, number]>([0, 0]);
   // Distinguishes a real swipe from a tap so a tap-to-enter isn't swallowed.
   const draggedRef = useRef(false);
 
   const current = CATEGORIES[index];
 
+  const paginate = useCallback((d: number) => {
+    setSlide(([i]) => [(i + d + CATEGORIES.length) % CATEGORIES.length, d]);
+  }, []);
   const goTo = useCallback((i: number) => {
-    setIndex((i + CATEGORIES.length) % CATEGORIES.length);
+    setSlide(([cur]) => [i, i >= cur ? 1 : -1]);
   }, []);
 
   // Prefetch destinations + decode every image up front so swaps are instant.
@@ -65,14 +77,15 @@ export default function HeroMobile() {
   // Auto-advance. Keyed on `index`, so any manual change restarts the timer.
   useEffect(() => {
     if (!isHome) return;
-    const t = setTimeout(() => goTo(index + 1), AUTO_MS);
+    const t = setTimeout(() => paginate(1), AUTO_MS);
     return () => clearTimeout(t);
-  }, [index, isHome, goTo]);
+  }, [index, isHome, paginate]);
 
   const handleDragEnd = (_e: unknown, info: PanInfo) => {
     if (Math.abs(info.offset.x) > 8) draggedRef.current = true;
-    if (info.offset.x <= -SWIPE_THRESHOLD) goTo(index + 1);
-    else if (info.offset.x >= SWIPE_THRESHOLD) goTo(index - 1);
+    // Swiping left advances; account for RTL where left means "previous".
+    if (info.offset.x <= -SWIPE_THRESHOLD) paginate(isHe ? -1 : 1);
+    else if (info.offset.x >= SWIPE_THRESHOLD) paginate(isHe ? 1 : -1);
   };
 
   const handleEnter = () => {
@@ -87,8 +100,8 @@ export default function HeroMobile() {
 
   return (
     <div className="fixed inset-0 z-[100] overflow-hidden bg-black">
-      {/* Slides — crossfade + swipe (drag anywhere); tap-to-enter is a smaller
-          central zone so it doesn't steal taps from the top toolbar/footer. */}
+      {/* Slides — horizontal slide + swipe (drag anywhere); tap-to-enter is a
+          smaller central zone so it doesn't steal taps from the toolbar/footer. */}
       <motion.div
         className="absolute inset-0"
         drag="x"
@@ -96,17 +109,20 @@ export default function HeroMobile() {
         dragElastic={0.18}
         onDragEnd={handleDragEnd}
       >
-        {CATEGORIES.map((c, i) => (
+        <AnimatePresence initial={false} custom={dir}>
           <motion.div
-            key={c.key}
+            key={index}
+            custom={dir}
+            variants={slideVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={SLIDE}
             className="absolute inset-0"
-            initial={false}
-            animate={{ opacity: i === index ? 1 : 0 }}
-            transition={FADE}
           >
-            <Image src={c.img} alt="" fill priority sizes="100vw" className="object-cover" />
+            <Image src={current.img} alt="" fill priority sizes="100vw" className="object-cover" />
           </motion.div>
-        ))}
+        </AnimatePresence>
 
         {/* Top wash: fully matte theme color for the top 20% of the screen,
             then a short fade into the photo. Bottom stays fully transparent. */}

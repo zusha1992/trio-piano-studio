@@ -1,268 +1,602 @@
 'use client';
 
-import { useLocale } from 'next-intl';
-import { motion } from 'framer-motion';
+import { useState, useEffect, useRef, FormEvent } from 'react';
 import Image from 'next/image';
+import { useTranslations, useLocale } from 'next-intl';
+import { AnimatePresence, motion } from 'framer-motion';
+import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import emailjs from '@emailjs/browser';
+import QRCode from 'qrcode';
+import { concerts, concertGallery } from '@/data/concerts';
 import ContactCTA from '@/components/sections/ContactCTA';
 
+const EMAILJS_SERVICE_ID = 'service_52uluqq';
+const EMAILJS_TEMPLATE_ID = 'template_8ozp076';
+const EMAILJS_PUBLIC_KEY = 'FsgqljsX-d4Ea9-Ai';
+
+const EASE = [0.16, 1, 0.3, 1] as const;
+
 export default function ConcertsPage() {
-  const locale = useLocale();
+  const t = useTranslations('concerts');
+  const locale = useLocale() as 'en' | 'he';
   const isHe = locale === 'he';
-  const headingFont = isHe ? 'var(--font-heebo), sans-serif' : 'var(--font-cormorant), serif';
+  const titleFont = isHe ? 'var(--font-rubik), sans-serif' : 'var(--font-arimo), sans-serif';
 
-  const concertsData = [
-    {
-      image: '/images/WhatsApp Image 2026-07-03 at 09.09.33.jpeg',
-      titleHe: 'עידו חיימוביץ — סולו פסנתר',
-      titleEn: 'Ido Heimovitch — Solo Piano',
-      dateHe: 'רביעי 21.08 · 20:30',
-      dateEn: 'Wed Aug 21 · 20:30',
-      performersHe: 'עידו חיימוביץ — פסנתר\nאנסמבל פינאלה',
-      performersEn: 'Ido Heimovitch — Piano\nEnsemble Finale',
-      programHe: 'תוכנית בקרוב',
-      programEn: 'Program to be announced',
-      pianoHe: 'שטיינווי & סאנס — משוקם בסדנה',
-      pianoEn: 'Steinway & Sons — Restored in our workshop',
-    },
-    {
-      image: '/images/WhatsApp Image 2026-07-03 at 09.09.33 (1).jpeg',
-      titleHe: 'אילן בר לביא טריו + אורחים',
-      titleEn: 'Ilan Bar Leviya Trio + Guests',
-      dateHe: 'רביעי 31.07 · 20:30 · בן סירא 3',
-      dateEn: 'Wed Jul 31 · 20:30 · Ben Sira 3',
-      performersHe: 'אילן בר לביא — פסנתר\nאסף דהן · עוז יחיאלי — אורחים',
-      performersEn: 'Ilan Bar Leviya — Piano\nAsaf Dahan · Oz Yichieli — Guests',
-      programHe: 'תוכנית בקרוב',
-      programEn: 'Program to be announced',
-      pianoHe: 'גרנד משוקם בסדנת טריו',
-      pianoEn: 'Restored Grand — Trio Workshop',
-    },
-    {
-      image: '/images/WhatsApp Image 2026-07-03 at 09.09.33 (2).jpeg',
-      titleHe: 'Rosa Salamon feat. Peskoffs',
-      titleEn: 'Rosa Salamon feat. Peskoffs',
-      dateHe: 'רביעי 24.07 · 20:00 · בן סירא 3',
-      dateEn: 'Wed Jul 24 · 20:00 · Ben Sira 3',
-      performersHe: 'רוזה סלמון — שירה\nאנסמבל פסקופס',
-      performersEn: 'Rosa Salamon — Vocals\nThe Peskoffs Ensemble',
-      programHe: 'ג\'אז ומוזיקה עולמית',
-      programEn: 'Jazz & World Music',
-      pianoHe: 'גרנד משוקם בסדנת טריו',
-      pianoEn: 'Restored Grand — Trio Workshop',
-    },
-    {
-      image: '/images/WhatsApp Image 2026-07-03 at 09.09.33 (3).jpeg',
-      titleHe: 'רועי בן יוסף טריו',
-      titleEn: 'Roei Ben Yosef Trio',
-      dateHe: 'רביעי 17.07 · 20:30 · בן סירא 3',
-      dateEn: 'Wed Jul 17 · 20:30 · Ben Sira 3',
-      performersHe: 'רועי בן יוסף — פסנתר\nאלון ביר · גדי שפר',
-      performersEn: 'Roei Ben Yosef — Piano\nAlon Bir · Gadi Shafar',
-      programHe: 'ג\'אז מקורי',
-      programEn: 'Original Jazz',
-      pianoHe: 'גרנד משוקם בסדנת טריו',
-      pianoEn: 'Restored Grand — Trio Workshop',
-    },
-    {
-      image: '/images/WhatsApp Image 2026-07-03 at 09.09.33 (4).jpeg',
-      titleHe: 'רביעיית קסקט',
-      titleEn: 'Kasket Quartet',
-      dateHe: 'רביעי 14.05 · 20:30 · בן סירא 3',
-      dateEn: 'Wed May 14 · 20:30 · Ben Sira 3',
-      performersHe: 'עמרי בר אל גיורא — גיטרה\nעוז יחיאלי — קונטרבס\nשי גולן — סקסופון\nדוד דגמי — תופים',
-      performersEn: 'Omri Bar El Giora — Guitar\nOz Yichieli — Bass\nShai Golan — Saxophone\nDavid Dagmi — Drums',
-      programHe: 'ג\'אז ומוזיקה עכשווית',
-      programEn: 'Jazz & Contemporary Music',
-      pianoHe: 'גרנד משוקם בסדנת טריו',
-      pianoEn: 'Restored Grand — Trio Workshop',
-    },
-    {
-      image: '/images/WhatsApp Image 2026-07-03 at 09.09.34.jpeg',
-      titleHe: 'שלישיית טל גמליאלי',
-      titleEn: 'Tal Gamlieli Trio',
-      dateHe: 'רביעי 05.03 · 20:30 · בן סירא 3',
-      dateEn: 'Wed Mar 5 · 20:30 · Ben Sira 3',
-      performersHe: 'טל גמליאלי — צ\'לו\nמילסון מיכאלי — פסנתר\nאביב בונה — תופים',
-      performersEn: 'Tal Gamlieli — Cello\nMilson Michaeli — Piano\nAviv Bona — Drums',
-      programHe: 'מוזיקה חדשה ואימפרוביזציה',
-      programEn: 'New Music & Improvisation',
-      pianoHe: 'גרנד משוקם בסדנת טריו',
-      pianoEn: 'Restored Grand — Trio Workshop',
-    },
-    {
-      image: '/images/WhatsApp Image 2026-07-03 at 09.09.34 (1).jpeg',
-      titleHe: 'ערב אופרה',
-      titleEn: 'Opera Evening',
-      dateHe: 'רביעי 22.01 · 20:30 · בן סירא 3',
-      dateEn: 'Wed Jan 22 · 20:30 · Ben Sira 3',
-      performersHe: 'דרור שביד — פסנתר\nדניאל צין — כינור\nמוסיקאים מהאקדמיה',
-      performersEn: 'Dror Shavid — Piano\nDaniel Zin — Violin\nMusicians from the Academy',
-      programHe: 'אריות ומנגינות מהאופרה הגדולה',
-      programEn: 'Arias & melodies from the great opera repertoire',
-      pianoHe: 'שטיינווי & סאנס — משוקם בסדנה',
-      pianoEn: 'Steinway & Sons — Restored in our workshop',
-    },
-  ];
+  // Browse vs. register: `selected` is the concert index being registered for.
+  const [selected, setSelected] = useState<number | null>(null);
+  const concert = selected !== null ? concerts[selected] : null;
 
-  const WaIcon = () => (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 shrink-0">
-      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-    </svg>
-  );
+  // Poster shown in the browse view (defaults to the soonest concert).
+  const [hovered, setHovered] = useState<string | null>(null);
+  const posterConcert = concerts.find((c) => c.id === hovered) ?? concerts[0];
+
+  // Gallery carousel (browse) + shared fullscreen viewer.
+  const [[slide, dir], setSlide] = useState<[number, number]>([0, 0]);
+  const [paused, setPaused] = useState(false);
+  const [fullscreen, setFullscreen] = useState(false);
+  const [fsIndex, setFsIndex] = useState(0);
+
+  // In register mode the right side shows the single poster; otherwise gallery.
+  const rightImages = selected === null ? concertGallery : concert ? [concert.poster] : [];
+
+  const paginate = (d: number) => {
+    setPaused(true);
+    setSlide(([s]) => [(s + d + concertGallery.length) % concertGallery.length, d]);
+  };
+  const goTo = (i: number) => {
+    setPaused(true);
+    setSlide(([s]) => [i, i > s ? 1 : -1]);
+  };
+  const fsPaginate = (d: number) =>
+    setFsIndex((i) => (rightImages.length ? (i + d + rightImages.length) % rightImages.length : 0));
+
+  useEffect(() => {
+    if (selected !== null || paused || fullscreen || concertGallery.length <= 1) return;
+    const id = setInterval(() => setSlide(([s]) => [(s + 1) % concertGallery.length, 1]), 5000);
+    return () => clearInterval(id);
+  }, [selected, paused, fullscreen]);
+
+  useEffect(() => {
+    if (!fullscreen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setFullscreen(false);
+      if (e.key === 'ArrowRight') fsPaginate(isHe ? -1 : 1);
+      if (e.key === 'ArrowLeft') fsPaginate(isHe ? 1 : -1);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fullscreen, isHe, rightImages.length]);
+
+  // ── Registration form ──────────────────────────────────────────────
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [spots, setSpots] = useState(1);
+  const [errors, setErrors] = useState<{ name?: string; phone?: string; email?: string }>({});
+  const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
+  const [ticketId, setTicketId] = useState('');
+  const qrRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+  }, []);
+
+  useEffect(() => {
+    if (status !== 'success' || !ticketId || !qrRef.current) return;
+    QRCode.toCanvas(qrRef.current, ticketId, {
+      width: 210,
+      margin: 2,
+      color: { dark: '#111111', light: '#ffffff' },
+    }).catch(() => {});
+  }, [status, ticketId]);
+
+  const openRegister = (i: number) => {
+    setSelected(i);
+    setStatus('idle');
+    setErrors({});
+  };
+  const backToBrowse = () => {
+    setSelected(null);
+    setStatus('idle');
+  };
+  const gotoConcert = (d: number) => {
+    if (selected === null) return;
+    setSelected((selected + d + concerts.length) % concerts.length);
+    setStatus('idle');
+    setErrors({});
+  };
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!concert) return;
+    const errs: typeof errors = {};
+    if (name.trim().length < 2) errs.name = t('err_required');
+    if (!phone.trim()) errs.phone = t('err_required');
+    else if (!/^[\d+\-()\s]{7,20}$/.test(phone)) errs.phone = t('err_phone');
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) errs.email = t('err_email');
+    setErrors(errs);
+    if (Object.keys(errs).length) return;
+
+    setStatus('sending');
+    const id = (
+      globalThis.crypto?.randomUUID?.() ??
+      `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`
+    )
+      .replace(/-/g, '')
+      .slice(0, 12)
+      .toUpperCase();
+    try {
+      await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+        name,
+        email,
+        phone,
+        title: `הרשמה לקונצרט: ${concert.name.he}`,
+        subject: `Concert registration — ${concert.name.en}`,
+        message: [
+          `Concert: ${concert.name.en} / ${concert.name.he}`,
+          `Date: ${concert.date} · ${concert.time}`,
+          `Seats: ${spots}`,
+          `Total: ${spots * concert.price} ILS`,
+          `Ticket ID: ${id}`,
+          `Name: ${name}`,
+          `Phone: ${phone}`,
+          `Email: ${email}`,
+        ].join('\n'),
+      });
+      setTicketId(id);
+      setStatus('success');
+    } catch (err) {
+      console.error('EmailJS error:', err);
+      setStatus('error');
+    }
+  };
+
+  const downloadTicket = () => {
+    const c = qrRef.current;
+    if (!c) return;
+    const a = document.createElement('a');
+    a.href = c.toDataURL('image/png');
+    a.download = `trio-${concert?.id ?? 'ticket'}.png`;
+    a.click();
+  };
+
+  const slideVariants = {
+    enter: (d: number) => ({ x: d > 0 ? '100%' : '-100%' }),
+    center: { x: '0%' },
+    exit: (d: number) => ({ x: d > 0 ? '-100%' : '100%' }),
+  };
+  const reveal = {
+    initial: { opacity: 0, y: 24 },
+    whileInView: { opacity: 1, y: 0 },
+    viewport: { once: true, amount: 0.15 },
+    transition: { duration: 0.7, ease: EASE },
+  } as const;
+
+  const BackArrow = isHe ? ChevronRight : ChevronLeft;
+  const FwdArrow = isHe ? ChevronLeft : ChevronRight;
+
+  const fmtDate = (iso: string) =>
+    new Intl.DateTimeFormat(isHe ? 'he-IL' : 'en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    }).format(new Date(iso));
+
+  const label = 'mb-2 block text-[11px] uppercase tracking-[0.18em] text-[var(--c-muted)]';
+  const field =
+    'w-full rounded-lg border border-[var(--c-border)] bg-transparent px-4 py-3 text-[15px] text-[var(--c-text)] transition-colors focus:border-[var(--c-cat)] focus:outline-none';
 
   return (
     <>
-      {/* Hero */}
-      <section className="relative min-h-[50vh] flex items-end bg-[var(--c-bg)] pt-20">
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage:
-              'radial-gradient(ellipse 80% 60% at 50% 0%, rgba(201,168,76,0.04) 0%, transparent 60%)',
-          }}
-        />
-        <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 pb-16 w-full" dir={isHe ? 'rtl' : 'ltr'}>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-[10px] tracking-[0.4em] uppercase text-[var(--c-accent)] mb-4"
-          >
-            {isHe ? 'תרבות ואמנות' : 'Culture & Art'}
-          </motion.p>
-          <div className="gold-divider" />
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
+      <section className="mx-auto max-w-[100rem] px-6 pb-24 pt-32 sm:px-10 md:pt-44 lg:px-16 lg:pt-52">
+        {/* Kicker (register mode only) */}
+        {concert && (
+          <motion.button
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="text-5xl lg:text-6xl font-light text-[var(--c-text)] leading-tight mb-4"
-            style={{ fontFamily: headingFont }}
+            transition={{ duration: 0.5, ease: EASE }}
+            onClick={backToBrowse}
+            className="ms-4 flex cursor-pointer items-center gap-1.5 text-[11px] uppercase tracking-[0.25em] text-[color:var(--c-cat)] transition-colors hover:text-[color:var(--c-cat-active)] sm:ms-8 md:ms-14 lg:ms-24"
           >
-            {isHe ? 'קונצרטים' : 'Concerts'}
-          </motion.h1>
-          <motion.p
+            <BackArrow size={15} />
+            {t('back')}
+          </motion.button>
+        )}
+
+        {/* Title */}
+        <motion.h1
+          key={concert ? concert.id : 'browse'}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: concert ? 0.05 : 0.1, duration: 0.7, ease: EASE }}
+          className="ms-4 mt-2 text-6xl leading-[0.95] tracking-tight text-[var(--c-text)] sm:ms-8 sm:text-7xl md:ms-14 lg:ms-24 lg:text-8xl"
+          style={{ fontFamily: titleFont, fontWeight: 500 }}
+        >
+          {concert ? concert.name[locale] : t('hero_title')}
+        </motion.h1>
+
+        {/* Main split */}
+        <div className="mt-16 grid grid-cols-1 gap-x-14 gap-y-12 md:mt-20 md:grid-cols-2">
+          {/* Left — list + poster (browse) or form/confirmation (register) */}
+          <motion.div {...reveal} className="order-2 md:order-1">
+            {selected === null ? (
+              <>
+                {/* Concert list */}
+                <ul onMouseLeave={() => setHovered(null)}>
+                  {concerts.map((c, i) => (
+                    <li key={c.id}>
+                      <button
+                        onMouseEnter={() => setHovered(c.id)}
+                        onClick={() => openRegister(i)}
+                        className="group flex w-full cursor-pointer items-center justify-between gap-4 border-b border-[var(--c-border-lt)] py-5 text-start"
+                      >
+                        <span className="block">
+                          <span className="block text-[11px] uppercase tracking-[0.25em] text-[var(--c-ultra-dim)]">
+                            {fmtDate(c.date)} · {c.time}
+                          </span>
+                          <span
+                            className="mt-1 block text-2xl tracking-tight text-[var(--c-text)] sm:text-3xl"
+                            style={{ fontFamily: titleFont, fontWeight: 400 }}
+                          >
+                            {c.name[locale]}
+                          </span>
+                        </span>
+                        <span
+                          className="shrink-0 rounded-full bg-[color:var(--c-cat)] px-5 py-2 text-[11px] uppercase tracking-[0.2em] text-[var(--c-bg)] transition-colors duration-300 group-hover:bg-[color:var(--c-cat-active)]"
+                          style={{ fontFamily: titleFont, fontWeight: 400 }}
+                        >
+                          {t('register')}
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+
+                {/* Poster — one at a time, switches with the hovered concert */}
+                <div className="relative mt-10 aspect-[3/4] w-full max-w-[18rem] overflow-hidden rounded-2xl bg-[var(--c-bg-alt)]">
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={posterConcert.id}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.4, ease: EASE }}
+                      className="absolute inset-0"
+                    >
+                      <Image
+                        src={posterConcert.poster}
+                        alt={posterConcert.name[locale]}
+                        fill
+                        className="object-contain"
+                        sizes="18rem"
+                      />
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
+              </>
+            ) : status === 'success' ? (
+              /* Confirmation + barcode */
+              <div>
+                <h2
+                  className="text-2xl tracking-tight text-[var(--c-text)] sm:text-3xl"
+                  style={{ fontFamily: titleFont, fontWeight: 400 }}
+                >
+                  {t('done_title')}
+                </h2>
+                <p className="mt-3 max-w-md text-[15px] leading-relaxed text-[var(--c-dim)]">
+                  {t('done_desc')}
+                </p>
+                <div className="mt-8 inline-block rounded-2xl bg-white p-4 shadow-sm">
+                  <canvas ref={qrRef} className="block h-[210px] w-[210px]" />
+                </div>
+                <p className="mt-5 text-sm text-[var(--c-dim)]">
+                  {t('done_email')} <span dir="ltr">{email}</span>
+                </p>
+                <button
+                  onClick={downloadTicket}
+                  className="mt-6 inline-block cursor-pointer rounded-full bg-[color:var(--c-cat)] px-7 py-3 text-[11px] uppercase tracking-[0.25em] text-[var(--c-bg)] transition-colors duration-300 hover:bg-[color:var(--c-cat-active)]"
+                  style={{ fontFamily: titleFont, fontWeight: 400 }}
+                >
+                  {t('download')}
+                </button>
+              </div>
+            ) : (
+              /* Registration form */
+              <div>
+                {/* How it works */}
+                <div className="mb-8 rounded-2xl border border-[var(--c-border)] p-6">
+                  <h2
+                    className="mb-4 text-sm uppercase tracking-[0.2em] text-[var(--c-text)]"
+                    style={{ fontFamily: titleFont, fontWeight: 400 }}
+                  >
+                    {t('how_title')}
+                  </h2>
+                  <ul className="space-y-2.5 text-sm leading-relaxed text-[var(--c-dim)]">
+                    {[t('note1'), t('note2', { price: concert!.price }), t('note3')].map((n, i) => (
+                      <li key={i} className="flex gap-2.5">
+                        <span className="mt-1 text-[color:var(--c-cat)]">✦</span>
+                        <span>{n}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <form onSubmit={handleSubmit} noValidate className="space-y-5">
+                  <div>
+                    <label className={label}>{t('form_name')} *</label>
+                    <input value={name} onChange={(e) => setName(e.target.value)} className={field} />
+                    {errors.name && <p className="mt-1.5 text-xs text-red-500">{errors.name}</p>}
+                  </div>
+                  <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                    <div>
+                      <label className={label}>{t('form_phone')} *</label>
+                      <input
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        type="tel"
+                        dir="ltr"
+                        className={field}
+                      />
+                      {errors.phone && <p className="mt-1.5 text-xs text-red-500">{errors.phone}</p>}
+                    </div>
+                    <div>
+                      <label className={label}>{t('form_email')} *</label>
+                      <input
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        type="email"
+                        dir="ltr"
+                        className={field}
+                      />
+                      {errors.email && <p className="mt-1.5 text-xs text-red-500">{errors.email}</p>}
+                    </div>
+                  </div>
+
+                  {/* Seats */}
+                  <div>
+                    <label className={label}>
+                      {t('form_spots')}
+                      <span className="ms-2 lowercase tracking-normal text-[var(--c-ultra-dim)]">
+                        · {t('form_spots_hint')}
+                      </span>
+                    </label>
+                    <div className="flex gap-3">
+                      {[1, 2, 3, 4].map((n) => (
+                        <button
+                          type="button"
+                          key={n}
+                          onClick={() => setSpots(n)}
+                          className={`h-11 w-11 cursor-pointer rounded-full border text-sm transition-colors ${
+                            spots === n
+                              ? 'border-[var(--c-text)] bg-[var(--c-text)] text-[var(--c-bg)]'
+                              : 'border-[var(--c-border)] text-[var(--c-dim)] hover:border-[var(--c-text)]'
+                          }`}
+                        >
+                          {n}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Total */}
+                  <div className="flex items-baseline justify-between border-t border-[var(--c-border-lt)] pt-5">
+                    <span className="text-[11px] uppercase tracking-[0.2em] text-[var(--c-muted)]">
+                      {t('form_total')}
+                    </span>
+                    <span
+                      className="text-xl text-[var(--c-text)]"
+                      style={{ fontFamily: titleFont, fontWeight: 400 }}
+                      dir="ltr"
+                    >
+                      {spots * concert!.price} ₪
+                    </span>
+                  </div>
+
+                  {status === 'error' && (
+                    <p className="text-sm text-red-500">{t('err_general')}</p>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={status === 'sending'}
+                    className="inline-block cursor-pointer rounded-full bg-[color:var(--c-cat)] px-8 py-3 text-[11px] uppercase tracking-[0.25em] text-[var(--c-bg)] transition-colors duration-300 hover:bg-[color:var(--c-cat-active)] disabled:opacity-60"
+                    style={{ fontFamily: titleFont, fontWeight: 400 }}
+                  >
+                    {status === 'sending' ? t('form_sending') : t('form_submit')}
+                  </button>
+                </form>
+              </div>
+            )}
+          </motion.div>
+
+          {/* Right — gallery (browse) or poster (register) */}
+          <motion.div {...reveal} className="order-1 md:order-2">
+            {selected === null ? (
+              <div
+                className="group relative aspect-[4/5] cursor-pointer overflow-hidden rounded-2xl bg-[var(--c-bg-alt)] md:aspect-square"
+                onClick={() => {
+                  setFsIndex(slide);
+                  setFullscreen(true);
+                }}
+              >
+                <AnimatePresence initial={false} custom={dir}>
+                  <motion.div
+                    key={slide}
+                    custom={dir}
+                    variants={slideVariants}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    transition={{ duration: 0.5, ease: EASE }}
+                    className="absolute inset-0"
+                  >
+                    <Image
+                      src={concertGallery[slide]}
+                      alt=""
+                      fill
+                      className="object-cover object-center"
+                      sizes="(max-width: 768px) 100vw, 45vw"
+                    />
+                  </motion.div>
+                </AnimatePresence>
+
+                {concertGallery.length > 1 && (
+                  <>
+                    <button
+                      type="button"
+                      aria-label="Previous"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        paginate(-1);
+                      }}
+                      className="absolute start-3 top-1/2 -translate-y-1/2 cursor-pointer rounded-full bg-black/40 p-1.5 text-white backdrop-blur-sm transition-colors hover:bg-black/60"
+                    >
+                      <BackArrow size={20} />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Next"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        paginate(1);
+                      }}
+                      className="absolute end-3 top-1/2 -translate-y-1/2 cursor-pointer rounded-full bg-black/40 p-1.5 text-white backdrop-blur-sm transition-colors hover:bg-black/60"
+                    >
+                      <FwdArrow size={20} />
+                    </button>
+                    <div className="absolute inset-x-0 bottom-4 flex justify-center gap-2">
+                      {concertGallery.map((img, i) => (
+                        <button
+                          key={img}
+                          type="button"
+                          aria-label={`Go to image ${i + 1}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            goTo(i);
+                          }}
+                          className={`h-1.5 cursor-pointer rounded-full transition-all ${
+                            i === slide ? 'w-5 bg-white' : 'w-1.5 bg-white/50 hover:bg-white/80'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+            ) : (
+              <div
+                className="group relative aspect-[3/4] cursor-pointer overflow-hidden rounded-2xl bg-[var(--c-bg-alt)] md:aspect-[4/5]"
+                onClick={() => {
+                  setFsIndex(0);
+                  setFullscreen(true);
+                }}
+              >
+                <Image
+                  src={concert!.poster}
+                  alt={concert!.name[locale]}
+                  fill
+                  className="object-contain"
+                  sizes="(max-width: 768px) 100vw, 45vw"
+                />
+              </div>
+            )}
+          </motion.div>
+        </div>
+
+        {/* Prev / next concert (register mode) */}
+        {concert && (
+          <div className="mt-20 flex items-stretch justify-between gap-4 md:mt-24">
+            <button
+              onClick={() => gotoConcert(-1)}
+              className="group flex cursor-pointer items-center gap-2 text-[color:var(--c-cat)] transition-colors hover:text-[color:var(--c-cat-active)]"
+            >
+              <BackArrow size={18} className="shrink-0" />
+              <span
+                className="text-sm tracking-tight sm:text-base"
+                style={{ fontFamily: titleFont, fontWeight: 400 }}
+              >
+                {concerts[(selected! - 1 + concerts.length) % concerts.length].name[locale]}
+              </span>
+            </button>
+            <button
+              onClick={() => gotoConcert(1)}
+              className="group flex cursor-pointer items-center gap-2 text-end text-[color:var(--c-cat)] transition-colors hover:text-[color:var(--c-cat-active)]"
+            >
+              <span
+                className="text-sm tracking-tight sm:text-base"
+                style={{ fontFamily: titleFont, fontWeight: 400 }}
+              >
+                {concerts[(selected! + 1) % concerts.length].name[locale]}
+              </span>
+              <FwdArrow size={18} className="shrink-0" />
+            </button>
+          </div>
+        )}
+      </section>
+
+      {/* Fullscreen image viewer */}
+      <AnimatePresence>
+        {fullscreen && rightImages.length > 0 && (
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-            className="text-base text-[var(--c-muted)] max-w-xl leading-relaxed"
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[120] flex items-center justify-center bg-black/95 p-4 backdrop-blur-sm"
+            onClick={() => setFullscreen(false)}
           >
-            {isHe
-              ? 'ערבי מוזיקה אינטימיים על גרנדים משוקמים בסדנה. עם אחד הנגנים בעולם'
-              : 'Intimate music evenings performed on restored grand pianos — up close with world-class musicians.'}
-          </motion.p>
-        </div>
-      </section>
+            <button
+              onClick={() => setFullscreen(false)}
+              aria-label="Close"
+              className="absolute right-5 top-5 z-10 cursor-pointer text-white/70 transition-colors hover:text-white"
+            >
+              <X size={28} strokeWidth={1.5} />
+            </button>
 
-      {/* Concert grid */}
-      <section className="section-padding bg-[var(--c-bg)] border-t border-[var(--c-card)]">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {concertsData.map((concert, i) => {
-              const waMsg = encodeURIComponent(
-                isHe
-                  ? `שלום, אני מעוניין/ת לקבל פרטים על הקונצרט "${concert.titleHe}"`
-                  : `Hello, I'd like details about the concert "${concert.titleEn}"`
-              );
-              const waHref = `https://wa.me/972543337341?text=${waMsg}`;
-              return (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: i * 0.08 }}
-                  className="group relative overflow-hidden"
+            {rightImages.length > 1 && (
+              <>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    fsPaginate(isHe ? 1 : -1);
+                  }}
+                  aria-label="Previous"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 cursor-pointer text-white/60 transition-colors hover:text-white"
                 >
-                  {/* Poster */}
-                  <div className="relative aspect-square w-full overflow-hidden">
-                    <Image
-                      src={concert.image}
-                      alt={isHe ? concert.titleHe : concert.titleEn}
-                      fill
-                      className="object-cover transition-transform duration-700 group-hover:scale-105"
-                      sizes="(max-width: 768px) 100vw, 50vw"
-                    />
+                  <ChevronLeft size={38} strokeWidth={1.5} />
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    fsPaginate(isHe ? -1 : 1);
+                  }}
+                  aria-label="Next"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer text-white/60 transition-colors hover:text-white"
+                >
+                  <ChevronRight size={38} strokeWidth={1.5} />
+                </button>
+              </>
+            )}
 
-                    {/* Hover overlay */}
-                    <div
-                      className="absolute inset-0 flex flex-col justify-end translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out"
-                      style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.96) 60%, rgba(0,0,0,0.5) 100%)' }}
-                      dir={isHe ? 'rtl' : 'ltr'}
-                    >
-                      <div className="p-6 lg:p-8 flex flex-col gap-4">
-                        <p className="text-[10px] tracking-[0.3em] uppercase text-[var(--c-accent)]">
-                          {isHe ? concert.dateHe : concert.dateEn}
-                        </p>
-                        <h3 className="text-xl lg:text-2xl font-light text-white leading-snug"
-                          style={{ fontFamily: headingFont }}>
-                          {isHe ? concert.titleHe : concert.titleEn}
-                        </h3>
-                        <div>
-                          <p className="text-[9px] tracking-[0.3em] uppercase text-white/40 mb-1.5">
-                            {isHe ? 'נגנים' : 'Performers'}
-                          </p>
-                          <p className="text-sm text-white/80 leading-relaxed whitespace-pre-line">
-                            {isHe ? concert.performersHe : concert.performersEn}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-[9px] tracking-[0.3em] uppercase text-white/40 mb-1.5">
-                            {isHe ? 'תוכנית' : 'Program'}
-                          </p>
-                          <p className="text-sm text-white/80 leading-relaxed">
-                            {isHe ? concert.programHe : concert.programEn}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-[9px] tracking-[0.3em] uppercase text-white/40 mb-1.5">
-                            {isHe ? 'על הפסנתר' : 'Piano'}
-                          </p>
-                          <p className="text-sm text-white/80">
-                            {isHe ? concert.pianoHe : concert.pianoEn}
-                          </p>
-                        </div>
-                        <a
-                          href={waHref}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="mt-2 flex items-center gap-2 self-start px-5 py-2.5 text-white text-xs tracking-[0.15em] uppercase transition-colors duration-200"
-                          style={{ backgroundColor: '#25D366' }}
-                          onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#20BD5C')}
-                          onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#25D366')}
-                        >
-                          <WaIcon />
-                          {isHe ? 'רוצה להגיע' : 'I want to attend'}
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Mobile — always-visible button below poster */}
-                  <div className="md:hidden bg-[var(--c-card)] border border-[var(--c-border)] border-t-0 p-4 flex items-center justify-between"
-                    dir={isHe ? 'rtl' : 'ltr'}>
-                    <div>
-                      <p className="text-[9px] tracking-[0.2em] uppercase text-[var(--c-accent)] mb-0.5">
-                        {isHe ? concert.dateHe : concert.dateEn}
-                      </p>
-                      <p className="text-sm font-light text-[var(--c-text)]">
-                        {isHe ? concert.titleHe : concert.titleEn}
-                      </p>
-                    </div>
-                    <a
-                      href={waHref}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1.5 bg-[#25D366] text-white text-[10px] tracking-[0.1em] uppercase px-3 py-2 shrink-0"
-                    >
-                      <WaIcon />
-                      {isHe ? 'להגיע' : 'Attend'}
-                    </a>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
+            <motion.div
+              key={fsIndex}
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.25 }}
+              className="relative h-[85vh] w-full max-w-5xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Image
+                src={rightImages[fsIndex]}
+                alt=""
+                fill
+                sizes="90vw"
+                className="object-contain"
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <ContactCTA />
     </>

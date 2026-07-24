@@ -7,46 +7,86 @@ import { AnimatePresence, motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
-import { workshopCategories } from '@/data/workshopServices';
+import { shopItems, ShopRegion } from '@/data/shopItems';
 import ContactCTA from '@/components/sections/ContactCTA';
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
-export default function CategoryPage() {
+const REGION_LABEL: Record<ShopRegion, { en: string; he: string }> = {
+  japan: { en: 'Japan', he: 'יפן' },
+  europe: { en: 'Europe', he: 'אירופה' },
+  usa: { en: 'USA', he: 'ארה"ב' },
+};
+const ORIGIN_ICON: Record<ShopRegion, string> = {
+  japan: '/images/shop/icons/japan_icon.png',
+  europe: '/images/shop/icons/eu_icon.png',
+  usa: '/images/shop/icons/usa_icon.png',
+};
+
+// Diameter matches the color swatch, bumped by 5px of radius (i.e. +10px).
+const SPEC_ICON = 26;
+
+function brandIcon(brand: string): string {
+  const b = brand.toLowerCase();
+  if (b.includes('yamaha')) return '/images/shop/icons/yamaha_icon.png';
+  if (b.includes('kawai')) return '/images/shop/icons/kawai_icon.png';
+  return '/images/shop/icons/steinwey_icon.png';
+}
+
+// Overlay positions (in % of the illustration box) for the width / height / depth
+// labels, tuned to the current placeholder art. When the un-labelled artwork is
+// dropped in these just sit where the measurements are drawn.
+// Both illustrations share the same three measurements in the same spots
+// (upright is the reference layout).
+const DIM_POS: Record<'width' | 'height' | 'depth', { top: string; left: string }> = {
+  width: { top: '15%', left: '55%' },
+  height: { top: '50%', left: '92%' },
+  depth: { top: '86%', left: '80%' },
+};
+
+export default function PianoPage() {
   const params = useParams();
-  const t = useTranslations('services');
+  const t = useTranslations('store');
   const locale = useLocale() as 'en' | 'he';
   const isHe = locale === 'he';
   const titleFont = isHe ? 'var(--font-rubik), sans-serif' : 'var(--font-arimo), sans-serif';
 
-  const slug = params.category as string;
-  const index = workshopCategories.findIndex((c) => c.id === slug);
+  const id = params.id as string;
+  const index = shopItems.findIndex((p) => p.id === id);
   if (index === -1) notFound();
 
-  const cat = workshopCategories[index];
-  const prev = workshopCategories[(index - 1 + workshopCategories.length) % workshopCategories.length];
-  const next = workshopCategories[(index + 1) % workshopCategories.length];
+  const item = shopItems[index];
+  const prev = shopItems[(index - 1 + shopItems.length) % shopItems.length];
+  const next = shopItems[(index + 1) % shopItems.length];
 
-  // Gallery images (falls back to the single tile image for now). Track the
-  // travel direction so slides move in/out horizontally instead of fading.
-  const images = cat.images?.length ? cat.images : [cat.image];
+  // Gallery images — for now reuse neighbouring pianos so the carousel has a
+  // few frames to move through. Replaced per-item via `images` when available.
+  const images =
+    item.images?.length
+      ? item.images
+      : [
+          item.image,
+          shopItems[(index + 1) % shopItems.length].image,
+          shopItems[(index + 2) % shopItems.length].image,
+        ];
+
   const [[slide, dir], setSlide] = useState<[number, number]>([0, 0]);
-  // Auto-advance stops for good once the visitor takes manual control.
   const [paused, setPaused] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
+
   const paginate = (d: number) => {
     setPaused(true);
-    setSlide([(slide + d + images.length) % images.length, d]);
+    setSlide(([s]) => [(s + d + images.length) % images.length, d]);
   };
   const goTo = (i: number) => {
     setPaused(true);
-    setSlide([i, i > slide ? 1 : -1]);
+    setSlide(([s]) => [i, i > s ? 1 : -1]);
   };
 
   useEffect(() => {
     if (paused || fullscreen || images.length <= 1) return;
-    const id = setInterval(() => setSlide(([s]) => [(s + 1) % images.length, 1]), 5000);
-    return () => clearInterval(id);
+    const t2 = setInterval(() => setSlide(([s]) => [(s + 1) % images.length, 1]), 5000);
+    return () => clearInterval(t2);
   }, [paused, fullscreen, images.length]);
 
   // Keyboard control while the fullscreen viewer is open.
@@ -60,7 +100,7 @@ export default function CategoryPage() {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fullscreen, isHe, slide, images.length]);
+  }, [fullscreen, isHe, images.length]);
 
   const slideVariants = {
     enter: (d: number) => ({ x: d > 0 ? '100%' : '-100%' }),
@@ -68,25 +108,79 @@ export default function CategoryPage() {
     exit: (d: number) => ({ x: d > 0 ? '-100%' : '100%' }),
   };
 
-  // Break the fixes into two columns once a single column would run taller
-  // than the (square) image beside it.
-  const twoCols = cat.services.length > 4;
-
   const reveal = {
     initial: { opacity: 0, y: 24 },
     whileInView: { opacity: 1, y: 0 },
     viewport: { once: true, amount: 0.2 },
     transition: { duration: 0.7, ease: EASE },
-  };
+  } as const;
 
-  // Reading-direction aware arrows: "previous" points to the start of the line.
   const BackArrow = isHe ? ChevronRight : ChevronLeft;
   const FwdArrow = isHe ? ChevronLeft : ChevronRight;
+
+  const typePhrase = t(item.type === 'grand' ? 'type_grand' : 'type_upright');
+  const priceText =
+    item.price === 'contact' ? t('price_contact') : `₪${item.price.toLocaleString('en-US')}`;
+  const description = item.description
+    ? item.description[locale]
+    : t('desc_fallback', { brand: item.brand, model: item.model, type: typePhrase });
+
+  const specs = [
+    {
+      label: t('spec_origin'),
+      value: (
+        <span className="inline-flex items-center gap-2.5">
+          <Image
+            src={ORIGIN_ICON[item.region]}
+            alt=""
+            width={SPEC_ICON}
+            height={SPEC_ICON}
+            className="rounded-full object-cover"
+          />
+          {REGION_LABEL[item.region][locale]}
+        </span>
+      ),
+    },
+    {
+      label: t('spec_brand'),
+      value: (
+        <span className="inline-flex items-center gap-2.5">
+          <Image
+            src={brandIcon(item.brand)}
+            alt=""
+            width={SPEC_ICON}
+            height={SPEC_ICON}
+            className="rounded-full object-cover"
+          />
+          {item.brand}
+        </span>
+      ),
+    },
+    {
+      label: t('spec_color'),
+      value: (
+        <span className="inline-flex items-center gap-2.5">
+          <span
+            className="inline-block rounded-full border border-[var(--c-border)]"
+            style={{ width: SPEC_ICON, height: SPEC_ICON, backgroundColor: item.color.hex }}
+          />
+          {item.color.name[locale]}
+        </span>
+      ),
+    },
+    { label: t('spec_price'), value: priceText },
+  ];
+
+  const dims: { key: 'width' | 'height' | 'depth'; value: number }[] = [
+    { key: 'width', value: item.dimensions.width },
+    { key: 'height', value: item.dimensions.height },
+    { key: 'depth', value: item.dimensions.depth },
+  ];
 
   return (
     <>
       <section className="mx-auto max-w-[100rem] px-6 pb-24 pt-32 sm:px-10 md:pt-44 lg:px-16 lg:pt-52">
-        {/* Kicker / back to the workshop */}
+        {/* Kicker / back to the store */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -94,15 +188,15 @@ export default function CategoryPage() {
           className="ms-4 sm:ms-8 md:ms-14 lg:ms-24"
         >
           <Link
-            href={`/${locale}/services`}
+            href={`/${locale}/store`}
             className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.25em] text-[color:var(--c-cat)] transition-colors hover:text-[color:var(--c-cat-active)]"
           >
             <BackArrow size={15} />
-            {t('hero_title')}
+            {t('back')}
           </Link>
         </motion.div>
 
-        {/* Title (label) */}
+        {/* Title */}
         <motion.h1
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -110,48 +204,70 @@ export default function CategoryPage() {
           className="ms-4 mt-4 text-5xl leading-[0.98] tracking-tight text-[var(--c-text)] sm:ms-8 sm:text-6xl md:ms-14 lg:ms-24 lg:text-7xl"
           style={{ fontFamily: titleFont, fontWeight: 500 }}
         >
-          {cat.name[locale]}
+          {item.brand} {item.model}
         </motion.h1>
 
-        {/* One-liner description */}
-        <motion.p
+        {/* ID / spec row — full width beneath the title */}
+        <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.7, ease: EASE }}
-          className="ms-4 mt-5 max-w-2xl text-lg leading-relaxed text-[var(--c-dim)] sm:ms-8 md:ms-14 lg:ms-24"
+          className="ms-4 mt-5 grid max-w-3xl grid-cols-2 gap-x-8 gap-y-8 sm:ms-8 sm:grid-cols-4 md:ms-14 lg:ms-24"
         >
-          {cat.description[locale]}
-        </motion.p>
+          {specs.map((s, i) => (
+            <div key={i}>
+              <p className="mb-2 text-[10px] uppercase tracking-[0.25em] text-[var(--c-ultra-dim)]">
+                {s.label}
+              </p>
+              <div className="text-base text-[var(--c-text)]">{s.value}</div>
+            </div>
+          ))}
+        </motion.div>
 
-        {/* One row — fixes list on one side, image gallery on the other. The
-            fixes list splits into two columns when the category has many. */}
-        <div className="mt-16 grid grid-cols-1 gap-x-12 gap-y-10 md:mt-24 md:grid-cols-2 md:items-center">
-          {/* Fixes list */}
-          <motion.ul
-            {...reveal}
-            className={`order-2 gap-x-8 gap-y-7 md:order-1 ${
-              twoCols ? 'grid grid-cols-1 sm:grid-cols-2' : 'flex flex-col'
-            }`}
-          >
-            {cat.services.map((s) => (
-              <li key={s.id}>
-                <h3
-                  className="text-lg tracking-tight text-[var(--c-text)] sm:text-xl"
-                  style={{ fontFamily: titleFont, fontWeight: 400 }}
-                >
-                  {s.name[locale]}
-                </h3>
-                <p className="mt-1.5 max-w-xs text-sm leading-relaxed text-[var(--c-dim)]">
-                  {s.description[locale]}
-                </p>
-              </li>
-            ))}
-          </motion.ul>
+        {/* Main part: description + illustration | gallery */}
+        <div className="mt-16 grid grid-cols-1 gap-x-14 gap-y-12 md:mt-24 md:grid-cols-2">
+          {/* Left — description + size illustration */}
+          <motion.div {...reveal} className="order-2 md:order-1">
+            <p className="text-base leading-relaxed text-[var(--c-text)]">
+              {description}
+            </p>
 
-          {/* Image gallery / carousel */}
+            {/* Size illustration with overlaid values */}
+            <div className="relative mt-10 aspect-[928/1131] w-full max-w-[15rem]">
+                <Image
+                  src={item.type === 'grand' ? '/images/shop/Grand.png' : '/images/shop/Upright.png'}
+                  alt=""
+                  fill
+                  sizes="19rem"
+                  className="object-contain"
+                  style={{ filter: 'var(--logo-filter)' }}
+                />
+                {dims.map((d) => {
+                  const pos = DIM_POS[d.key];
+                  // Fine-tune nudge (px) applied on top of the percentage anchor.
+                  const nudgeX = 20;
+                  return (
+                    <span
+                      key={d.key}
+                      dir="ltr"
+                      style={{
+                        top: pos.top,
+                        left: pos.left,
+                        transform: `translate(calc(-50% + ${nudgeX}px), -50%)`,
+                      }}
+                      className="absolute whitespace-nowrap rounded bg-[var(--c-bg)] px-1.5 py-0.5 text-xs font-medium text-[var(--c-text)] sm:text-sm"
+                    >
+                      {d.value} cm
+                    </span>
+                  );
+                })}
+              </div>
+          </motion.div>
+
+          {/* Right column — carousel (click for fullscreen) */}
           <motion.div {...reveal} className="order-1 md:order-2">
             <div
-              className="group relative aspect-square cursor-pointer overflow-hidden rounded-2xl bg-[var(--c-bg-alt)]"
+              className="group relative aspect-[4/5] cursor-pointer overflow-hidden rounded-2xl bg-[var(--c-bg-alt)] md:aspect-square"
               onClick={() => setFullscreen(true)}
             >
               <AnimatePresence initial={false} custom={dir}>
@@ -167,7 +283,7 @@ export default function CategoryPage() {
                 >
                   <Image
                     src={images[slide]}
-                    alt={cat.name[locale]}
+                    alt={`${item.brand} ${item.model}`}
                     fill
                     className="object-cover object-center"
                     sizes="(max-width: 768px) 100vw, 45vw"
@@ -197,7 +313,7 @@ export default function CategoryPage() {
                   <div className="absolute inset-x-0 bottom-4 flex justify-center gap-2">
                     {images.map((img, i) => (
                       <button
-                        key={img}
+                        key={`${img}-${i}`}
                         type="button"
                         aria-label={`Go to image ${i + 1}`}
                         onClick={(e) => { e.stopPropagation(); goTo(i); }}
@@ -213,30 +329,24 @@ export default function CategoryPage() {
           </motion.div>
         </div>
 
-        {/* Prev / next category navigation */}
+        {/* Prev / next piano navigation */}
         <div className="mt-20 flex items-stretch justify-between gap-4 md:mt-28">
           <Link
-            href={`/${locale}/services/${prev.id}`}
+            href={`/${locale}/store/${prev.id}`}
             className="group flex items-center gap-2 text-[color:var(--c-cat)] transition-colors hover:text-[color:var(--c-cat-active)]"
           >
             <BackArrow size={18} className="shrink-0" />
-            <span
-              className="text-sm tracking-tight sm:text-base"
-              style={{ fontFamily: titleFont, fontWeight: 400 }}
-            >
-              {prev.name[locale]}
+            <span className="text-sm tracking-tight sm:text-base" style={{ fontFamily: titleFont, fontWeight: 400 }}>
+              {prev.brand} {prev.model}
             </span>
           </Link>
 
           <Link
-            href={`/${locale}/services/${next.id}`}
+            href={`/${locale}/store/${next.id}`}
             className="group flex items-center gap-2 text-end text-[color:var(--c-cat)] transition-colors hover:text-[color:var(--c-cat-active)]"
           >
-            <span
-              className="text-sm tracking-tight sm:text-base"
-              style={{ fontFamily: titleFont, fontWeight: 400 }}
-            >
-              {next.name[locale]}
+            <span className="text-sm tracking-tight sm:text-base" style={{ fontFamily: titleFont, fontWeight: 400 }}>
+              {next.brand} {next.model}
             </span>
             <FwdArrow size={18} className="shrink-0" />
           </Link>
@@ -290,7 +400,7 @@ export default function CategoryPage() {
             >
               <Image
                 src={images[slide]}
-                alt={cat.name[locale]}
+                alt={`${item.brand} ${item.model}`}
                 fill
                 sizes="90vw"
                 className="object-contain"

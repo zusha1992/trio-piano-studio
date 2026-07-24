@@ -1,12 +1,14 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useTranslations, useLocale } from 'next-intl';
 import { AnimatePresence, motion } from 'framer-motion';
-import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { shopItems, ShopType, ShopRegion } from '@/data/shopItems';
 import ContactCTA from '@/components/sections/ContactCTA';
+
+const MotionLink = motion.create(Link);
 
 // Organized-but-varied rhythm on the 3-col desktop grid. Purely positional so
 // it works for any number of items (see shopItems). Repeats every 7 tiles as
@@ -46,7 +48,6 @@ export default function StorePage() {
   // Within a facet the selections are OR'd; the two facets are AND'd together.
   const [types, setTypes] = useState<ShopType[]>([]);
   const [regions, setRegions] = useState<ShopRegion[]>([]);
-  const [lightbox, setLightbox] = useState<number | null>(null);
 
   const titleFont = isHe ? 'var(--font-rubik), sans-serif' : 'var(--font-arimo), sans-serif';
   // Delicate serif for the descriptor line (Hebrew has no serif → soft sans).
@@ -93,24 +94,6 @@ export default function StorePage() {
       ),
     [types, regions],
   );
-
-  const closeLightbox = useCallback(() => setLightbox(null), []);
-  const step = useCallback(
-    (dir: number) =>
-      setLightbox((i) => (i === null ? i : (i + dir + items.length) % items.length)),
-    [items.length],
-  );
-
-  useEffect(() => {
-    if (lightbox === null) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') closeLightbox();
-      if (e.key === 'ArrowRight') step(isHe ? -1 : 1);
-      if (e.key === 'ArrowLeft') step(isHe ? 1 : -1);
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [lightbox, step, closeLightbox, isHe]);
 
   return (
     <>
@@ -177,14 +160,14 @@ export default function StorePage() {
         <div className="mt-12 grid grid-cols-2 gap-3 sm:gap-4 md:mt-16 md:grid-cols-3 md:auto-rows-[24rem] lg:auto-rows-[30rem]">
           <AnimatePresence mode="popLayout">
             {items.map((item, i) => (
-              <motion.button
+              <MotionLink
                 key={item.id}
+                href={`/${locale}/store/${item.id}`}
                 layout
                 initial={false}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                onClick={() => setLightbox(i)}
-                className={`group relative aspect-[4/5] cursor-pointer overflow-hidden rounded-2xl bg-[var(--c-bg-alt)] md:aspect-auto ${
+                className={`group relative block aspect-[4/5] cursor-pointer overflow-hidden rounded-2xl bg-[var(--c-bg-alt)] md:aspect-auto ${
                   TILE_SPANS[i % TILE_SPANS.length]
                 }`}
               >
@@ -223,7 +206,7 @@ export default function StorePage() {
                     </span>
                   </div>
                 </div>
-              </motion.button>
+              </MotionLink>
             ))}
           </AnimatePresence>
         </div>
@@ -232,69 +215,6 @@ export default function StorePage() {
           <p className="py-20 text-center text-sm text-[var(--c-ultra-dim)]">{t('empty')}</p>
         )}
       </section>
-
-      {/* Lightbox */}
-      <AnimatePresence>
-        {lightbox !== null && items[lightbox] && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[110] flex items-center justify-center bg-black/90 p-4 backdrop-blur-sm"
-            onClick={closeLightbox}
-          >
-            <button
-              onClick={closeLightbox}
-              aria-label="Close"
-              className="absolute right-5 top-5 text-white/70 transition-colors hover:text-white"
-            >
-              <X size={26} strokeWidth={1.5} />
-            </button>
-
-            <button
-              onClick={(e) => { e.stopPropagation(); step(isHe ? 1 : -1); }}
-              aria-label="Previous"
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-white/60 transition-colors hover:text-white"
-            >
-              <ChevronLeft size={34} strokeWidth={1.5} />
-            </button>
-            <button
-              onClick={(e) => { e.stopPropagation(); step(isHe ? -1 : 1); }}
-              aria-label="Next"
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-white/60 transition-colors hover:text-white"
-            >
-              <ChevronRight size={34} strokeWidth={1.5} />
-            </button>
-
-            <motion.div
-              key={items[lightbox].id}
-              initial={{ opacity: 0, scale: 0.98 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3 }}
-              className="relative flex max-h-[85vh] w-full max-w-4xl flex-col"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="relative h-[70vh] w-full">
-                <Image
-                  src={items[lightbox].image}
-                  alt={`${items[lightbox].brand} ${items[lightbox].model}`}
-                  fill
-                  sizes="90vw"
-                  className="object-contain"
-                />
-              </div>
-              <div className="mt-4 text-white" dir={isHe ? 'rtl' : 'ltr'}>
-                <p className="text-[10px] uppercase tracking-[0.3em] text-white/60">
-                  {TYPE_LABEL[items[lightbox].type][locale]} · {items[lightbox].size}
-                </p>
-                <p className="mt-1 text-xl font-light">
-                  {items[lightbox].brand} {items[lightbox].model}
-                </p>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       <ContactCTA />
     </>

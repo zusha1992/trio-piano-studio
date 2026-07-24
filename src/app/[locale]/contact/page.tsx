@@ -91,6 +91,17 @@ export default function ContactPage() {
           {t('hero_title')}
         </motion.h1>
 
+        {/* Mobile only: opening hours shown between the title and the icons
+            (there's no hover to reveal them from the clock on touch). */}
+        <motion.p
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.7, ease: EASE }}
+          className="ms-4 text-sm leading-relaxed text-[var(--c-dim)] sm:ms-8 md:hidden"
+        >
+          {t('info_hours').replace(/\n/g, '  ·  ')}
+        </motion.p>
+
         {/* Icons sit at the end of the line; hovering one reveals its detail
             inline, emerging from the icons' side — from the right in English,
             from the left in Hebrew. */}
@@ -145,10 +156,11 @@ export default function ContactPage() {
                   {inner}
                 </a>
               ) : (
+                // Clock/hours — hidden on mobile (shown as text above instead).
                 <span
                   key={c.icon}
                   aria-label={c.text}
-                  className={`${common} cursor-default`}
+                  className={`${common} hidden cursor-default md:flex`}
                   onMouseEnter={on}
                   onFocus={on}
                   tabIndex={0}

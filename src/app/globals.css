@@ -83,6 +83,15 @@ body {
   transition: background-color 0.4s ease, color 0.4s ease;
 }
 
+/* On mobile, never scroll the page sideways (swipe gestures are handled in JS,
+   so they still work). Prevents stray horizontal drift from wide elements. */
+@media (max-width: 1023px) {
+  html,
+  body {
+    overflow-x: hidden;
+  }
+}
+
 :lang(he) body,
 :lang(he) p,
 :lang(he) span,
