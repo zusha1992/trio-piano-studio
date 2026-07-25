@@ -132,6 +132,7 @@ export default function ImageCarousel({
       <motion.div
         className={`group relative cursor-pointer overflow-hidden rounded-2xl bg-[var(--c-bg-alt)] ${frameClassName}`}
         style={{ touchAction: 'pan-y' }}
+        onPointerDown={() => { swipedRef.current = false; }}
         onPanEnd={handleFramePanEnd}
         onClick={handleFrameClick}
       >

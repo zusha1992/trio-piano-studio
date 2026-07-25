@@ -89,12 +89,18 @@ export default function HeroMobile() {
   }, [index, isHome, advance]);
 
   const handlePanEnd = (_e: unknown, info: PanInfo) => {
-    if (Math.abs(info.offset.x) > 8) draggedRef.current = true;
-    // The slide transition follows the finger: swiping left slides content left
-    // (dir 1), swiping right slides it right (dir -1). The landing category is
-    // mirrored for RTL so "next" tracks the reading direction.
-    if (info.offset.x <= -SWIPE_THRESHOLD) move(1, isHe ? -1 : 1);
-    else if (info.offset.x >= SWIPE_THRESHOLD) move(-1, isHe ? 1 : -1);
+    // Only count it as a swipe — and swallow the follow-up click — when the pan
+    // clears the threshold. Smaller finger jitter during a tap must NOT block
+    // the tap, otherwise pressing an image sometimes does nothing.
+    // The slide follows the finger: swiping left slides content left (dir 1),
+    // right slides it right (dir -1); the landing category is mirrored for RTL.
+    if (info.offset.x <= -SWIPE_THRESHOLD) {
+      draggedRef.current = true;
+      move(1, isHe ? -1 : 1);
+    } else if (info.offset.x >= SWIPE_THRESHOLD) {
+      draggedRef.current = true;
+      move(-1, isHe ? 1 : -1);
+    }
   };
 
   const handleEnter = () => {
@@ -146,6 +152,7 @@ export default function HeroMobile() {
         aria-label={isHe ? current.labelHe : current.labelEn}
         className="absolute inset-0 z-[5] cursor-pointer touch-none select-none"
         style={{ touchAction: 'none', overscrollBehavior: 'none' }}
+        onPointerDown={() => { draggedRef.current = false; }}
         onPanEnd={handlePanEnd}
         onClick={handleEnter}
         onKeyDown={(e) => {
