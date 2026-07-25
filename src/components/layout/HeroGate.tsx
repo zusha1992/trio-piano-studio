@@ -138,12 +138,18 @@ export default function HeroGate() {
   const imageHalfPos = imageOnRight ? 'right-0' : 'left-0';
   const catClip = imageOnRight ? LEFT_CLIP : RIGHT_CLIP;
 
+  // Both panels must travel the SAME real distance (~half the viewport) so the
+  // two halves open/close in perfect sync. Percentage transforms are relative
+  // to each element's own width: the image panel is 50vw wide (→ 102% ≈ 51vw),
+  // while the categories panel is full-width (→ needs ~51% to move the same
+  // ~51vw). Using 102% on both would make the categories half move twice as
+  // far in the same time, so it would open roughly twice as fast.
   const imageVariants: Variants = {
     off: { x: imageOnRight ? '102%' : '-102%' },
     in: { x: '0%' },
   };
   const catVariants: Variants = {
-    off: { x: imageOnRight ? '-102%' : '102%' },
+    off: { x: imageOnRight ? '-51%' : '51%' },
     in: { x: '0%' },
   };
 

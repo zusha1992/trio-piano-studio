@@ -1,9 +1,9 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { type PointerEvent as ReactPointerEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useLocale } from 'next-intl';
-import { AnimatePresence, motion, type PanInfo } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Moon, Sun } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -54,8 +54,8 @@ export default function HeroMobile() {
   // Track the slide index together with the travel direction so slides move
   // in/out horizontally instead of crossfading.
   const [[index, dir], setSlide] = useState<[number, number]>([0, 0]);
-  // Distinguishes a real swipe from a tap so a tap-to-enter isn't swallowed.
-  const draggedRef = useRef(false);
+  // Where the current press began, so pointer-up can tell a swipe from a tap.
+  const pressRef = useRef<{ x: number; y: number } | null>(null);
 
   const current = CATEGORIES[index];
 
@@ -88,27 +88,33 @@ export default function HeroMobile() {
     return () => clearTimeout(t);
   }, [index, isHome, advance]);
 
-  const handlePanEnd = (_e: unknown, info: PanInfo) => {
-    // Only count it as a swipe — and swallow the follow-up click — when the pan
-    // clears the threshold. Smaller finger jitter during a tap must NOT block
-    // the tap, otherwise pressing an image sometimes does nothing.
-    // The slide follows the finger: swiping left slides content left (dir 1),
-    // right slides it right (dir -1); the landing category is mirrored for RTL.
-    if (info.offset.x <= -SWIPE_THRESHOLD) {
-      draggedRef.current = true;
-      move(1, isHe ? -1 : 1);
-    } else if (info.offset.x >= SWIPE_THRESHOLD) {
-      draggedRef.current = true;
-      move(-1, isHe ? 1 : -1);
-    }
-  };
+  const enter = () => router.push(`/${locale}/${current.href}`);
 
-  const handleEnter = () => {
-    if (draggedRef.current) {
-      draggedRef.current = false;
+  // We resolve tap-vs-swipe ourselves from raw pointer events instead of relying
+  // on click, because after a swipe the browser suppresses the synthetic click
+  // (ghost-click), which made the first tap after navigating do nothing.
+  const handlePointerDown = (e: ReactPointerEvent) => {
+    pressRef.current = { x: e.clientX, y: e.clientY };
+  };
+  const handlePointerCancel = () => {
+    pressRef.current = null;
+  };
+  const handlePointerUp = (e: ReactPointerEvent) => {
+    const start = pressRef.current;
+    pressRef.current = null;
+    if (!start) return;
+    const dx = e.clientX - start.x;
+    const dy = e.clientY - start.y;
+    // A clear horizontal swipe advances the carousel: the slide follows the
+    // finger (left → dir 1, right → dir -1) and the landing category is mirrored
+    // for RTL so "next" tracks the reading direction.
+    if (Math.abs(dx) >= SWIPE_THRESHOLD && Math.abs(dx) >= Math.abs(dy)) {
+      if (dx < 0) move(1, isHe ? -1 : 1);
+      else move(-1, isHe ? 1 : -1);
       return;
     }
-    router.push(`/${locale}/${current.href}`);
+    // Anything else is a tap → enter the current category.
+    enter();
   };
 
   if (!isHome) return null;
@@ -143,20 +149,21 @@ export default function HeroMobile() {
         }}
       />
 
-      {/* Swipe + tap surface — one transparent layer that detects the pan
-          (advance category) and the tap (enter category). Sits above the image
-          and overlay but below the header/footer chrome (z-10). */}
-      <motion.div
+      {/* Swipe + tap surface — one transparent layer that resolves the swipe
+          (advance category) and the tap (enter category) from raw pointer
+          events. Sits above the image and overlay but below the header/footer
+          chrome (z-10). */}
+      <div
         role="button"
         tabIndex={0}
         aria-label={isHe ? current.labelHe : current.labelEn}
         className="absolute inset-0 z-[5] cursor-pointer touch-none select-none"
         style={{ touchAction: 'none', overscrollBehavior: 'none' }}
-        onPointerDown={() => { draggedRef.current = false; }}
-        onPanEnd={handlePanEnd}
-        onClick={handleEnter}
+        onPointerDown={handlePointerDown}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerCancel}
         onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') handleEnter();
+          if (e.key === 'Enter' || e.key === ' ') enter();
         }}
       />
 
