@@ -2,9 +2,11 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion, type PanInfo } from 'framer-motion';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { EASE } from '@/lib/motion';
+
+const FRAME_SWIPE_THRESHOLD = 40;
 
 const slideVariants = {
   enter: (d: number) => ({ x: d > 0 ? '100%' : '-100%' }),
@@ -54,6 +56,23 @@ export default function ImageCarousel({
   const goTo = (i: number) => {
     setPaused(true);
     setSlide(([s]) => [i, i > s ? 1 : -1]);
+  };
+
+  // Swipe support for the inline (non-fullscreen) frame — mainly for touch,
+  // where the arrows are hidden. `swipedRef` tells the frame's click handler to
+  // ignore the click that follows a swipe so it doesn't open fullscreen.
+  const swipedRef = useRef(false);
+  const handleFramePanEnd = (_e: unknown, info: PanInfo) => {
+    if (!many || Math.abs(info.offset.x) < FRAME_SWIPE_THRESHOLD) return;
+    swipedRef.current = true;
+    paginate(info.offset.x < 0 ? 1 : -1);
+  };
+  const handleFrameClick = () => {
+    if (swipedRef.current) {
+      swipedRef.current = false;
+      return;
+    }
+    openFullscreen();
   };
 
   // Auto-advance stops for good once the visitor takes manual control.
@@ -110,9 +129,11 @@ export default function ImageCarousel({
 
   return (
     <>
-      <div
+      <motion.div
         className={`group relative cursor-pointer overflow-hidden rounded-2xl bg-[var(--c-bg-alt)] ${frameClassName}`}
-        onClick={openFullscreen}
+        style={{ touchAction: 'pan-y' }}
+        onPanEnd={handleFramePanEnd}
+        onClick={handleFrameClick}
       >
         <AnimatePresence initial={false} custom={dir}>
           <motion.div
@@ -137,11 +158,12 @@ export default function ImageCarousel({
 
         {many && (
           <>
+            {/* Arrows are desktop-only; on mobile the frame is swipeable. */}
             <button
               type="button"
               aria-label="Previous"
               onClick={(e) => { e.stopPropagation(); paginate(-1); }}
-              className="absolute start-3 top-1/2 -translate-y-1/2 cursor-pointer rounded-full bg-black/40 p-1.5 text-white backdrop-blur-sm transition-colors hover:bg-black/60"
+              className="absolute start-3 top-1/2 hidden -translate-y-1/2 cursor-pointer rounded-full bg-black/40 p-1.5 text-white backdrop-blur-sm transition-colors hover:bg-black/60 lg:block"
             >
               <BackArrow size={20} />
             </button>
@@ -149,7 +171,7 @@ export default function ImageCarousel({
               type="button"
               aria-label="Next"
               onClick={(e) => { e.stopPropagation(); paginate(1); }}
-              className="absolute end-3 top-1/2 -translate-y-1/2 cursor-pointer rounded-full bg-black/40 p-1.5 text-white backdrop-blur-sm transition-colors hover:bg-black/60"
+              className="absolute end-3 top-1/2 hidden -translate-y-1/2 cursor-pointer rounded-full bg-black/40 p-1.5 text-white backdrop-blur-sm transition-colors hover:bg-black/60 lg:block"
             >
               <FwdArrow size={20} />
             </button>
@@ -169,7 +191,7 @@ export default function ImageCarousel({
             </div>
           </>
         )}
-      </div>
+      </motion.div>
 
       {/* Fullscreen image viewer */}
       <AnimatePresence>

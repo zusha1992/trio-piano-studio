@@ -109,15 +109,9 @@ export default function HeroMobile() {
 
   return (
     <div className="fixed inset-0 z-[100] overflow-hidden bg-black">
-      {/* Slides — a swipe (pan) advances between categories. We detect the pan
-          gesture without dragging the element itself, so nothing shifts to
-          reveal the black background; the slide-in transition provides the
-          swipe feel on release. */}
-      <motion.div
-        className="absolute inset-0 touch-none select-none"
-        style={{ touchAction: 'none', overscrollBehavior: 'none' }}
-        onPanEnd={handlePanEnd}
-      >
+      {/* Background images — the ONLY layer that slides on swipe, so the matte
+          overlay and title above it stay perfectly still between categories. */}
+      <div className="absolute inset-0">
         <AnimatePresence initial={false} custom={dir}>
           <motion.div
             key={index}
@@ -132,44 +126,50 @@ export default function HeroMobile() {
             <Image src={current.img} alt="" fill priority sizes="100vw" className="object-cover" />
           </motion.div>
         </AnimatePresence>
+      </div>
 
-        {/* Top wash: fully matte theme color for the top 20% of the screen,
-            then a short fade into the photo. Bottom stays fully transparent. */}
-        <div
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background: `linear-gradient(to bottom, rgba(${grad},1) 0%, rgba(${grad},1) 20%, rgba(${grad},0) 60%)`,
-          }}
-        />
+      {/* Constant matte overlay — shared by every category, never slides. Top
+          ~20% is fully matte theme color, fading into the photo by 60%. */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background: `linear-gradient(to bottom, rgba(${grad},1) 0%, rgba(${grad},1) 20%, rgba(${grad},0) 60%)`,
+        }}
+      />
 
-        {/* Tap-to-enter zone — covers the whole slide so the entire body (image
-            included) enters the category. Header/footer chrome sit above at
-            z-10, so their taps are preserved. */}
-        <button
-          type="button"
-          aria-label={isHe ? current.labelHe : current.labelEn}
-          onClick={handleEnter}
-          className="absolute inset-0 z-[5] cursor-pointer"
-        />
+      {/* Swipe + tap surface — one transparent layer that detects the pan
+          (advance category) and the tap (enter category). Sits above the image
+          and overlay but below the header/footer chrome (z-10). */}
+      <motion.div
+        role="button"
+        tabIndex={0}
+        aria-label={isHe ? current.labelHe : current.labelEn}
+        className="absolute inset-0 z-[5] cursor-pointer touch-none select-none"
+        style={{ touchAction: 'none', overscrollBehavior: 'none' }}
+        onPanEnd={handlePanEnd}
+        onClick={handleEnter}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') handleEnter();
+        }}
+      />
 
-        {/* Title — sits inside the matte band */}
-        <div className="pointer-events-none absolute inset-x-0 top-[11%] flex justify-center px-8">
-          <AnimatePresence mode="wait">
-            <motion.h2
-              key={current.key}
-              dir={isHe ? 'rtl' : 'ltr'}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12, transition: { duration: 0.22, ease: EASE } }}
-              transition={{ duration: 0.5, ease: EASE }}
-              className="text-center text-[2.9rem] leading-none tracking-tight"
-              style={{ fontFamily: headingFont, fontWeight: 400, color: fg }}
-            >
-              {isHe ? current.labelHe : current.labelEn}
-            </motion.h2>
-          </AnimatePresence>
-        </div>
-      </motion.div>
+      {/* Title — constant band; only its text animates on category change. */}
+      <div className="pointer-events-none absolute inset-x-0 top-[11%] z-[6] flex justify-center px-8">
+        <AnimatePresence mode="wait">
+          <motion.h2
+            key={current.key}
+            dir={isHe ? 'rtl' : 'ltr'}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12, transition: { duration: 0.22, ease: EASE } }}
+            transition={{ duration: 0.5, ease: EASE }}
+            className="text-center text-[2.9rem] leading-none tracking-tight"
+            style={{ fontFamily: headingFont, fontWeight: 400, color: fg }}
+          >
+            {isHe ? current.labelHe : current.labelEn}
+          </motion.h2>
+        </AnimatePresence>
+      </div>
 
       {/* Header: logo + language/theme toggles (color follows the theme) */}
       <header
