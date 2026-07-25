@@ -254,7 +254,7 @@ export default function ConcertsPage() {
             </div>
 
             {concert.description && (
-              <p className="mt-8 max-w-xl text-base leading-relaxed text-[var(--c-muted)] sm:text-lg">
+              <p className="mt-8 max-w-xl text-base leading-relaxed text-[var(--c-muted)] sm:text-lg md:max-w-sm">
                 {concert.description[locale]}
               </p>
             )}
