@@ -57,6 +57,10 @@ html {
      centered content from shifting a few pixels on navigation. */
   overflow-y: scroll;
   scrollbar-gutter: stable;
+  /* Kill the browser's horizontal overscroll/edge-swipe navigation so the
+     home-screen swipe carousel doesn't trigger the native "end of scroll"
+     bounce or a back/forward gesture. */
+  overscroll-behavior: none;
 }
 
 body {

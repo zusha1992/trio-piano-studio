@@ -2,6 +2,7 @@
 
 import { useTranslations, useLocale } from 'next-intl';
 import Link from 'next/link';
+import { CONTACTS, ContactIcon } from '@/components/layout/heroShared';
 import { displayFont } from '@/lib/fonts';
 
 export default function ContactCTA() {
@@ -28,6 +29,23 @@ export default function ContactCTA() {
         >
           {t('cta')}
         </Link>
+      </div>
+
+      {/* Direct contact shortcuts — WhatsApp, mail, Instagram, and directions —
+          so visitors can reach out or find the studio without leaving the page. */}
+      <div className="mt-6 flex items-center justify-center gap-4 sm:gap-5">
+        {CONTACTS.map((c) => (
+          <a
+            key={c.icon}
+            href={c.href}
+            target={c.external ? '_blank' : undefined}
+            rel={c.external ? 'noopener noreferrer' : undefined}
+            aria-label={isHe ? c.labelHe : c.labelEn}
+            className="text-[color:var(--c-cat)] transition-colors duration-300 hover:text-[color:var(--c-cat-active)]"
+          >
+            <ContactIcon src={`/assets/icons/${c.icon}`} size={22} />
+          </a>
+        ))}
       </div>
     </section>
   );

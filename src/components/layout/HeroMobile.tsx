@@ -59,9 +59,15 @@ export default function HeroMobile() {
 
   const current = CATEGORIES[index];
 
-  const paginate = useCallback((d: number) => {
-    setSlide(([i]) => [(i + d + CATEGORIES.length) % CATEGORIES.length, d]);
+  // `dir` is the VISUAL travel (1 = current slide leaves toward the leading
+  // edge and the next enters from the trailing edge) so the animation always
+  // follows the finger. `step` is how the index moves through CATEGORIES, which
+  // is mirrored for RTL so "forward" tracks the reading direction.
+  const move = useCallback((dir: number, step: number) => {
+    setSlide(([i]) => [(i + step + CATEGORIES.length) % CATEGORIES.length, dir]);
   }, []);
+  // Auto-advance to the next category, sliding in the reading direction.
+  const advance = useCallback(() => move(isHe ? -1 : 1, 1), [move, isHe]);
   const goTo = useCallback((i: number) => {
     setSlide(([cur]) => [i, i >= cur ? 1 : -1]);
   }, []);
@@ -78,15 +84,17 @@ export default function HeroMobile() {
   // Auto-advance. Keyed on `index`, so any manual change restarts the timer.
   useEffect(() => {
     if (!isHome) return;
-    const t = setTimeout(() => paginate(1), AUTO_MS);
+    const t = setTimeout(advance, AUTO_MS);
     return () => clearTimeout(t);
-  }, [index, isHome, paginate]);
+  }, [index, isHome, advance]);
 
-  const handleDragEnd = (_e: unknown, info: PanInfo) => {
+  const handlePanEnd = (_e: unknown, info: PanInfo) => {
     if (Math.abs(info.offset.x) > 8) draggedRef.current = true;
-    // Swiping left advances; account for RTL where left means "previous".
-    if (info.offset.x <= -SWIPE_THRESHOLD) paginate(isHe ? -1 : 1);
-    else if (info.offset.x >= SWIPE_THRESHOLD) paginate(isHe ? 1 : -1);
+    // The slide transition follows the finger: swiping left slides content left
+    // (dir 1), swiping right slides it right (dir -1). The landing category is
+    // mirrored for RTL so "next" tracks the reading direction.
+    if (info.offset.x <= -SWIPE_THRESHOLD) move(1, isHe ? -1 : 1);
+    else if (info.offset.x >= SWIPE_THRESHOLD) move(-1, isHe ? 1 : -1);
   };
 
   const handleEnter = () => {
@@ -101,14 +109,14 @@ export default function HeroMobile() {
 
   return (
     <div className="fixed inset-0 z-[100] overflow-hidden bg-black">
-      {/* Slides — horizontal slide + swipe (drag anywhere); tap-to-enter is a
-          smaller central zone so it doesn't steal taps from the toolbar/footer. */}
+      {/* Slides — a swipe (pan) advances between categories. We detect the pan
+          gesture without dragging the element itself, so nothing shifts to
+          reveal the black background; the slide-in transition provides the
+          swipe feel on release. */}
       <motion.div
-        className="absolute inset-0"
-        drag="x"
-        dragConstraints={{ left: 0, right: 0 }}
-        dragElastic={0.18}
-        onDragEnd={handleDragEnd}
+        className="absolute inset-0 touch-none select-none"
+        style={{ touchAction: 'none', overscrollBehavior: 'none' }}
+        onPanEnd={handlePanEnd}
       >
         <AnimatePresence initial={false} custom={dir}>
           <motion.div
@@ -152,7 +160,7 @@ export default function HeroMobile() {
               dir={isHe ? 'rtl' : 'ltr'}
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
+              exit={{ opacity: 0, y: -12, transition: { duration: 0.22, ease: EASE } }}
               transition={{ duration: 0.5, ease: EASE }}
               className="text-center text-[2.9rem] leading-none tracking-tight"
               style={{ fontFamily: headingFont, fontWeight: 400, color: fg }}

@@ -223,49 +223,62 @@ export default function ConcertsPage() {
           {t('hero_title')}
         </motion.h1>
 
-        {/* Top split: concert + poster | gallery */}
-        <div className="mt-16 grid grid-cols-1 gap-x-14 gap-y-12 md:mt-20 md:grid-cols-2">
-          {/* Left — the single upcoming concert + its poster */}
-          <motion.div {...reveal} className="order-1">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <p className="text-[11px] uppercase tracking-[0.25em] text-[var(--c-text)]">
-                  {fmtDate(concert.date)} · {concert.time}
-                </p>
+        {/* Featured concert: details (one side) beside the poster (the other).
+            The square poster sets the row height and the details column is
+            centered to match it. */}
+        <div className="mt-16 grid grid-cols-1 gap-x-14 gap-y-10 md:mt-20 md:grid-cols-2 md:items-stretch">
+          {/* Details — concert row + tempting artist description */}
+          <motion.div {...reveal} className="order-2 flex flex-col md:order-1 md:justify-center">
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.25em] text-[var(--c-text)]">
+                {fmtDate(concert.date)} · {concert.time}
+              </p>
+              <div className="mt-1.5 flex items-center justify-between gap-4">
                 <h2
-                  className="mt-1.5 text-3xl tracking-tight text-[var(--c-text)] sm:text-4xl"
+                  className="text-3xl tracking-tight text-[var(--c-text)] sm:text-4xl"
                   style={{ fontFamily: titleFont, fontWeight: 400 }}
                 >
                   {concert.name[locale]}
                 </h2>
+                <button
+                  onClick={revealForm}
+                  className="shrink-0 cursor-pointer rounded-full bg-[color:var(--c-cat)] px-6 py-2.5 text-[11px] uppercase tracking-[0.2em] text-[var(--c-bg)] transition-colors duration-300 hover:bg-[color:var(--c-cat-active)]"
+                  style={{ fontFamily: titleFont, fontWeight: 400 }}
+                >
+                  {t('register')}
+                </button>
               </div>
-              <button
-                onClick={revealForm}
-                className="shrink-0 cursor-pointer rounded-full bg-[color:var(--c-cat)] px-6 py-2.5 text-[11px] uppercase tracking-[0.2em] text-[var(--c-bg)] transition-colors duration-300 hover:bg-[color:var(--c-cat-active)]"
-                style={{ fontFamily: titleFont, fontWeight: 400 }}
-              >
-                {t('register')}
-              </button>
+              <p className="mt-1.5 text-[11px] uppercase tracking-[0.25em] text-[var(--c-text)]">
+                {concert.venue[locale]}
+              </p>
             </div>
 
-            {/* Poster (square) */}
+            {concert.description && (
+              <p className="mt-8 max-w-xl text-base leading-relaxed text-[var(--c-muted)] sm:text-lg">
+                {concert.description[locale]}
+              </p>
+            )}
+          </motion.div>
+
+          {/* Poster — the height reference for the row */}
+          <motion.div {...reveal} className="order-1 md:order-2">
             <ImageCarousel
               images={[concert.poster]}
               alt={concert.name[locale]}
               isHe={isHe}
-              frameClassName="mt-8 aspect-square w-full"
-            />
-          </motion.div>
-
-          {/* Right — photo gallery (matches the left column's height) */}
-          <motion.div {...reveal} className="order-2 md:h-full">
-            <ImageCarousel
-              images={concertGallery}
-              isHe={isHe}
-              frameClassName="aspect-[4/5] md:aspect-auto md:h-full"
+              frameClassName="aspect-square w-full"
             />
           </motion.div>
         </div>
+
+        {/* Photo gallery from past concerts */}
+        <motion.div {...reveal} className="mt-16 md:mt-24">
+          <ImageCarousel
+            images={concertGallery}
+            isHe={isHe}
+            frameClassName="aspect-[4/5] sm:aspect-[16/9] lg:aspect-[21/9]"
+          />
+        </motion.div>
 
         {/* Registration — revealed below on demand */}
         <AnimatePresence initial={false}>

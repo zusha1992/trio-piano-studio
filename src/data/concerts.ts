@@ -20,6 +20,8 @@ export interface Concert {
   venue: LocalizedText;
   /** Ticket price in ILS. */
   price: number;
+  /** Short, tempting blurb about the artist and the performance. */
+  description?: LocalizedText;
 }
 
 const VENUE: LocalizedText = {
@@ -28,6 +30,19 @@ const VENUE: LocalizedText = {
 };
 
 export const concerts: Concert[] = [
+  {
+    id: 'misha-zartsekel',
+    name: { en: 'Michael Zartsekel', he: 'מישה זרצקל' },
+    poster: '/images/Concerts/misha-zartsekel.png',
+    date: '2026-12-14',
+    time: '20:00',
+    venue: { en: 'Ben Sira 3, Jerusalem', he: 'בן סירא 3, ירושלים' },
+    price: 90,
+    description: {
+      en: "Michael (Misha) Zartsekel is one of the leading Israeli pianists of his generation, born in Rostov, Russia, and immigrating to Israel on his own at a young age. He began playing at the age of seven and, by ten, had been admitted to Moscow's prestigious Tchaikovsky school for gifted young musicians. He has won a string of international prizes, among them first prize at the Scriabin Competition in Moscow and at the piano competition of the Jerusalem Academy of Music. Zartsekel performs as a soloist with Israel's foremost symphony orchestras and appears frequently in recitals and festivals both in Israel and abroad. In this intimate recital he brings a sweeping classical program — a rare evening of virtuosity and feeling, up close.",
+      he: 'מיכאל (מישה) זַרְצֶקֶל הוא מן הפסנתרנים הישראלים המובילים בדורו, יליד רוסטוב שברוסיה שעלה לישראל בגפו בגיל צעיר. את נגינתו החל בגיל שבע, וכבר בגיל עשר התקבל לבית הספר היוקרתי למחוננים על שם צ׳ייקובסקי במוסקבה. הוא זכה בשורה של תחרויות בין-לאומיות, ובהן הפרס הראשון בתחרות על שם סקריאבין במוסקבה ובתחרות הפסנתר של האקדמיה למוסיקה בירושלים. זרצקל מופיע כסולן עם התזמורות הסימפוניות המובילות בישראל ומרבה לנגן ברסיטלים ובפסטיבלים בארץ ובעולם. ברסיטל אינטימי זה יביא זרצקל תוכנית קלאסית סוחפת — ערב נדיר של וירטואוזיות ורגש, במרחק נגיעה.',
+    },
+  },
   {
     id: 'aviv-peck',
     name: { en: 'Aviv Peck', he: 'אביב פק' },
