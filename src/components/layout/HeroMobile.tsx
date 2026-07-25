@@ -134,12 +134,14 @@ export default function HeroMobile() {
           }}
         />
 
-        {/* Tap-to-enter zone — central band only, clear of the toolbar/footer. */}
+        {/* Tap-to-enter zone — covers the whole slide so the entire body (image
+            included) enters the category. Header/footer chrome sit above at
+            z-10, so their taps are preserved. */}
         <button
           type="button"
           aria-label={isHe ? current.labelHe : current.labelEn}
           onClick={handleEnter}
-          className="absolute inset-x-0 top-[14%] bottom-[16%] z-[5] cursor-pointer"
+          className="absolute inset-0 z-[5] cursor-pointer"
         />
 
         {/* Title — sits inside the matte band */}

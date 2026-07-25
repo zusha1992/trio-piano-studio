@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
@@ -63,11 +63,43 @@ export default function ImageCarousel({
     return () => clearInterval(id);
   }, [paused, fullscreen, many, autoAdvanceMs, images.length]);
 
+  // Guards against firing history.back() twice for a single close (e.g. the X
+  // button click also bubbling to the backdrop), which would pop an extra
+  // history entry and navigate the visitor off the page.
+  const closingRef = useRef(false);
+
+  // Open the viewer and push a history entry so the device back button /
+  // swipe-back gesture closes the viewer instead of leaving the page.
+  const openFullscreen = () => {
+    closingRef.current = false;
+    setFullscreen(true);
+    window.history.pushState({ carouselFullscreen: true }, '');
+  };
+  // Route every close action through history so the back button and the
+  // in-viewer controls stay in sync (this pops the entry we pushed above).
+  const closeFullscreen = () => {
+    if (closingRef.current) return;
+    closingRef.current = true;
+    window.history.back();
+  };
+
+  // While open, a back navigation (device button or history.back) just closes
+  // the viewer and keeps the visitor on the current page.
+  useEffect(() => {
+    if (!fullscreen) return;
+    const onPop = () => {
+      closingRef.current = true;
+      setFullscreen(false);
+    };
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, [fullscreen]);
+
   // Keyboard control while the fullscreen viewer is open.
   useEffect(() => {
     if (!fullscreen) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setFullscreen(false);
+      if (e.key === 'Escape') closeFullscreen();
       if (e.key === 'ArrowRight') paginate(isHe ? -1 : 1);
       if (e.key === 'ArrowLeft') paginate(isHe ? 1 : -1);
     };
@@ -80,7 +112,7 @@ export default function ImageCarousel({
     <>
       <div
         className={`group relative cursor-pointer overflow-hidden rounded-2xl bg-[var(--c-bg-alt)] ${frameClassName}`}
-        onClick={() => setFullscreen(true)}
+        onClick={openFullscreen}
       >
         <AnimatePresence initial={false} custom={dir}>
           <motion.div
@@ -147,10 +179,10 @@ export default function ImageCarousel({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[120] flex items-center justify-center bg-black/95 p-4 backdrop-blur-sm"
-            onClick={() => setFullscreen(false)}
+            onClick={closeFullscreen}
           >
             <button
-              onClick={() => setFullscreen(false)}
+              onClick={(e) => { e.stopPropagation(); closeFullscreen(); }}
               aria-label="Close"
               className="absolute right-5 top-5 z-10 cursor-pointer text-white/70 transition-colors hover:text-white"
             >
