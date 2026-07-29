@@ -53,6 +53,8 @@ export interface ShopItem {
   images?: string[];
   /** Optional per-item description; falls back to a generated line. */
   description?: LocalizedText;
+  /** Optional second paragraph with more background / model history. */
+  details?: LocalizedText;
   /** True while the piano is still being restored and is not yet for sale. */
   wip?: boolean;
 }
@@ -103,6 +105,44 @@ const DESC_BLUTHNER: LocalizedText = {
   he: 'פסנתר הכנף הזה, בלוטנר דגם 6, נבנה בלייפציג סביב שנת 1920, בתור הזהב של בית המלאכה הגרמני הנודע שנוסד ב-1853. באורך 190 ס"מ הוא מפיק צליל חם ושר עם צלילות בכל הרגיסטרים ונגיעה קלה ורספונסיבית שבלוטנר מפורסמת בה, בין היתר בזכות מיתור ה-Aliquot הפטנטי. מתאים באותה מידה לקטעים עדינים ולשיאים עוצמתיים, זהו כלי אירופי מכובד הנמצא כעת בשיקום מלא בסדנה שלנו ואינו מוצע עדיין למכירה.',
 };
 
+// ── Second paragraphs (model background / history) ──────────────────────────
+const DETAILS_U1: LocalizedText = {
+  en: 'First introduced in 1927, the U1 has been refined over nearly a century into the definitive studio upright, with hundreds of thousands built. Its full-length strings and solid spruce soundboard give a bigger sound than its compact cabinet suggests, while the renowned Yamaha action stays precise for decades. Imported from Japan and reconditioned for our climate, this instrument holds its tuning beautifully and serves equally well for daily practice or performance preparation.',
+  he: 'ה-U1 הוצג לראשונה ב-1927 ולאורך כמעט מאה שנה עוצב והשתכלל לכדי הפסנתר הזקוף האולפני המוביל, במאות אלפי יחידות שנבנו. המיתרים במלוא אורכם ולוח התהודה מעץ אשוח מלא מפיקים צליל גדול מכפי שגודל הארון מרמז, בעוד המכניקה המהוללת של ימאהה נשארת מדויקת במשך עשורים. הכלי יובא מיפן ושופץ להתאמה לאקלים שלנו, שומר על כיוונו להפליא ומשרת נאמנה הן לתרגול יומי והן להכנה להופעות.',
+};
+const DETAILS_U3: LocalizedText = {
+  en: "The U3 has been Yamaha's flagship 52-inch upright since 1927 — the taller cousin of the U1, chosen by conservatories and professionals who want more power and a deeper bass. Its longer strings and larger soundboard produce a broad, resonant sound that fills a room, and the celebrated Yamaha action allows fast, controlled repetition. Imported from Japan and fully reconditioned, this U3 offers near-recital projection while remaining perfectly at home in a serious practice studio.",
+  he: "ה-U3 הוא דגל הפסנתרים הזקופים בגובה 52 אינץ' של ימאהה מאז 1927 — בן הדוד הגבוה של ה-U1, שנבחר על ידי קונסרבטוריונים ואנשי מקצוע הזקוקים לעוצמה רבה יותר ולבס עמוק יותר. המיתרים הארוכים ולוח התהודה הגדול יוצרים צליל רחב ומהדהד הממלא את החדר, והמכניקה הנודעת של ימאהה מאפשרת חזרתיות מהירה ומבוקרת. לאחר יבוא מיפן ושיפוץ מלא, ה-U3 מספק הקרנה קרובה לזו של אולם, ובה בעת מרגיש בבית באולפן תרגול רציני.",
+};
+const DETAILS_UX: LocalizedText = {
+  en: "Produced between 1976 and 1980, the UX introduced Yamaha's distinctive wooden X-shaped back brace, borrowed from grand-piano design to add rigidity and tonal stability. Combined with longer bass strings routed over a curved bridge and higher-grade hammer felt, this gives the UX a warmer, more complex voice than the standard U-series. Now relatively rare and prized by collectors and professionals alike, this fully serviced example offers concert-level tone in an upright cabinet.",
+  he: 'ה-UX יוצר בין 1976 ל-1980 והציג את גב ה-X העשוי עץ הייחודי של ימאהה, ששאול מעולם פסנתרי הכנף כדי להוסיף קשיחות ויציבות צלילית. יחד עם מיתרי בס ארוכים יותר המונחים על גשר מעוקל ולבד פטישים באיכות גבוהה, מעניק הדבר ל-UX צליל חם ומורכב יותר מסדרת ה-U הרגילה. כיום נדיר יחסית ומוערך על ידי אספנים ואנשי מקצוע כאחד, הכלי המטופל במלואו מציע צליל ברמת קונצרט בארון של פסנתר זקוף.',
+};
+const DETAILS_CX21: LocalizedText = {
+  en: 'Kawai built the CX-21 in the late 1980s and early 1990s as a professional-grade competitor to the Yamaha U1, and it remains a favourite for its warm, singing tone and quiet, even action. Careful scaling and a solid spruce soundboard produce a rounder, less bright sound that many pianists find easier to listen to over long sessions. Reconditioned in our workshop, this CX-21 is a dependable, characterful choice for the home or teaching studio.',
+  he: 'קאוואי ייצרה את ה-CX-21 בסוף שנות ה-80 ותחילת שנות ה-90 כמתחרה מקצועי ל-U1 של ימאהה, והוא נותר מועדף בזכות צלילו החם והשר ומכניקה שקטה ואחידה. סקיילינג קפדני ולוח תהודה מאשוח מלא מפיקים צליל עגול ופחות חד, שרבים מוצאים נעים יותר להאזנה לאורך זמן. לאחר שיפוץ בסדנה שלנו, ה-CX-21 הוא בחירה אמינה ובעלת אופי לבית או לסטודיו להוראה.',
+};
+const DETAILS_NS35: LocalizedText = {
+  en: "The NS-35 was the top model of Kawai's NS series, produced from the mid-1980s to the mid-1990s and built to professional 'artist' standards with premium materials throughout. At 132 cm it is among the tallest uprights Kawai made, and its extra string length and large soundboard yield a powerful, dynamic tone with a full, warm bass. Marketed mainly in Japan, the NS-35 is now sought after abroad; this fully restored example offers grand-like scale and depth in an upright footprint.",
+  he: 'ה-NS-35 היה הדגם העליון בסדרת ה-NS של קאוואי, שיוצרה מאמצע שנות ה-80 עד אמצע שנות ה-90 ונבנתה בסטנדרט "אמן" מקצועי מחומרים מובחרים לכל אורכה. בגובה 132 ס"מ הוא מהגבוהים שבפסנתרים הזקופים שקאוואי ייצרה, ואורך המיתרים הנוסף ולוח התהודה הגדול מפיקים צליל עוצמתי ודינמי עם בס מלא וחם. הדגם שווק בעיקר ביפן ומבוקש כיום גם מחוצה לה; הכלי המשוקם במלואו מציע ממדים ועומק דמויי כנף בתצורת פסנתר זקוף.',
+};
+const DETAILS_ERARD: LocalizedText = {
+  en: 'Founded in Paris in 1780, the House of Érard supplied instruments to Liszt, Mendelssohn, Fauré, and Ravel, and its 1821 double-escapement action became the template for every grand piano that followed. Instruments of this era are cherished for their transparent, colourful tone and fine period cabinetry — qualities that make them ideal for Romantic and Impressionist French music. Our technicians are carefully restoring this Érard to preserve both its historic character and its playability, so it can once again be heard as its makers intended.',
+  he: 'בית ארר, שנוסד בפריז ב-1780, סיפק כלים לליסט, מנדלסון, פורה וראוול, ומנגנון הבריחה הכפולה שלו משנת 1821 הפך לתבנית לכל פסנתר כנף שבא אחריו. כלים מתקופה זו נערצים בזכות צלילם השקוף ועתיר הצבע ובזכות נגרות התקופה המעודנת שלהם — תכונות ההופכות אותם למושלמים למוזיקה הצרפתית הרומנטית והאימפרסיוניסטית. הטכנאים שלנו משקמים בקפידה את הארר הזה כדי לשמר הן את אופיו ההיסטורי והן את נגישותו לנגינה, כך שיישמע שוב כפי שיוצריו התכוונו.',
+};
+const DETAILS_STEINWAY: LocalizedText = {
+  en: "Since 1853 Steinway & Sons has held more than a hundred patents that shaped the modern piano, and its grands remain the overwhelming choice of the world's concert stages. Each instrument is built from thousands of individually crafted parts around Steinway's patented rim and soundboard, producing the singing sustain, colour, and dynamic range that define the brand. Restored in our Jerusalem workshop, this grand offers the responsiveness and tonal depth that reward a lifetime of playing.",
+  he: 'מאז 1853 מחזיקה סטיינווי אנד סאנס ביותר ממאה פטנטים שעיצבו את הפסנתר המודרני, ופסנתרי הכנף שלה נותרים הבחירה המובהקת של במות הקונצרטים בעולם. כל כלי נבנה מאלפי חלקים מעובדים בנפרד סביב המסגרת ולוח התהודה הפטנטיים של סטיינווי, ומפיק את הסאסטיין השר, הצבע והטווח הדינמי המגדירים את המותג. לאחר שיקום בסדנה שלנו בירושלים, פסנתר כנף זה מציע את הרספונסיביות והעומק הצלילי המתגמלים נגינה של חיים שלמים.',
+};
+const DETAILS_YAMAHA_GRAND: LocalizedText = {
+  en: "The C3 belongs to Yamaha's acclaimed C (Conservatory) series and has passed through several generations of refinement since the early 1970s, earning a reputation as the reliable, all-round six-foot grand. Its scale design delivers a clear, projecting tone with a firm bass and singing treble, and the precise Yamaha action makes it a favourite for classical study, jazz, and recording alike. Built in Japan and fully serviced by our team, this C3 is an ideal first grand for a school, studio, or serious home.",
+  he: 'ה-C3 שייך לסדרת ה-C (קונסרבטורי) המהוללת של ימאהה ועבר מספר דורות של שכלול מאז תחילת שנות ה-70, וזכה למוניטין של פסנתר הכנף בגודל שש רגל האמין והרב-תכליתי. תכן הסקייל שלו מספק צליל צלול ומקרין עם בס איתן וטרבל שר, והמכניקה המדויקת של ימאהה הופכת אותו למועדף ללימוד קלאסי, ג׳אז והקלטות כאחד. מתוצרת יפן ולאחר טיפול מלא על ידי הצוות שלנו, ה-C3 הוא פסנתר כנף ראשון אידיאלי לבית ספר, אולפן או בית רציני.',
+};
+const DETAILS_BLUTHNER: LocalizedText = {
+  en: "Julius Blüthner founded his Leipzig workshop in 1853, and by 1900 Blüthner was among the largest and most respected piano makers in the world, chosen by Brahms, Debussy, and Rachmaninoff. The firm's signature Aliquot stringing adds a sympathetic fourth string in the treble that enriches the tone with a warm, golden shimmer unique to the brand. Currently undergoing full restoration in our workshop, this Model 6 will offer the light action and singing, romantic voice for which Blüthner grands are treasured.",
+  he: 'יוליוס בלוטנר ייסד את בית המלאכה שלו בלייפציג ב-1853, ועד 1900 הייתה בלוטנר בין יצרני הפסנתרים הגדולים והמכובדים בעולם, ונבחרה על ידי ברהמס, דביסי ורחמנינוב. מיתור ה-Aliquot הייחודי של החברה מוסיף מיתר רביעי אוהד באזור הטרבל המעשיר את הצליל בברק זהוב וחם הייחודי למותג. הכלי נמצא כעת בשיקום מלא בסדנה שלנו, וה-Model 6 הזה יציע את המכניקה הקלה ואת הצליל השר והרומנטי שבזכותם מוקירים את פסנתרי הכנף של בלוטנר.',
+};
+
 export const shopItems: ShopItem[] = [
   // ── Grands ────────────────────────────────────────────────────────────────
   {
@@ -121,6 +161,7 @@ export const shopItems: ShopItem[] = [
     image: '/images/shop/steinway/steinway-0.webp',
     images: imgs('steinway', 11),
     description: DESC_STEINWAY,
+    details: DETAILS_STEINWAY,
   },
   {
     id: 'bluthner',
@@ -135,6 +176,7 @@ export const shopItems: ShopItem[] = [
     image: '/images/shop/bluthner/bluthner-0.webp',
     images: imgs('bluthner', 14),
     description: DESC_BLUTHNER,
+    details: DETAILS_BLUTHNER,
     wip: true,
   },
   {
@@ -150,6 +192,7 @@ export const shopItems: ShopItem[] = [
     image: '/images/shop/erard/erard-0.webp',
     images: imgs('erard', 17),
     description: DESC_ERARD,
+    details: DETAILS_ERARD,
     wip: true,
   },
   {
@@ -165,6 +208,7 @@ export const shopItems: ShopItem[] = [
     image: '/images/shop/yamaha-grand/yamaha-grand-0.webp',
     images: imgs('yamaha-grand', 14),
     description: DESC_YAMAHA_GRAND,
+    details: DETAILS_YAMAHA_GRAND,
   },
 
   // ── Uprights ──────────────────────────────────────────────────────────────
@@ -181,6 +225,7 @@ export const shopItems: ShopItem[] = [
     image: '/images/shop/yamaha-ux/yamaha-ux-0.webp',
     images: imgs('yamaha-ux', 8),
     description: DESC_UX,
+    details: DETAILS_UX,
   },
   {
     id: 'kawai-ns35',
@@ -196,6 +241,7 @@ export const shopItems: ShopItem[] = [
     image: '/images/shop/kawai-ns35/kawai-ns35-0.webp',
     images: imgs('kawai-ns35', 6),
     description: DESC_NS35,
+    details: DETAILS_NS35,
   },
   {
     id: 'kawai-cx21',
@@ -211,6 +257,7 @@ export const shopItems: ShopItem[] = [
     image: '/images/shop/kawai-cx21/kawai-cx21-0.webp',
     images: imgs('kawai-cx21', 6),
     description: DESC_CX21,
+    details: DETAILS_CX21,
   },
   {
     id: 'yamaha-u3-3091140',
@@ -226,6 +273,7 @@ export const shopItems: ShopItem[] = [
     image: '/images/shop/yamaha-u3-3091140/yamaha-u3-3091140-0.webp',
     images: imgs('yamaha-u3-3091140', 6),
     description: DESC_U3,
+    details: DETAILS_U3,
   },
   {
     id: 'yamaha-u3-3247416',
@@ -241,6 +289,7 @@ export const shopItems: ShopItem[] = [
     image: '/images/shop/yamaha-u3-3247416/yamaha-u3-3247416-0.webp',
     images: imgs('yamaha-u3-3247416', 6),
     description: DESC_U3,
+    details: DETAILS_U3,
   },
   {
     id: 'yamaha-u3-3493455',
@@ -256,6 +305,7 @@ export const shopItems: ShopItem[] = [
     image: '/images/shop/yamaha-u3-3493455/yamaha-u3-3493455-0.webp',
     images: imgs('yamaha-u3-3493455', 8),
     description: DESC_U3,
+    details: DETAILS_U3,
   },
   {
     id: 'yamaha-u1-2262061',
@@ -271,6 +321,7 @@ export const shopItems: ShopItem[] = [
     image: '/images/shop/yamaha-u1-2262061/yamaha-u1-2262061-0.webp',
     images: imgs('yamaha-u1-2262061', 5),
     description: DESC_U1,
+    details: DETAILS_U1,
   },
   {
     id: 'yamaha-u1-3576901',
@@ -286,6 +337,7 @@ export const shopItems: ShopItem[] = [
     image: '/images/shop/yamaha-u1-3576901/yamaha-u1-3576901-0.webp',
     images: imgs('yamaha-u1-3576901', 6),
     description: DESC_U1,
+    details: DETAILS_U1,
   },
   {
     id: 'yamaha-u1-3579760',
@@ -301,6 +353,7 @@ export const shopItems: ShopItem[] = [
     image: '/images/shop/yamaha-u1-3579760/yamaha-u1-3579760-0.webp',
     images: imgs('yamaha-u1-3579760', 7),
     description: DESC_U1,
+    details: DETAILS_U1,
   },
   {
     id: 'yamaha-u1-3688607',
@@ -316,5 +369,6 @@ export const shopItems: ShopItem[] = [
     image: '/images/shop/yamaha-u1-3688607/yamaha-u1-3688607-0.webp',
     images: imgs('yamaha-u1-3688607', 7),
     description: DESC_U1,
+    details: DETAILS_U1,
   },
 ];

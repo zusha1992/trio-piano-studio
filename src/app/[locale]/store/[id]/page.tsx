@@ -27,13 +27,15 @@ const ORIGIN_ICON: Record<ShopRegion, string> = {
 // Diameter matches the color swatch, bumped by 5px of radius (i.e. +10px).
 const SPEC_ICON = 26;
 
-// Brand logos we ship today. Blüthner and Érard have no icon yet, so we return
-// null and simply omit the badge (the brand name still shows).
+// Brand logos. Falls back to null (badge omitted, brand name still shown) for
+// any brand we don't have an icon for.
 function brandIcon(brand: string): string | null {
   const b = brand.toLowerCase();
   if (b.includes('yamaha')) return '/images/shop/icons/yamaha_icon.webp';
   if (b.includes('kawai')) return '/images/shop/icons/kawai_icon.webp';
   if (b.includes('steinway')) return '/images/shop/icons/steinwey_icon.webp';
+  if (b.includes('rard')) return '/images/shop/icons/erard_icon.webp';
+  if (b.includes('thner')) return '/images/shop/icons/bluthner_icon.webp';
   return null;
 }
 
@@ -224,6 +226,11 @@ export default function PianoPage() {
             <p className="text-base leading-relaxed text-[var(--c-text)]">
               {description}
             </p>
+            {item.details && (
+              <p className="mt-4 text-base leading-relaxed text-[var(--c-muted)]">
+                {item.details[locale]}
+              </p>
+            )}
 
             {/* Size illustration with overlaid values */}
             <div className="relative mt-10 aspect-[928/1131] w-full max-w-[15rem] mx-auto md:mx-0">

@@ -46,6 +46,15 @@ export default function ImageCarousel({
   const [fullscreen, setFullscreen] = useState(false);
   const many = images.length > 1;
 
+  // Frames adjacent to the current one, pre-fetched (hidden) so the next/prev
+  // image is already in cache before it slides in — otherwise the incoming
+  // slide shows an empty dark frame until it finishes downloading, since
+  // next/image only fetches a frame once it's mounted.
+  const len = images.length;
+  const neighbors = many
+    ? Array.from(new Set([(slide + 1) % len, (slide - 1 + len) % len])).filter((i) => i !== slide)
+    : [];
+
   const BackArrow = isHe ? ChevronRight : ChevronLeft;
   const FwdArrow = isHe ? ChevronLeft : ChevronRight;
 
@@ -157,6 +166,22 @@ export default function ImageCarousel({
           </motion.div>
         </AnimatePresence>
 
+        {/* Hidden warm-up of the neighbouring frames (see `neighbors`). */}
+        {neighbors.length > 0 && (
+          <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 opacity-0">
+            {neighbors.map((i) => (
+              <Image
+                key={`pre-${images[i]}-${i}`}
+                src={images[i]}
+                alt=""
+                fill
+                sizes={sizes}
+                className="object-cover"
+              />
+            ))}
+          </div>
+        )}
+
         {many && (
           <>
             {/* Arrows are desktop-only; on mobile the frame is swipeable. */}
@@ -255,6 +280,22 @@ export default function ImageCarousel({
                 className="pointer-events-none object-contain"
               />
             </motion.div>
+
+            {/* Warm up neighbouring frames at the fullscreen size too. */}
+            {neighbors.length > 0 && (
+              <div aria-hidden className="pointer-events-none absolute h-px w-px overflow-hidden opacity-0">
+                {neighbors.map((i) => (
+                  <Image
+                    key={`pre-fs-${images[i]}-${i}`}
+                    src={images[i]}
+                    alt=""
+                    fill
+                    sizes="90vw"
+                    className="object-contain"
+                  />
+                ))}
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
