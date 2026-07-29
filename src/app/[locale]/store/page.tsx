@@ -12,21 +12,21 @@ import { displayFont } from '@/lib/fonts';
 
 const MotionLink = motion.create(Link);
 
-// Organized-but-varied rhythm on the 3-col desktop grid. Purely positional so
-// it works for any number of items (see shopItems). Repeats every 7 tiles as
-// three row types that each fill the 3 columns exactly:
-//   row A: [wide-left (2) | single]
-//   row B: [single | single | single]
-//   row C: [single | wide-right (2)]
-const TILE_SPANS = [
-  'md:col-span-2', // A
-  'md:col-span-1',
-  'md:col-span-1', // B
-  'md:col-span-1',
-  'md:col-span-1',
-  'md:col-span-1', // C
-  'md:col-span-2',
-];
+// Tile shape is driven by the instrument type, not by position: grand pianos
+// are landscape by nature so they take the wide, horizontal cells, while
+// uprights sit in square cells (their landscape photo is center-cropped by
+// object-cover). `grid-auto-flow: dense` then back-fills any gaps left by the
+// mix of 1- and 2-column tiles.
+//
+// On the 3-col desktop grid we alternate which pair of columns each successive
+// wide grand occupies (1–2, then 2–3, …) via col-start, so the grands don't all
+// hug the same side — the rhythm reads uneven/editorial.
+const tileClass = (type: ShopType, grandIndex: number) =>
+  type === 'grand'
+    ? `col-span-2 aspect-[16/10] md:col-span-2 md:aspect-auto ${
+        grandIndex % 2 === 0 ? 'md:col-start-1' : 'md:col-start-2'
+      }`
+    : 'col-span-1 aspect-square md:col-span-1 md:aspect-auto';
 
 const TYPE_LABEL: Record<ShopType, { en: string; he: string }> = {
   grand: { en: 'Grand', he: 'כנף' },
@@ -97,6 +97,16 @@ export default function StorePage() {
     [types, regions],
   );
 
+  // Pair each visible item with its tile classes, alternating the side of every
+  // successive wide grand (see tileClass).
+  const tiles = useMemo(() => {
+    let grandIndex = 0;
+    return items.map((item) => ({
+      item,
+      cls: tileClass(item.type, item.type === 'grand' ? grandIndex++ : 0),
+    }));
+  }, [items]);
+
   return (
     <>
       <section className="mx-auto max-w-[100rem] px-6 pb-20 pt-32 sm:px-10 md:pt-44 lg:px-16 lg:pt-52">
@@ -158,10 +168,10 @@ export default function StorePage() {
           </motion.div>
         </div>
 
-        {/* Editorial asymmetric gallery */}
-        <div className="mt-12 grid grid-cols-2 gap-3 sm:gap-4 md:mt-16 md:grid-cols-3 md:auto-rows-[24rem] lg:auto-rows-[30rem]">
+        {/* Editorial asymmetric gallery — grands wide, uprights square */}
+        <div className="mt-12 grid grid-cols-2 gap-3 [grid-auto-flow:dense] sm:gap-4 md:mt-16 md:grid-cols-3 md:auto-rows-[24rem] lg:auto-rows-[30rem]">
           <AnimatePresence mode="popLayout">
-            {items.map((item, i) => (
+            {tiles.map(({ item, cls }) => (
               <MotionLink
                 key={item.id}
                 href={`/${locale}/store/${item.id}`}
@@ -169,9 +179,7 @@ export default function StorePage() {
                 initial={false}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.3, ease: EASE }}
-                className={`group relative block aspect-[4/5] cursor-pointer overflow-hidden rounded-2xl bg-[var(--c-bg-alt)] md:aspect-auto ${
-                  TILE_SPANS[i % TILE_SPANS.length]
-                }`}
+                className={`group relative block cursor-pointer overflow-hidden rounded-2xl bg-[var(--c-bg-alt)] ${cls}`}
               >
                 <Image
                   src={item.image}
@@ -184,6 +192,13 @@ export default function StorePage() {
                 {/* Legibility scrim — constant, keeps the labels readable. */}
                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/5 to-transparent opacity-80" />
 
+                {/* Work-in-progress badge — restored pianos not yet for sale. */}
+                {item.wip && (
+                  <span className="pointer-events-none absolute start-3 top-3 rounded-full bg-[var(--c-bg)]/90 px-3 py-1 text-[9px] uppercase tracking-[0.22em] text-[var(--c-text)] backdrop-blur-sm sm:text-[10px]">
+                    {t('wip_badge')}
+                  </span>
+                )}
+
                 {/* Minimal details + reveal-up CTA */}
                 <div className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col items-center px-3 pb-7 text-center">
                   <div className="transition-transform duration-500 ease-out md:group-hover:-translate-y-14">
@@ -191,13 +206,14 @@ export default function StorePage() {
                       className="text-base uppercase leading-tight tracking-[0.15em] text-white md:text-lg"
                       style={{ fontFamily: titleFont, fontWeight: 400 }}
                     >
-                      {item.brand}
+                      {`${item.brand} ${item.model}`.trim()}
                     </h3>
                     <p
+                      dir="ltr"
                       className="mt-1 text-[11px] uppercase tracking-[0.25em] text-white/85"
                       style={{ fontFamily: 'var(--font-rubik), sans-serif', fontWeight: 300 }}
                     >
-                      {item.model} — {item.size}
+                      {`${item.serial ? `${item.serial} · ` : ''}${item.dimensions.width} × ${item.dimensions.height} cm`}
                     </p>
                   </div>
 
