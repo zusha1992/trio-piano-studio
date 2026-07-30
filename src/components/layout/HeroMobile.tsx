@@ -8,7 +8,6 @@ import { Moon, Sun } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
-  ALL_IMAGES,
   CATEGORIES,
   CONTACTS,
   ContactIcon,
@@ -72,13 +71,11 @@ export default function HeroMobile() {
     setSlide(([cur]) => [i, i >= cur ? 1 : -1]);
   }, []);
 
-  // Prefetch destinations + decode every image up front so swaps are instant.
+  // Prefetch the category destinations. (Image warm-up is handled by the hidden
+  // next/image layer below — a plain new Image() would fetch the raw asset, not
+  // the /_next/image optimized URL that the slides actually request.)
   useEffect(() => {
     CATEGORIES.forEach((c) => router.prefetch(`/${locale}/${c.href}`));
-    ALL_IMAGES.forEach((src) => {
-      const img = new window.Image();
-      img.src = src;
-    });
   }, [locale, router]);
 
   // Auto-advance. Keyed on `index`, so any manual change restarts the timer.
@@ -121,6 +118,24 @@ export default function HeroMobile() {
 
   return (
     <div className="fixed inset-0 z-[100] overflow-hidden bg-black">
+      {/* Hidden warm-up of every category image. next/image only fetches a frame
+          once it's mounted, and it requests the /_next/image optimized URL — so
+          without pre-mounting these, the incoming slide shows a black frame until
+          it downloads on first view. Mounting them (hidden) caches those exact
+          URLs up front so swaps reveal the photo immediately. */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 opacity-0">
+        {CATEGORIES.map((c) => (
+          <Image
+            key={`pre-${c.img}`}
+            src={c.img}
+            alt=""
+            fill
+            sizes="100vw"
+            className="object-cover"
+          />
+        ))}
+      </div>
+
       {/* Background images — the ONLY layer that slides on swipe, so the matte
           overlay and title above it stay perfectly still between categories. */}
       <div className="absolute inset-0">

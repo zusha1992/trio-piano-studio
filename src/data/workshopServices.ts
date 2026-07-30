@@ -72,10 +72,10 @@ export const workshopCategories: WorkshopCategory[] = [
       },
       {
         id: 'pinblock-replacement',
-        name: { en: 'Pinblock Replacement', he: 'החלפת פין־בלוק' },
+        name: { en: 'Pinblock Replacement', he: 'החלפת לוח ברגי כיוון' },
         description: {
           en: 'Replacing the pinblock to improve tuning stability over time.',
-          he: 'החלפת הפין־בלוק לשיפור יציבות הכיוון לאורך זמן.',
+          he: 'החלפת הפינבלוק לשיפור יציבות הכיוון לאורך זמן.',
         },
       },
       {
@@ -104,10 +104,10 @@ export const workshopCategories: WorkshopCategory[] = [
       },
       {
         id: 'damper-restoration',
-        name: { en: 'Damper Restoration', he: 'שיקום מערכת המשתיקים' },
+        name: { en: 'Damper Restoration', he: 'שיקום מערכת האוטמים' },
         description: {
           en: 'Restoring and regulating the damper system for quiet, precise operation.',
-          he: 'שיקום וכיוון מערכת המשתיקים לפעולה שקטה ומדויקת.',
+          he: 'שיקום וכיוון מערכת האוטמים לפעולה שקטה ומדויקת.',
         },
       },
       {
@@ -150,54 +150,14 @@ export const workshopCategories: WorkshopCategory[] = [
           he: 'שמירה על יציבות הכיוון ואיכות הצליל לאורך זמן.',
         },
       },
-      {
-        id: 'concert-tuning',
-        name: { en: 'Concert Tuning', he: 'כיוון לקונצרטים' },
-        description: {
-          en: 'Precise tuning before performances, recordings and events.',
-          he: 'כיוון מדויק לפני הופעות, הקלטות ואירועים.',
-        },
-      },
-      {
-        id: 'pitch-raise',
-        name: { en: 'Pitch Raise', he: 'הרמת גובה הצליל' },
-        description: {
-          en: 'Bringing significantly out-of-tune pianos back to standard pitch.',
-          he: 'החזרת פסנתרים שיצאו מכיוון משמעותי לגובה הצליל התקני.',
-        },
-      },
-      {
-        id: 'concert-preparation',
-        name: { en: 'Concert Preparation', he: 'הכנת פסנתר להופעה' },
-        description: {
-          en: 'Inspection, tuning and final adjustments before a concert or recording.',
-          he: 'בדיקה, כיוון והתאמות אחרונות לפני קונצרט או הקלטה.',
-        },
-      },
-      {
-        id: 'recording-sessions',
-        name: { en: 'Recording Sessions', he: 'כיוון להקלטות' },
-        description: {
-          en: 'Preparing the piano to meet the demands of professional studio recording.',
-          he: 'התאמת הפסנתר לדרישות אולפן והקלטה מקצועית.',
-        },
-      },
-      {
-        id: 'emergency-tuning',
-        name: { en: 'Emergency Tuning', he: 'כיוון דחוף' },
-        description: {
-          en: 'Fast tuning service for urgent cases or right before events.',
-          he: 'שירות כיוון מהיר במקרים דחופים או לפני אירועים.',
-        },
-      },
     ],
   },
   {
     id: 'regulation',
-    name: { en: 'Regulation & PTD', he: 'איזון מנגנון' },
+    name: { en: 'PTD', he: 'איזון מנגנון בשיטת PTD' },
     description: {
-      en: 'Adjusting the action so it delivers a precise, even and comfortable playing feel.',
-      he: 'התאמת פעולת המנגנון לקבלת תחושת נגינה מדויקת, אחידה ונוחה.',
+      en: 'Balancing and reshaping the action using the Precision Touch Design method.',
+      he: 'איזון ועיצוב מחדש של המנגנון בשיטת Precision Touch Design.',
     },
     image: '/images/workshop/regulation.webp',
     images: [
@@ -208,50 +168,10 @@ export const workshopCategories: WorkshopCategory[] = [
     services: [
       {
         id: 'full-regulation',
-        name: { en: 'Full Regulation', he: 'איזון מנגנון מלא' },
+        name: { en: 'Full Regulation', he: 'איזון מנגנון מלא (רגולציה)' },
         description: {
-          en: "Recalibrating all of the action's components.",
-          he: 'כיוון מחדש של כל מרכיבי המנגנון.',
-        },
-      },
-      {
-        id: 'ptd-regulation',
-        name: { en: 'PTD Regulation', he: 'איזון מנגנון בשיטת PTD' },
-        description: {
-          en: 'Regulating and reshaping the action using the Precision Touch Design method.',
-          he: 'איזון ועיצוב מחדש של המנגנון בשיטת Precision Touch Design.',
-        },
-      },
-      {
-        id: 'key-leveling',
-        name: { en: 'Key Leveling', he: 'איזון קלידים' },
-        description: {
-          en: 'Leveling the keys to a uniform height for a consistent playing feel.',
-          he: 'יישור הקלידים לגובה אחיד ולתחושת נגינה עקבית.',
-        },
-      },
-      {
-        id: 'touch-weight-balancing',
-        name: { en: 'Touch Weight Balancing', he: 'איזון משקל הקלידים' },
-        description: {
-          en: 'Balancing the touch weight across the entire keyboard.',
-          he: 'התאמת משקל הלחיצה לאורך כל המקלדת.',
-        },
-      },
-      {
-        id: 'let-off-adjustment',
-        name: { en: 'Let-off Adjustment', he: 'כיוון מנגנון השחרור' },
-        description: {
-          en: 'Adjusting the let-off distance for precise control while playing.',
-          he: 'כיוון מרחק השחרור לקבלת שליטה מדויקת בנגינה.',
-        },
-      },
-      {
-        id: 'repetition-adjustment',
-        name: { en: 'Repetition Adjustment', he: 'כיוון מנגנון החזרה' },
-        description: {
-          en: 'Improving the speed and precision of hammer repetition.',
-          he: 'שיפור מהירות ודיוק החזרת הפטישים.',
+          en: "Recalibrating all of the action's components for a precise, even and comfortable playing feel.",
+          he: 'כיוון מחדש של כל מרכיבי המנגנון לקבלת תחושת נגינה מדויקת, אחידה ונוחה.',
         },
       },
     ],
@@ -269,48 +189,7 @@ export const workshopCategories: WorkshopCategory[] = [
       '/images/workshop/tuning.webp',
       '/images/workshop/restoration.webp',
     ],
-    services: [
-      {
-        id: 'hammer-voicing',
-        name: { en: 'Hammer Voicing', he: 'Voicing לפטישים' },
-        description: {
-          en: 'Shaping the tone color by treating the hammers.',
-          he: 'עיצוב גוון הצליל באמצעות טיפול בפטישים.',
-        },
-      },
-      {
-        id: 'hammer-shaping',
-        name: { en: 'Hammer Shaping', he: 'עיצוב פטישים' },
-        description: {
-          en: 'Reshaping the hammer surface after wear.',
-          he: 'עיצוב מחדש של פני הפטיש לאחר שחיקה.',
-        },
-      },
-      {
-        id: 'tone-balancing',
-        name: { en: 'Tone Balancing', he: 'איזון צליל' },
-        description: {
-          en: 'Creating evenness across all registers of the keyboard.',
-          he: 'יצירת אחידות בין כל תחומי המקלדת.',
-        },
-      },
-      {
-        id: 'tone-brightening',
-        name: { en: 'Tone Brightening', he: 'הבהרת הצליל' },
-        description: {
-          en: 'Adjusting the piano toward a more open, brighter tone.',
-          he: 'התאמת הפסנתר לצליל פתוח ובהיר יותר.',
-        },
-      },
-      {
-        id: 'tone-softening',
-        name: { en: 'Tone Softening', he: 'ריכוך הצליל' },
-        description: {
-          en: 'Creating a warmer, rounder and mellower tone.',
-          he: 'יצירת צליל חם, עגול ונעים יותר.',
-        },
-      },
-    ],
+    services: [],
   },
   {
     id: 'care',
@@ -335,35 +214,11 @@ export const workshopCategories: WorkshopCategory[] = [
         },
       },
       {
-        id: 'lubrication',
-        name: { en: 'Lubrication', he: 'שימון מנגנון' },
-        description: {
-          en: 'Treating moving parts to reduce wear.',
-          he: 'טיפול בחלקים נעים להפחתת שחיקה.',
-        },
-      },
-      {
-        id: 'small-repairs',
-        name: { en: 'Small Repairs', he: 'תיקונים שוטפים' },
-        description: {
-          en: 'Handling minor issues before they become major ones.',
-          he: 'טיפול בתקלות קטנות לפני שהופכות לגדולות.',
-        },
-      },
-      {
         id: 'wheel-replacement',
         name: { en: 'Wheel Replacement', he: 'החלפת גלגלים' },
         description: {
           en: 'Replacing worn casters to improve stability and mobility.',
           he: 'החלפת גלגלים שחוקים לשיפור היציבות והניידות.',
-        },
-      },
-      {
-        id: 'keyboard-adjustments',
-        name: { en: 'Keyboard Adjustments', he: 'כיוון מקלדת' },
-        description: {
-          en: 'Minor repairs and adjustments to improve the playing feel.',
-          he: 'תיקונים וכיוונים קלים לשיפור תחושת הנגינה.',
         },
       },
       {
@@ -389,56 +244,7 @@ export const workshopCategories: WorkshopCategory[] = [
       '/images/workshop/consultation.webp',
       '/images/workshop/climate.webp',
     ],
-    services: [
-      {
-        id: 'concert-rental',
-        name: { en: 'Concert Rental', he: 'השכרה לקונצרטים' },
-        description: {
-          en: 'Renting pianos for concerts, recitals and festivals.',
-          he: 'השכרת פסנתרים לקונצרטים, רסיטלים ופסטיבלים.',
-        },
-      },
-      {
-        id: 'recording-rental',
-        name: { en: 'Recording Sessions', he: 'השכרה להקלטות' },
-        description: {
-          en: 'Renting pianos for recording studios and music productions.',
-          he: 'השכרת פסנתרים לאולפני הקלטות ולהפקות מוזיקליות.',
-        },
-      },
-      {
-        id: 'event-rental',
-        name: { en: 'Event Rental', he: 'השכרה לאירועים' },
-        description: {
-          en: 'Renting pianos for private, corporate and cultural events.',
-          he: 'השכרת פסנתרים לאירועים פרטיים, עסקיים ואירועי תרבות.',
-        },
-      },
-      {
-        id: 'long-term-rental',
-        name: { en: 'Long-Term Rental', he: 'השכרה לטווח ארוך' },
-        description: {
-          en: 'Rental solutions for institutions, studios, schools and private clients.',
-          he: 'פתרונות השכרה למוסדות, אולפנים, בתי ספר ולקוחות פרטיים.',
-        },
-      },
-      {
-        id: 'delivery-installation',
-        name: { en: 'Delivery & Installation', he: 'הובלה והתקנה' },
-        description: {
-          en: 'Professional transport, placement and setup of the piano at the venue.',
-          he: 'הובלה מקצועית, הצבת הפסנתר והכנתו לנגינה במקום האירוע.',
-        },
-      },
-      {
-        id: 'on-site-tuning',
-        name: { en: 'On-Site Tuning', he: 'כיוון באתר' },
-        description: {
-          en: 'Tuning the piano after delivery and before the event or recording begins.',
-          he: 'כיוון הפסנתר לאחר ההובלה ולפני תחילת האירוע או ההקלטה.',
-        },
-      },
-    ],
+    services: [],
   },
   {
     id: 'climate',
@@ -462,30 +268,6 @@ export const workshopCategories: WorkshopCategory[] = [
           he: 'התקנת מערכת Piano Life Saver להגנה על הפסנתר.',
         },
       },
-      {
-        id: 'dampp-chaser',
-        name: { en: 'Dampp-Chaser', he: 'Dampp-Chaser' },
-        description: {
-          en: 'Installing a Dampp-Chaser system to stabilize humidity conditions.',
-          he: 'התקנת מערכת Dampp-Chaser לייצוב תנאי הלחות.',
-        },
-      },
-      {
-        id: 'humidity-monitoring',
-        name: { en: 'Humidity Monitoring', he: 'ניטור לחות' },
-        description: {
-          en: 'Checking environmental conditions and tailoring the right solutions.',
-          he: 'בדיקת תנאי הסביבה והתאמת פתרונות.',
-        },
-      },
-      {
-        id: 'climate-consultation',
-        name: { en: 'Climate Consultation', he: 'ייעוץ סביבתי' },
-        description: {
-          en: 'Recommendations for optimal placement and care of the piano.',
-          he: 'המלצות למיקום ולשמירה מיטבית על הפסנתר.',
-        },
-      },
     ],
   },
   {
@@ -503,35 +285,11 @@ export const workshopCategories: WorkshopCategory[] = [
     ],
     services: [
       {
-        id: 'pre-purchase-inspection',
-        name: { en: 'Pre-purchase Inspection', he: 'בדיקה לפני רכישה' },
-        description: {
-          en: 'A professional condition assessment before purchasing a piano.',
-          he: 'הערכת מצב מקצועית לפני קניית פסנתר.',
-        },
-      },
-      {
         id: 'piano-appraisal',
         name: { en: 'Piano Appraisal', he: 'הערכת שווי' },
         description: {
           en: 'Valuation for sale, insurance or inheritance purposes.',
           he: 'הערכת שווי לצורכי מכירה, ביטוח או ירושה.',
-        },
-      },
-      {
-        id: 'restoration-planning',
-        name: { en: 'Restoration Planning', he: 'תכנון רסטורציה' },
-        description: {
-          en: "Building a restoration plan based on the instrument's condition.",
-          he: 'בניית תוכנית שיקום בהתאם למצב הכלי.',
-        },
-      },
-      {
-        id: 'condition-report',
-        name: { en: 'Condition Report', he: 'חוות דעת מקצועית' },
-        description: {
-          en: "A detailed report on the piano's condition with recommendations for next steps.",
-          he: 'דו”ח מפורט על מצב הפסנתר והמלצות להמשך.',
         },
       },
     ],

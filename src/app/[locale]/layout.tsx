@@ -9,7 +9,9 @@ import { ThemeProvider } from '@/components/layout/ThemeContext';
 import '../globals.css';
 
 // Set the theme class before paint so a dark preference doesn't flash light.
-const THEME_INIT = `(function(){try{if(localStorage.getItem('heroTheme')==='dark'){document.documentElement.classList.add('dark');}}catch(e){}})();`;
+// Default: dark on mobile (< lg), light on desktop — an explicit stored choice
+// always wins. Kept in sync with the initial read in ThemeProvider.
+const THEME_INIT = `(function(){try{var t=localStorage.getItem('heroTheme');var m=window.matchMedia('(max-width:1023px)').matches;if(t==='dark'||(!t&&m)){document.documentElement.classList.add('dark');}}catch(e){}})();`;
 
 const cormorant = Cormorant_Garamond({
   subsets: ['latin'],

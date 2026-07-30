@@ -38,7 +38,12 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setNegative(window.localStorage.getItem(THEME_KEY) === 'dark');
+    // Default to dark on mobile (< lg) where the dark home screen reads better;
+    // an explicit stored choice always wins. Mirrors the pre-paint script in the
+    // layout so the class set before paint matches this initial state.
+    const stored = window.localStorage.getItem(THEME_KEY);
+    const mobile = window.matchMedia('(max-width: 1023px)').matches;
+    setNegative(stored ? stored === 'dark' : mobile);
     setMounted(true);
   }, []);
 
