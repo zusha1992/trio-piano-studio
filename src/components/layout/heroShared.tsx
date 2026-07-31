@@ -10,7 +10,7 @@ import type { Localized } from '@/lib/i18n';
 export const SCHEMES = {
   light: {
     bg: '#ffffff',
-    intro: '#f2f2f3',
+    intro: '#ffffff',
     cat: '#3a3a3c',
     catActive: '#09090b',
     sub: 'text-[var(--c-muted)] hover:text-[var(--c-text)]',

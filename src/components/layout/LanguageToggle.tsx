@@ -62,8 +62,8 @@ export default function LanguageToggle({
               key={l}
               href={`/${l}${restOfPath}`}
               onClick={() => setOpen(false)}
-              dir={l === 'he' || l === 'ar' ? 'rtl' : 'ltr'}
-              className={`block px-4 py-2 text-sm transition-colors ${
+            dir={l === 'he' || l === 'ar' ? 'rtl' : 'ltr'}
+            className={`block px-4 py-2 text-center text-sm transition-colors ${
                 l === locale
                   ? 'text-[color:var(--c-cat-active)]'
                   : 'text-[color:var(--c-cat)] hover:text-[color:var(--c-cat-active)]'

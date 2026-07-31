@@ -7,7 +7,6 @@ import { useLocale } from 'next-intl';
 import { usePathname } from 'next/navigation';
 import { useGate } from '@/components/layout/GateContext';
 import { useAdmin } from '@/components/admin/AdminContext';
-import { useIsMobile } from '@/hooks/useIsMobile';
 
 interface LogoProps {
   className?: string;
@@ -22,7 +21,6 @@ export default function Logo({ className = '' }: LogoProps) {
   const pathname = usePathname();
   const gate = useGate();
   const admin = useAdmin();
-  const isMobile = useIsMobile();
   const isHome = pathname === `/${locale}` || pathname === `/${locale}/`;
 
   // A completed long-press opens the admin modal and must suppress the click
@@ -52,10 +50,10 @@ export default function Logo({ className = '' }: LogoProps) {
       longPressed.current = false;
       return;
     }
-    // From a subpage on desktop, close the curtain over the current page first;
-    // the HeroGate performs the actual navigation once the animation finishes.
-    // On mobile there is no gate, so let the link navigate home normally.
-    if (!isHome && !isMobile && gate) {
+    // From a subpage, close the curtain over the current page first; the hero
+    // (desktop gate or mobile vertical gate) performs the actual navigation
+    // home once the closing animation finishes.
+    if (!isHome && gate) {
       e.preventDefault();
       gate.requestCloseHome();
     }
