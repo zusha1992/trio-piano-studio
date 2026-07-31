@@ -17,8 +17,14 @@
       "binding": "WORKER_SELF_REFERENCE",
       "service": "web"
     }
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "trio-piano-studio",
+      "database_id": "54f54938-7d4f-46a1-bb55-f9dc12a506ad",
+      "migrations_dir": "migrations"
+    }
   ]
-  // Bindings added in later phases:
-  // "d1_databases":  D1 (content database)
-  // "r2_buckets":    R2 (image storage) + optionally the ISR incremental cache
+  // "r2_buckets" (image storage) added in Phase 4.
 }
