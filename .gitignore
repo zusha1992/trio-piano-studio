@@ -33,3 +33,5 @@ Thumbs.db
 .open-next/
 .wrangler/
 .dev.vars
+# Generated binding types (run `npm run cf-typegen` after changing wrangler.jsonc)
+cloudflare-env.d.ts
