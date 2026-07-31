@@ -28,3 +28,8 @@ yarn-error.log*
 .DS_Store
 *.pem
 Thumbs.db
+
+# cloudflare / opennext
+.open-next/
+.wrangler/
+.dev.vars

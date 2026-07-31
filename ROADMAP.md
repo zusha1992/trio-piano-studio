@@ -30,7 +30,7 @@ yet. Order is roughly dependency-first; each phase has checkable tasks.
 
 ## Phase 1 — Infrastructure: Supabase (DB + storage)
 
-- [ ] Create Supabase project; add keys to Vercel/local env (no keys in client bundle).
+- [ ] Create Supabase project; add keys to Cloudflare/local env (no keys in client bundle).
 - [ ] Design schema: `pianos`, `concerts`, `registrations`, `workshop_categories`,
       `workshop_services`, and per-entity `images` (with ordering + alt text).
 - [ ] Localized text columns for **4 languages** (en/he/ar/ru) on all content tables.
@@ -77,11 +77,11 @@ yet. Order is roughly dependency-first; each phase has checkable tasks.
 - [ ] Send confirmation with the **ticket / QR** to the registrant after signup
       (Trio mailbox still notified), sent from the Trio Gmail address.
 
-## Phase 6 — Domain + Vercel
+## Phase 6 — Domain + Cloudflare
 
 - [ ] Purchase domain.
-- [ ] Connect to Vercel: DNS, HTTPS, `www` → apex redirect.
-- [ ] Move all secrets (Supabase, email keys) into Vercel env vars.
+- [ ] Connect to Cloudflare: DNS, HTTPS, `www` → apex redirect, custom domain on the Worker.
+- [ ] Move all secrets (email keys, admin password) into Cloudflare Worker secrets/vars.
 
 ## Phase 7 — i18n expansion (Arabic + Russian)
 
@@ -98,14 +98,14 @@ yet. Order is roughly dependency-first; each phase has checkable tasks.
 - [ ] Public pages: **static generation + ISR (revalidate)** so visitors read
       cached HTML, not per-request DB queries.
 - [ ] Images via Storage CDN + `next/image`.
-- [ ] Measure (Lighthouse / Vercel Analytics) before vs after; tune caching if
+- [ ] Measure (Lighthouse / Cloudflare Web Analytics) before vs after; tune caching if
       any regression.
 
 ## Phase 9 — Hardening
 
 - [ ] Spam protection (honeypot / captcha) on contact + registration forms.
 - [ ] Error monitoring (Sentry).
-- [ ] Traffic analytics (Vercel Analytics / Plausible) — separate from admin
+- [ ] Traffic analytics (Cloudflare Web Analytics / Plausible) — separate from admin
       signup counts.
 
 ## Phase 10 — Post-migration cleanup (do last, after DB verified live)

@@ -1,0 +1,24 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "main": ".open-next/worker.js",
+  "name": "web",
+  "account_id": "c3080ca096ba6ea476c38e2776c5f164",
+  "compatibility_date": "2024-12-30",
+  "compatibility_flags": [
+    "nodejs_compat",
+    "global_fetch_strictly_public"
+  ],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "web"
+    }
+  ]
+  // Bindings added in later phases:
+  // "d1_databases":  D1 (content database)
+  // "r2_buckets":    R2 (image storage) + optionally the ISR incremental cache
+}
