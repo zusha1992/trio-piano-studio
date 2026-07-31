@@ -6,6 +6,8 @@ import Navbar from '@/components/layout/Navbar';
 import Hero from '@/components/layout/Hero';
 import { GateProvider } from '@/components/layout/GateContext';
 import { ThemeProvider } from '@/components/layout/ThemeContext';
+import AdminProvider from '@/components/admin/AdminProvider';
+import AnalyticsTracker from '@/components/admin/AnalyticsTracker';
 import '../globals.css';
 
 // Set the theme class before paint so a dark preference doesn't flash light.
@@ -59,6 +61,13 @@ export const metadata: Metadata = {
   description:
     'Expert piano restoration and premium piano sales in Jerusalem, Israel. We import the finest pianos from Japan.',
   keywords: ['piano', 'restoration', 'Jerusalem', 'Israel', 'פסנתר', 'שיקום', 'ירושלים'],
+  // Use the single circular logo (icon.png) everywhere — favicon, apple-touch
+  // icon, and the thumbnail shown in shared-link previews on iOS/WhatsApp.
+  icons: {
+    icon: '/icon.png',
+    shortcut: '/icon.png',
+    apple: '/icon.png',
+  },
 };
 
 export default async function LocaleLayout({
@@ -84,13 +93,16 @@ export default async function LocaleLayout({
             Next's automatic next/font stylesheet injection. */}
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT }} />
         <NextIntlClientProvider messages={messages}>
-          <ThemeProvider>
-            <GateProvider>
-              <Navbar />
-              <main>{children}</main>
-              <Hero />
-            </GateProvider>
-          </ThemeProvider>
+          <AdminProvider>
+            <AnalyticsTracker />
+            <ThemeProvider>
+              <GateProvider>
+                <Navbar />
+                <main>{children}</main>
+                <Hero />
+              </GateProvider>
+            </ThemeProvider>
+          </AdminProvider>
         </NextIntlClientProvider>
       </body>
     </html>

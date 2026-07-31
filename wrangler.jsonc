@@ -12,6 +12,10 @@
     "directory": ".open-next/assets",
     "binding": "ASSETS"
   },
+  "routes": [
+    { "pattern": "triopianostudio.com", "custom_domain": true },
+    { "pattern": "www.triopianostudio.com", "custom_domain": true }
+  ],
   "services": [
     {
       "binding": "WORKER_SELF_REFERENCE",
@@ -31,5 +35,8 @@
       "binding": "MEDIA",
       "bucket_name": "trio-piano-studio-media"
     }
-  ]
+  ],
+  "ai": {
+    "binding": "AI"
+  }
 }

@@ -22,6 +22,12 @@ export interface Concert {
   price: number;
   /** Short, tempting blurb about the artist and the performance. */
   description?: LocalizedText;
+  /** Optional performer list (free text per language). */
+  artists?: LocalizedText;
+  /** DB id of the poster image (admin edit). */
+  posterId?: number;
+  /** Draft flag — hidden from the public list when false. */
+  published?: boolean;
 }
 
 const VENUE: LocalizedText = {

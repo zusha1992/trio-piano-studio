@@ -28,6 +28,10 @@ export interface WorkshopCategory {
   image: string;
   /** Optional extra images for the detail-page gallery/carousel. */
   images?: string[];
+  /** DB id of the primary image (admin edit). */
+  imageId?: number;
+  /** Gallery images with ids (admin edit; first is the tile/main image). */
+  galleryImages?: { id: number; url: string }[];
   services: WorkshopService[];
 }
 

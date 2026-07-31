@@ -10,7 +10,9 @@
 // gallery; the whole set is shown in the per-piano carousel.
 
 export type ShopType = 'grand' | 'upright';
-export type ShopRegion = 'japan' | 'europe' | 'usa';
+// Origin id — references a row in the `origins` library table. Kept as a free
+// string so new origins can be added at runtime.
+export type ShopRegion = string;
 
 export interface LocalizedText {
   en: string;
@@ -43,6 +45,8 @@ export interface ShopItem {
   region: ShopRegion;
   /** Height for uprights / length for grands, shown next to the model. */
   size: string;
+  /** Year of manufacture, when known. Shown as a spec on the detail page. */
+  year?: number;
   /** ILS price, or 'contact' when priced on request. */
   price: number | 'contact';
   color: ShopColor;
@@ -51,12 +55,16 @@ export interface ShopItem {
   image: string;
   /** Optional extra images for the detail-page gallery/carousel. */
   images?: string[];
+  /** Gallery images with ids (admin edit; first is the tile/main image). */
+  galleryImages?: { id: number; url: string }[];
   /** Optional per-item description; falls back to a generated line. */
   description?: LocalizedText;
   /** Optional second paragraph with more background / model history. */
   details?: LocalizedText;
   /** True while the piano is still being restored and is not yet for sale. */
   wip?: boolean;
+  /** Draft flag — hidden from the public store when false. */
+  published?: boolean;
 }
 
 // Shared finishes. All pianos are ebony except the Érard (mahogany).

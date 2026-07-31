@@ -6,6 +6,11 @@ const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
+    // Media is pre-converted to WebP and served straight from R2 (via the
+    // /media/<key> Worker route) with immutable caching, so we skip Next's
+    // image optimizer — on Cloudflare it can't proxy the same-origin R2 route,
+    // and re-optimizing already-optimized assets only burns Worker CPU.
+    unoptimized: true,
     remotePatterns: [],
   },
 };
