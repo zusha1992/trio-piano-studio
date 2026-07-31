@@ -114,37 +114,40 @@ export default function CategoryView({
           </motion.h1>
         </EditableText>
 
-        {/* One-liner description */}
-        <EditableText
-          entity="workshop_category"
-          id={cat.id}
-          column="description"
-          value={cat.description[locale] ?? ''}
-          multiline
-          label="Category description"
-          wrapAs="div"
-          className="ms-4 mt-5 max-w-2xl sm:ms-8 md:ms-14 lg:ms-24"
-        >
-          <motion.p
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.7, ease: EASE }}
-            className="text-lg leading-relaxed text-[var(--c-dim)]"
-          >
-            {pick(cat.description, locale)}
-          </motion.p>
-        </EditableText>
+        {/* One row — text (description + fixes) on one side, the image on the
+            other; both columns start at the same top so the paragraph sits
+            level with the top of the image. */}
+        <div className="mt-12 grid grid-cols-1 gap-x-12 gap-y-10 md:mt-16 md:grid-cols-2 md:items-start">
+          {/* Text column — sub-paragraph on top, fixes list below it */}
+          <div className="order-2 ms-4 sm:ms-8 md:order-1 md:ms-14 lg:ms-24">
+            {/* One-liner description */}
+            <EditableText
+              entity="workshop_category"
+              id={cat.id}
+              column="description"
+              value={cat.description[locale] ?? ''}
+              multiline
+              label="Category description"
+              wrapAs="div"
+              className="max-w-xl"
+            >
+              <motion.p
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.7, ease: EASE }}
+                className="text-lg leading-relaxed text-[var(--c-dim)]"
+              >
+                {pick(cat.description, locale)}
+              </motion.p>
+            </EditableText>
 
-        {/* One row — fixes list on one side, image gallery on the other. The
-            fixes list splits into two columns when the category has many. */}
-        <div className="mt-16 grid grid-cols-1 gap-x-12 gap-y-10 md:mt-24 md:grid-cols-2 md:items-center">
-          {/* Fixes list */}
-          <motion.ul
-            {...reveal}
-            className={`order-2 gap-x-8 gap-y-7 md:order-1 ${
-              twoCols ? 'grid grid-cols-1 sm:grid-cols-2' : 'flex flex-col'
-            }`}
-          >
+            {/* Fixes list */}
+            <motion.ul
+              {...reveal}
+              className={`mt-10 gap-x-8 gap-y-7 ${
+                twoCols ? 'grid grid-cols-1 sm:grid-cols-2' : 'flex flex-col'
+              }`}
+            >
             {cat.services.map((s) => (
               <li key={s.id} className="relative">
                 {editMode && (
@@ -208,7 +211,8 @@ export default function CategoryView({
                 </button>
               </li>
             )}
-          </motion.ul>
+            </motion.ul>
+          </div>
 
           {/* Image gallery / carousel */}
           <motion.div {...reveal} className="order-1 md:order-2">

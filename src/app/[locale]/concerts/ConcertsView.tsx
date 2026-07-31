@@ -631,37 +631,39 @@ function ConcertSettings({
   const labelCls = 'flex flex-col gap-1 text-[10px] uppercase tracking-[0.2em] text-neutral-400';
 
   return (
-    <div className="mt-6 grid grid-cols-2 gap-3 rounded-2xl border border-dashed border-neutral-300 p-4 sm:grid-cols-4">
-      <label className={labelCls}>
-        Date
-        <input
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          onBlur={() => date !== concert.date && onSave(concert.id, { date })}
-          className={inputCls}
-        />
-      </label>
-      <label className={labelCls}>
-        Time
-        <input
-          value={time}
-          onChange={(e) => setTime(e.target.value)}
-          onBlur={() => time !== concert.time && onSave(concert.id, { time })}
-          className={inputCls}
-        />
-      </label>
-      <label className={labelCls}>
-        Price ₪
-        <input
-          type="number"
-          value={price}
-          onChange={(e) => setPrice(e.target.value)}
-          onBlur={() => Number(price) !== concert.price && onSave(concert.id, { price_ils: Number(price) })}
-          className={inputCls}
-        />
-      </label>
-      <div className="flex items-end justify-start pb-1 sm:justify-end">
+    <div className="mt-6 rounded-2xl border border-dashed border-neutral-300 p-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <label className={labelCls}>
+          Date
+          <input
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            onBlur={() => date !== concert.date && onSave(concert.id, { date })}
+            className={inputCls}
+          />
+        </label>
+        <label className={labelCls}>
+          Time
+          <input
+            value={time}
+            onChange={(e) => setTime(e.target.value)}
+            onBlur={() => time !== concert.time && onSave(concert.id, { time })}
+            className={inputCls}
+          />
+        </label>
+        <label className={labelCls}>
+          Price ₪
+          <input
+            type="number"
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+            onBlur={() => Number(price) !== concert.price && onSave(concert.id, { price_ils: Number(price) })}
+            className={inputCls}
+          />
+        </label>
+      </div>
+      <div className="mt-4 flex justify-end">
         <PublishButton
           published={concert.published !== false}
           onChange={(next) => onSave(concert.id, { published: next })}

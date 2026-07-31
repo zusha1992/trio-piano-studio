@@ -150,9 +150,9 @@ export default function ServicesGrid({ categories }: { categories: WorkshopCateg
           </motion.div>
         </div>
 
-        {/* 4×2 grid of category tiles — square image + title, description
+        {/* 3×2 grid of category tiles — square image + title, description
             revealed on hover. Clicking will open a full category page later. */}
-        <div className="mt-16 grid grid-cols-2 gap-3 sm:gap-4 md:mt-24 md:grid-cols-4">
+        <div className="mt-16 grid grid-cols-2 gap-3 sm:gap-4 md:mt-24 md:grid-cols-3">
           {visible.map((cat) => (
             <MotionLink
               key={cat.id}
