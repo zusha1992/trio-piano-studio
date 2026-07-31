@@ -119,7 +119,7 @@ export default function AnalyticsPanel({ onClose }: { onClose: () => void }) {
   const clickSlices = toSlices(data?.clicks ?? [], CLICK_LABEL);
 
   return createPortal(
-    <div className="fixed inset-0 z-[130] flex items-center justify-center p-4" dir="ltr">
+    <div className="fixed inset-0 z-[130] flex items-center justify-center px-4 py-[5vh]" dir="ltr">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
       <div className="relative w-full max-w-6xl rounded-2xl bg-white p-6 text-neutral-900 shadow-2xl sm:p-7">
         <button
