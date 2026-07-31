@@ -90,6 +90,28 @@ body {
   font-family: var(--font-heebo), sans-serif;
 }
 
+:lang(ar) body,
+:lang(ar) p,
+:lang(ar) span,
+:lang(ar) li,
+:lang(ar) button,
+:lang(ar) input,
+:lang(ar) textarea,
+:lang(ar) label {
+  font-family: var(--font-cairo), sans-serif;
+}
+
+:lang(ru) body,
+:lang(ru) p,
+:lang(ru) span,
+:lang(ru) li,
+:lang(ru) button,
+:lang(ru) input,
+:lang(ru) textarea,
+:lang(ru) label {
+  font-family: var(--font-rubik), sans-serif;
+}
+
 :lang(en) h1,
 :lang(en) h2,
 :lang(en) h3,
@@ -102,6 +124,20 @@ body {
 :lang(he) h3,
 :lang(he) h4 {
   font-family: var(--font-heebo), sans-serif;
+}
+
+:lang(ar) h1,
+:lang(ar) h2,
+:lang(ar) h3,
+:lang(ar) h4 {
+  font-family: var(--font-cairo), sans-serif;
+}
+
+:lang(ru) h1,
+:lang(ru) h2,
+:lang(ru) h3,
+:lang(ru) h4 {
+  font-family: var(--font-rubik), sans-serif;
 }
 
 ::selection {

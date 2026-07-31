@@ -9,6 +9,7 @@ import EditableText from '@/components/admin/EditableText';
 import AdminImageOverlay from '@/components/admin/AdminImageOverlay';
 import { EASE } from '@/lib/motion';
 import { displayFont } from '@/lib/fonts';
+import { pick, pickArray, type Locale } from '@/lib/i18n';
 
 // Bottom scrim so overlaid text stays readable on the mobile banners.
 const SCRIM =
@@ -22,14 +23,16 @@ export default function AboutView({
   founders: Founder[];
 }) {
   const t = useTranslations('about');
-  const locale = useLocale() as 'en' | 'he';
-  const isHe = locale === 'he';
-  const titleFont = displayFont(isHe);
+  const locale = useLocale() as Locale;
+  const titleFont = displayFont(locale);
 
   const studio = sections.studio;
   const who = sections.who;
-  const studioBody = studio?.body[locale] ?? [];
-  const whoBody = who?.body[locale] ?? [];
+  // Raw arrays for the editor (the exact locale), display arrays with fallback.
+  const studioBodyRaw = studio?.body[locale] ?? [];
+  const whoBodyRaw = who?.body[locale] ?? [];
+  const studioBody = pickArray(studio?.body, locale);
+  const whoBody = pickArray(who?.body, locale);
 
   // Page entrance is handled once by the route template; in-page elements stay
   // static so they don't re-animate ("slide up") while scrolling.
@@ -69,11 +72,11 @@ export default function AboutView({
                 entity="about_section"
                 id={studio.key}
                 column="title"
-                value={studio.title[locale]}
+                value={studio.title[locale] ?? ''}
                 label="Section title"
               >
                 <h2 className={`hidden md:block ${heading}`} style={{ fontFamily: titleFont, fontWeight: 400 }}>
-                  {studio.title[locale]}
+                  {pick(studio.title, locale)}
                 </h2>
               </EditableText>
             )}
@@ -82,7 +85,7 @@ export default function AboutView({
                 entity="about_section"
                 id={studio.key}
                 column="body"
-                value={studioBody}
+                value={studioBodyRaw}
                 array
                 label="Section paragraphs"
                 wrapAs="div"
@@ -112,7 +115,7 @@ export default function AboutView({
             )}
             <div className={SCRIM} />
             <h2 className={bannerTitle} style={{ fontFamily: titleFont, fontWeight: 400 }}>
-              {studio?.title[locale]}
+              {pick(studio?.title, locale)}
             </h2>
             {studio && (
               <AdminImageOverlay
@@ -137,7 +140,7 @@ export default function AboutView({
             )}
             <div className={SCRIM} />
             <h2 className={bannerTitle} style={{ fontFamily: titleFont, fontWeight: 400 }}>
-              {who?.title[locale]}
+              {pick(who?.title, locale)}
             </h2>
             {who && (
               <AdminImageOverlay
@@ -156,11 +159,11 @@ export default function AboutView({
                 entity="about_section"
                 id={who.key}
                 column="title"
-                value={who.title[locale]}
+                value={who.title[locale] ?? ''}
                 label="Section title"
               >
                 <h2 className={`hidden md:block ${heading}`} style={{ fontFamily: titleFont, fontWeight: 400 }}>
-                  {who.title[locale]}
+                  {pick(who.title, locale)}
                 </h2>
               </EditableText>
             )}
@@ -169,7 +172,7 @@ export default function AboutView({
                 entity="about_section"
                 id={who.key}
                 column="body"
-                value={whoBody}
+                value={whoBodyRaw}
                 array
                 label="Section paragraphs"
                 wrapAs="div"
@@ -199,8 +202,8 @@ export default function AboutView({
 
           <div className="mt-12 grid grid-cols-1 gap-y-10 sm:grid-cols-3 sm:gap-x-10 sm:gap-y-14 lg:gap-x-16">
             {founders.map((f) => {
-              const name = f.name[locale];
-              const bio = f.bio[locale];
+              const name = pick(f.name, locale);
+              const bio = pick(f.bio, locale);
               return (
                 <motion.div
                   key={f.id}
@@ -231,7 +234,7 @@ export default function AboutView({
                       aspect={1}
                     />
                   </div>
-                  <EditableText entity="founder" id={f.id} column="name" value={name} label="Name">
+                  <EditableText entity="founder" id={f.id} column="name" value={f.name[locale] ?? ''} label="Name">
                     <h3
                       className="mt-5 hidden text-xl tracking-tight text-[var(--c-text)] md:block"
                       style={{ fontFamily: titleFont, fontWeight: 500 }}
@@ -243,7 +246,7 @@ export default function AboutView({
                     entity="founder"
                     id={f.id}
                     column="bio"
-                    value={bio}
+                    value={f.bio[locale] ?? ''}
                     multiline
                     label="Bio"
                     wrapAs="div"

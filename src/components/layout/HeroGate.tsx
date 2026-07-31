@@ -6,7 +6,6 @@ import { useLocale } from 'next-intl';
 import { motion, type Variants } from 'framer-motion';
 import { Moon, Sun } from 'lucide-react';
 import Image from 'next/image';
-import Link from 'next/link';
 import { useGate } from '@/components/layout/GateContext';
 import {
   ALL_IMAGES,
@@ -16,7 +15,10 @@ import {
   DEFAULT_IMG,
 } from '@/components/layout/heroShared';
 import { useTheme } from '@/components/layout/ThemeContext';
+import LanguageToggle from '@/components/layout/LanguageToggle';
 import { EASE } from '@/lib/motion';
+import { pick, isRtl } from '@/lib/i18n';
+import { displayFont } from '@/lib/fonts';
 
 /* ── Straight vertical seam ─────────────────────────────────────────
    Image fills the left half, logo/categories the right half.          */
@@ -36,8 +38,7 @@ const SWAP_DURATION = 0.6;
 
 export default function HeroGate() {
   const locale = useLocale();
-  const isHe = locale === 'he';
-  const otherLocale = isHe ? 'en' : 'he';
+  const rtl = isRtl(locale);
   const pathname = usePathname();
   const router = useRouter();
   const gate = useGate();
@@ -133,8 +134,8 @@ export default function HeroGate() {
   const panelInitial = startClosed ? 'in' : 'off';
 
   // Mirror the whole layout by language: image fills the reading-start half
-  // (right in Hebrew/RTL, left in English/LTR), categories fill the other half.
-  const imageOnRight = isHe;
+  // (right in RTL, left in LTR), categories fill the other half.
+  const imageOnRight = rtl;
   const imageHalfPos = imageOnRight ? 'right-0' : 'left-0';
   const catClip = imageOnRight ? LEFT_CLIP : RIGHT_CLIP;
 
@@ -159,7 +160,7 @@ export default function HeroGate() {
   const catHalfPos = imageOnRight ? 'left-0 right-1/2' : 'left-1/2 right-0';
   const toggleCorner = imageOnRight ? 'left-[6vw]' : 'right-[6vw]';
 
-  const headingFont = isHe ? 'var(--font-rubik), sans-serif' : 'var(--font-arimo), sans-serif';
+  const headingFont = displayFont(locale);
   const headingWeight = 400;
 
   return (
@@ -253,12 +254,7 @@ export default function HeroGate() {
 
             {/* Language toggle + theme toggle */}
             <div dir="ltr" className={`absolute top-[4vh] ${toggleCorner} z-10 flex items-center gap-3`}>
-              <Link
-                href={`/${otherLocale}`}
-                className={`text-[11px] tracking-[0.25em] uppercase ${scheme.toggle} transition-colors duration-300`}
-              >
-                {otherLocale === 'he' ? 'עב' : 'EN'}
-              </Link>
+              <LanguageToggle triggerClassName={scheme.toggle} align="start" />
               <button
                 type="button"
                 onClick={toggleTheme}
@@ -271,7 +267,7 @@ export default function HeroGate() {
 
             {/* Big category headers — vertically centered; hover swaps the image */}
             <div
-              dir={isHe ? 'rtl' : 'ltr'}
+              dir={rtl ? 'rtl' : 'ltr'}
               className={`absolute inset-y-0 ${catHalfPos} flex flex-col items-start justify-center pb-[12vh] ps-[7vw] pe-[6vw]`}
             >
               <ul onMouseLeave={() => setActive(null)} className="flex flex-col gap-12">
@@ -297,7 +293,7 @@ export default function HeroGate() {
                           color: isActive ? scheme.catActive : scheme.cat,
                         }}
                       >
-                        {isHe ? c.labelHe : c.labelEn}
+                        {pick(c.label, locale)}
                       </button>
                     </li>
                   );
@@ -310,7 +306,7 @@ export default function HeroGate() {
                 four labels use the full 50% width and stay on a single line.
                 flex-wrap is only a graceful fallback for very narrow screens. */}
             <div
-              dir={isHe ? 'rtl' : 'ltr'}
+              dir={rtl ? 'rtl' : 'ltr'}
               className={`absolute bottom-[5vh] ${catHalfPos} flex items-center justify-center gap-x-4 gap-y-2 flex-wrap px-4`}
             >
               {CONTACTS.map((c) => (
@@ -321,7 +317,7 @@ export default function HeroGate() {
                   className={`flex items-center gap-1.5 text-xs ${scheme.sub} transition-colors duration-300`}
                 >
                   <ContactIcon src={`/assets/icons/${c.icon}`} size={13} />
-                  <span className="whitespace-nowrap">{isHe ? c.labelHe : c.labelEn}</span>
+                  <span className="whitespace-nowrap">{pick(c.label, locale)}</span>
                 </a>
               ))}
             </div>

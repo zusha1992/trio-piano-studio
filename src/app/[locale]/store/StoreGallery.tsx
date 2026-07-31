@@ -13,6 +13,7 @@ import ContactCTA from '@/components/sections/ContactCTA';
 import { useAdmin } from '@/components/admin/AdminContext';
 import { EASE } from '@/lib/motion';
 import { displayFont } from '@/lib/fonts';
+import { pick, type Locale, type Localized } from '@/lib/i18n';
 
 const MotionLink = motion.create(Link);
 
@@ -32,9 +33,9 @@ const tileClass = (type: ShopType, grandIndex: number) =>
       }`
     : 'col-span-1 aspect-square md:col-span-1 md:aspect-auto';
 
-const TYPE_LABEL: Record<ShopType, { en: string; he: string }> = {
-  grand: { en: 'Grand', he: 'כנף' },
-  upright: { en: 'Upright', he: 'קיר' },
+const TYPE_LABEL: Record<ShopType, Localized> = {
+  grand: { en: 'Grand', he: 'כנף', ar: 'ذيل', ru: 'Рояль' },
+  upright: { en: 'Upright', he: 'קיר', ar: 'قائم', ru: 'Пианино' },
 };
 
 const TYPES: ShopType[] = ['grand', 'upright'];
@@ -47,16 +48,15 @@ export default function StoreGallery({
   origins?: OriginOption[];
 }) {
   const t = useTranslations('store');
-  const locale = useLocale() as 'en' | 'he';
+  const locale = useLocale() as Locale;
 
   // Region filter facets come from the origins library, limited to those that
   // actually have inventory, in library order.
   const present = new Set(pianos.map((p) => p.region));
   const REGIONS: ShopRegion[] = origins.filter((o) => present.has(o.id)).map((o) => o.id);
-  const REGION_LABEL: Record<string, { en: string; he: string }> = Object.fromEntries(
+  const REGION_LABEL: Record<string, Localized> = Object.fromEntries(
     origins.map((o) => [o.id, o.label]),
   );
-  const isHe = locale === 'he';
   // Multi-select facets: type (grand/upright) and region. Empty = "All".
   // Within a facet the selections are OR'd; the two facets are AND'd together.
   const [types, setTypes] = useState<ShopType[]>([]);
@@ -89,7 +89,7 @@ export default function StoreGallery({
     }
   };
 
-  const titleFont = displayFont(isHe);
+  const titleFont = displayFont(locale);
   // Delicate serif for the descriptor line (Hebrew has no serif → soft sans).
   const allActive = types.length === 0 && regions.length === 0;
   const clearAll = () => {
@@ -173,7 +173,7 @@ export default function StoreGallery({
               { key: 'all', label: t('filter_all'), active: allActive, disabled: false, onClick: clearAll, extra: 'hidden lg:inline-block' },
               ...TYPES.map((tp) => ({
                 key: tp,
-                label: TYPE_LABEL[tp][locale],
+                label: pick(TYPE_LABEL[tp], locale),
                 active: types.includes(tp),
                 disabled: !availableTypes.has(tp),
                 onClick: () => toggleType(tp),
@@ -181,7 +181,7 @@ export default function StoreGallery({
               })),
               ...REGIONS.map((r) => ({
                 key: r,
-                label: REGION_LABEL[r][locale],
+                label: pick(REGION_LABEL[r], locale),
                 active: regions.includes(r),
                 disabled: !availableRegions.has(r),
                 onClick: () => toggleRegion(r),

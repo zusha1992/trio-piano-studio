@@ -6,14 +6,16 @@ import { useLocale } from 'next-intl';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Moon, Sun } from 'lucide-react';
 import Image from 'next/image';
-import Link from 'next/link';
 import {
   CATEGORIES,
   CONTACTS,
   ContactIcon,
 } from '@/components/layout/heroShared';
 import { useTheme } from '@/components/layout/ThemeContext';
+import LanguageToggle from '@/components/layout/LanguageToggle';
 import { EASE } from '@/lib/motion';
+import { pick, isRtl } from '@/lib/i18n';
+import { displayFont } from '@/lib/fonts';
 
 const AUTO_MS = 4000;
 const SWIPE_THRESHOLD = 50;
@@ -34,8 +36,7 @@ const slideVariants = {
  */
 export default function HeroMobile() {
   const locale = useLocale();
-  const isHe = locale === 'he';
-  const otherLocale = isHe ? 'en' : 'he';
+  const rtl = isRtl(locale);
   const pathname = usePathname();
   const router = useRouter();
 
@@ -43,7 +44,7 @@ export default function HeroMobile() {
 
   const { negative, toggle: toggleTheme } = useTheme();
 
-  const headingFont = isHe ? 'var(--font-rubik), sans-serif' : 'var(--font-arimo), sans-serif';
+  const headingFont = displayFont(locale);
 
   // Overlay color follows the theme (matte wash): black in dark, white in light.
   const grad = negative ? '0, 0, 0' : '255, 255, 255';
@@ -66,7 +67,7 @@ export default function HeroMobile() {
     setSlide(([i]) => [(i + step + CATEGORIES.length) % CATEGORIES.length, dir]);
   }, []);
   // Auto-advance to the next category, sliding in the reading direction.
-  const advance = useCallback(() => move(isHe ? -1 : 1, 1), [move, isHe]);
+  const advance = useCallback(() => move(rtl ? -1 : 1, 1), [move, rtl]);
   const goTo = useCallback((i: number) => {
     setSlide(([cur]) => [i, i >= cur ? 1 : -1]);
   }, []);
@@ -106,8 +107,8 @@ export default function HeroMobile() {
     // finger (left → dir 1, right → dir -1) and the landing category is mirrored
     // for RTL so "next" tracks the reading direction.
     if (Math.abs(dx) >= SWIPE_THRESHOLD && Math.abs(dx) >= Math.abs(dy)) {
-      if (dx < 0) move(1, isHe ? -1 : 1);
-      else move(-1, isHe ? 1 : -1);
+      if (dx < 0) move(1, rtl ? -1 : 1);
+      else move(-1, rtl ? 1 : -1);
       return;
     }
     // Anything else is a tap → enter the current category.
@@ -171,7 +172,7 @@ export default function HeroMobile() {
       <div
         role="button"
         tabIndex={0}
-        aria-label={isHe ? current.labelHe : current.labelEn}
+        aria-label={pick(current.label, locale)}
         className="absolute inset-0 z-[5] cursor-pointer touch-none select-none"
         style={{ touchAction: 'none', overscrollBehavior: 'none' }}
         onPointerDown={handlePointerDown}
@@ -187,7 +188,7 @@ export default function HeroMobile() {
         <AnimatePresence mode="wait">
           <motion.h2
             key={current.key}
-            dir={isHe ? 'rtl' : 'ltr'}
+            dir={rtl ? 'rtl' : 'ltr'}
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -12, transition: { duration: 0.22, ease: EASE } }}
@@ -195,14 +196,14 @@ export default function HeroMobile() {
             className="text-center text-[2.9rem] leading-none tracking-tight"
             style={{ fontFamily: headingFont, fontWeight: 400, color: fg }}
           >
-            {isHe ? current.labelHe : current.labelEn}
+            {pick(current.label, locale)}
           </motion.h2>
         </AnimatePresence>
       </div>
 
       {/* Header: logo + language/theme toggles (color follows the theme) */}
       <header
-        dir={isHe ? 'rtl' : 'ltr'}
+        dir={rtl ? 'rtl' : 'ltr'}
         className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-center justify-between px-5 pt-5"
       >
         <Image
@@ -223,12 +224,7 @@ export default function HeroMobile() {
           className="pointer-events-auto flex items-center gap-3"
           style={{ color: fg }}
         >
-          <Link
-            href={`/${otherLocale}`}
-            className="text-[11px] uppercase tracking-[0.25em]"
-          >
-            {otherLocale === 'he' ? 'עב' : 'EN'}
-          </Link>
+          <LanguageToggle triggerClassName="" align="end" />
           <button
             type="button"
             onClick={toggleTheme}
@@ -247,7 +243,7 @@ export default function HeroMobile() {
             <button
               key={c.key}
               type="button"
-              aria-label={isHe ? c.labelHe : c.labelEn}
+              aria-label={pick(c.label, locale)}
               onClick={() => goTo(i)}
               className="h-2 rounded-full transition-all duration-300"
               style={{
@@ -263,7 +259,7 @@ export default function HeroMobile() {
             <a
               key={c.icon}
               href={c.href}
-              aria-label={isHe ? c.labelHe : c.labelEn}
+              aria-label={pick(c.label, locale)}
               {...(c.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
             >
               <ContactIcon src={`/assets/icons/${c.icon}`} size={19} />

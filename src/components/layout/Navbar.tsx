@@ -6,12 +6,19 @@ import { useLocale } from 'next-intl';
 import { usePathname } from 'next/navigation';
 import { Menu, Moon, Sun, X } from 'lucide-react';
 import Logo from '@/components/ui/Logo';
+import LanguageToggle from '@/components/layout/LanguageToggle';
 import { CATEGORIES } from '@/components/layout/heroShared';
 import { useTheme } from '@/components/layout/ThemeContext';
+import { pick } from '@/lib/i18n';
+import { displayFont } from '@/lib/fonts';
 
 // The landing page surfaces contact details in its footer; the subpages don't,
 // so the toolbar carries a dedicated contact link after the categories.
-const CONTACT_ITEM = { key: 'contact', href: 'contact', labelHe: 'צור קשר', labelEn: 'Contact' };
+const CONTACT_ITEM = {
+  key: 'contact',
+  href: 'contact',
+  label: { he: 'צור קשר', en: 'Contact', ar: 'اتصل بنا', ru: 'Контакты' },
+};
 // Explicit toolbar order (reads left→right in LTR, mirrored in RTL):
 // About · The Store · The Workshop · Concerts · Contact.
 const NAV_ORDER = ['about', 'store', 'services', 'concerts'];
@@ -22,23 +29,16 @@ const NAV_ITEMS = [
 
 export default function Navbar() {
   const locale = useLocale();
-  const isHe = locale === 'he';
   const pathname = usePathname();
   const isHome = pathname === `/${locale}` || pathname === `/${locale}/`;
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const { negative, toggle: toggleTheme } = useTheme();
 
-  const otherLocale = isHe ? 'en' : 'he';
   const navHref = (key: string) => `/${locale}/${key}`;
 
-  // Switch language in place: keep the current path, just swap the locale
-  // segment (e.g. /en/store → /he/store) so we don't bounce back to home.
-  const restOfPath = pathname.replace(/^\/[a-z]{2}(?=\/|$)/, '');
-  const switchLocaleHref = `/${otherLocale}${restOfPath}`;
-
   // Same typeface as the home-screen category headers.
-  const headingFont = isHe ? 'var(--font-rubik), sans-serif' : 'var(--font-arimo), sans-serif';
+  const headingFont = displayFont(locale);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -79,7 +79,7 @@ export default function Navbar() {
                       }`}
                       style={{ fontFamily: headingFont, fontWeight: 400 }}
                     >
-                      {isHe ? c.labelHe : c.labelEn}
+                      {pick(c.label, locale)}
                     </Link>
                   </li>
                 );
@@ -88,12 +88,7 @@ export default function Navbar() {
 
             <div className="flex items-center gap-4">
             {/* Language toggle */}
-            <Link
-              href={switchLocaleHref}
-              className="text-[11px] uppercase tracking-[0.2em] text-[color:var(--c-cat)] transition-colors duration-300 hover:text-[color:var(--c-cat-active)]"
-            >
-              {otherLocale === 'he' ? 'עב' : 'EN'}
-            </Link>
+            <LanguageToggle triggerClassName="text-[color:var(--c-cat)] hover:text-[color:var(--c-cat-active)]" />
 
             {/* Theme toggle — shares the home screen's persisted preference */}
             <button
@@ -139,7 +134,7 @@ export default function Navbar() {
                 }`}
                 style={{ fontFamily: headingFont, fontWeight: 400 }}
               >
-                {isHe ? c.labelHe : c.labelEn}
+                {pick(c.label, locale)}
               </Link>
             );
           })}

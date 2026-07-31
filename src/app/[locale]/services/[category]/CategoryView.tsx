@@ -14,6 +14,7 @@ import AdminGalleryEditor from '@/components/admin/AdminGalleryEditor';
 import { useAdmin } from '@/components/admin/AdminContext';
 import { EASE } from '@/lib/motion';
 import { displayFont } from '@/lib/fonts';
+import { pick, isRtl, type Locale } from '@/lib/i18n';
 
 export default function CategoryView({
   cat,
@@ -25,9 +26,9 @@ export default function CategoryView({
   next: WorkshopCategory;
 }) {
   const t = useTranslations('services');
-  const locale = useLocale() as 'en' | 'he';
-  const isHe = locale === 'he';
-  const titleFont = displayFont(isHe);
+  const locale = useLocale() as Locale;
+  const rtl = isRtl(locale);
+  const titleFont = displayFont(locale);
 
   const { editMode } = useAdmin();
   const router = useRouter();
@@ -70,8 +71,8 @@ export default function CategoryView({
   const reveal = { initial: false as const };
 
   // Reading-direction aware arrows: "previous" points to the start of the line.
-  const BackArrow = isHe ? ChevronRight : ChevronLeft;
-  const FwdArrow = isHe ? ChevronLeft : ChevronRight;
+  const BackArrow = rtl ? ChevronRight : ChevronLeft;
+  const FwdArrow = rtl ? ChevronLeft : ChevronRight;
 
   return (
     <>
@@ -97,7 +98,7 @@ export default function CategoryView({
           entity="workshop_category"
           id={cat.id}
           column="name"
-          value={cat.name[locale]}
+          value={cat.name[locale] ?? ''}
           label="Category name"
           wrapAs="div"
           className="ms-4 mt-4 sm:ms-8 md:ms-14 lg:ms-24"
@@ -109,7 +110,7 @@ export default function CategoryView({
             className="text-5xl leading-[0.98] tracking-tight text-[var(--c-text)] sm:text-6xl lg:text-7xl"
             style={{ fontFamily: titleFont, fontWeight: 500 }}
           >
-            {cat.name[locale]}
+            {pick(cat.name, locale)}
           </motion.h1>
         </EditableText>
 
@@ -118,7 +119,7 @@ export default function CategoryView({
           entity="workshop_category"
           id={cat.id}
           column="description"
-          value={cat.description[locale]}
+          value={cat.description[locale] ?? ''}
           multiline
           label="Category description"
           wrapAs="div"
@@ -130,7 +131,7 @@ export default function CategoryView({
             transition={{ delay: 0.2, duration: 0.7, ease: EASE }}
             className="text-lg leading-relaxed text-[var(--c-dim)]"
           >
-            {cat.description[locale]}
+            {pick(cat.description, locale)}
           </motion.p>
         </EditableText>
 
@@ -165,7 +166,7 @@ export default function CategoryView({
                   entity="workshop_service"
                   id={s.id}
                   column="name"
-                  value={s.name[locale]}
+                  value={s.name[locale] ?? ''}
                   label="Service name"
                   wrapAs="div"
                 >
@@ -173,22 +174,22 @@ export default function CategoryView({
                     className="text-lg tracking-tight text-[var(--c-text)] sm:text-xl"
                     style={{ fontFamily: titleFont, fontWeight: 400 }}
                   >
-                    {s.name[locale] || (editMode ? 'Untitled service' : '')}
+                    {pick(s.name, locale) || (editMode ? 'Untitled service' : '')}
                   </h3>
                 </EditableText>
-                {(s.description[locale] || editMode) && (
+                {(pick(s.description, locale) || editMode) && (
                   <EditableText
                     entity="workshop_service"
                     id={s.id}
                     column="description"
-                    value={s.description[locale]}
+                    value={s.description[locale] ?? ''}
                     multiline
                     label="Service description"
                     wrapAs="div"
                     className="mt-1.5 max-w-xs"
                   >
                     <p className="text-sm leading-relaxed text-[var(--c-dim)]">
-                      {s.description[locale] || (editMode ? 'Add description…' : '')}
+                      {pick(s.description, locale) || (editMode ? 'Add description…' : '')}
                     </p>
                   </EditableText>
                 )}
@@ -212,7 +213,7 @@ export default function CategoryView({
           {/* Image gallery / carousel */}
           <motion.div {...reveal} className="order-1 md:order-2">
             {images.length > 0 && (
-              <ImageCarousel images={images} alt={cat.name[locale]} isHe={isHe} />
+              <ImageCarousel images={images} alt={pick(cat.name, locale)} isHe={rtl} />
             )}
             <AdminGalleryEditor
               entityType="workshop_category"
@@ -235,7 +236,7 @@ export default function CategoryView({
               className="text-sm tracking-tight sm:text-base"
               style={{ fontFamily: titleFont, fontWeight: 400 }}
             >
-              {prev.name[locale]}
+              {pick(prev.name, locale)}
             </span>
           </Link>
 
@@ -247,7 +248,7 @@ export default function CategoryView({
               className="text-sm tracking-tight sm:text-base"
               style={{ fontFamily: titleFont, fontWeight: 400 }}
             >
-              {next.name[locale]}
+              {pick(next.name, locale)}
             </span>
             <FwdArrow size={18} className="shrink-0" />
           </Link>

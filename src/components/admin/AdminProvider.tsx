@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState, type ReactNode, type FormEvent } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { BarChart3, X } from 'lucide-react';
+import { BarChart3, Languages, X } from 'lucide-react';
 import { AdminContext } from './AdminContext';
 import AnalyticsPanel from './AnalyticsPanel';
 
@@ -206,6 +206,45 @@ function EditToolbar({
   onLogout: () => void;
   onAnalytics: () => void;
 }) {
+  // Fills missing en/ar/ru translations for existing content by looping the
+  // batched backfill endpoint until it reports done.
+  const [translating, setTranslating] = useState(false);
+  const [translateMsg, setTranslateMsg] = useState<string | null>(null);
+
+  const runTranslate = useCallback(async () => {
+    if (translating) return;
+    setTranslating(true);
+    setTranslateMsg('Translating…');
+    let filled = 0;
+    try {
+      for (let i = 0; i < 100; i += 1) {
+        const res = await fetch('/api/admin/translate-all', { method: 'POST' });
+        const data = (await res.json()) as {
+          ok?: boolean;
+          processed?: number;
+          remaining?: number;
+          done?: boolean;
+          error?: string;
+        };
+        if (!res.ok || !data.ok) {
+          setTranslateMsg(data.error ?? 'Failed');
+          break;
+        }
+        filled += data.processed ?? 0;
+        if (data.done) {
+          setTranslateMsg(filled ? `Filled ${filled}` : 'Up to date');
+          break;
+        }
+        setTranslateMsg(`Translating… ${filled} (${data.remaining} left)`);
+      }
+    } catch {
+      setTranslateMsg('Network error');
+    } finally {
+      setTranslating(false);
+      setTimeout(() => setTranslateMsg(null), 4000);
+    }
+  }, [translating]);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 24 }}
@@ -236,6 +275,17 @@ function EditToolbar({
         >
           <BarChart3 size={13} />
           Analytics
+        </button>
+
+        <button
+          type="button"
+          onClick={runTranslate}
+          disabled={translating}
+          aria-label="Fill translations"
+          className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] uppercase tracking-[0.18em] text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-neutral-900 disabled:opacity-50"
+        >
+          <Languages size={13} />
+          {translateMsg ?? 'Translate'}
         </button>
 
         <button

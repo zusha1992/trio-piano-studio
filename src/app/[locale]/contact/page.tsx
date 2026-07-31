@@ -7,6 +7,7 @@ import emailjs from '@emailjs/browser';
 import { CONTACTS, ContactIcon } from '@/components/layout/heroShared';
 import { EASE } from '@/lib/motion';
 import { displayFont } from '@/lib/fonts';
+import { pick, isRtl } from '@/lib/i18n';
 
 const EMAILJS_SERVICE_ID = 'service_52uluqq';
 const EMAILJS_TEMPLATE_ID = 'template_8ozp076';
@@ -21,9 +22,9 @@ const LTR_ICONS = [
 
 export default function ContactPage() {
   const t = useTranslations('contact');
-  const locale = useLocale() as 'en' | 'he';
-  const isHe = locale === 'he';
-  const titleFont = displayFont(isHe);
+  const locale = useLocale();
+  const rtl = isRtl(locale);
+  const titleFont = displayFont(locale);
 
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
   // Which contact icon is hovered/focused — drives the reveal text to its side.
@@ -64,7 +65,7 @@ export default function ContactPage() {
   const details = [
     ...CONTACTS.map((c) => ({
       icon: c.icon,
-      text: isHe ? c.labelHe : c.labelEn,
+      text: pick(c.label, locale),
       href: c.href,
       external: c.external ?? false,
     })),
@@ -118,9 +119,9 @@ export default function ContactPage() {
               {active && (
                 <motion.div
                   key={active}
-                  initial={{ opacity: 0, x: isHe ? -24 : 24 }}
+                  initial={{ opacity: 0, x: rtl ? -24 : 24 }}
                   animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: isHe ? -24 : 24 }}
+                  exit={{ opacity: 0, x: rtl ? -24 : 24 }}
                   transition={{ duration: 0.4, ease: EASE }}
                   className="absolute inset-0 flex items-center justify-end whitespace-nowrap text-lg text-[var(--c-text)]"
                 >

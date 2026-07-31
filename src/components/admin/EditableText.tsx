@@ -6,6 +6,15 @@ import { useRouter } from 'next/navigation';
 import { useLocale } from 'next-intl';
 import { Pencil, X } from 'lucide-react';
 import { useAdmin } from './AdminContext';
+import { isRtl } from '@/lib/i18n';
+
+// English names for the editor chrome (the admin UI is in English).
+const LANG_LABEL: Record<string, string> = {
+  he: 'Hebrew',
+  en: 'English',
+  ar: 'Arabic',
+  ru: 'Russian',
+};
 
 interface EditableTextProps {
   /** Entity key understood by /api/admin/content (e.g. 'about_section'). */
@@ -139,12 +148,12 @@ function EditModal({
   };
 
   const useTextarea = multiline || array;
-  const isHe = locale === 'he';
-  const langName = isHe ? 'Hebrew' : locale === 'en' ? 'English' : locale.toUpperCase();
+  const rtl = isRtl(locale);
+  const langName = LANG_LABEL[locale] ?? locale.toUpperCase();
   const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
 
   return createPortal(
-    <div className="fixed inset-0 z-[110] flex items-center justify-center p-6" dir={isHe ? 'rtl' : 'ltr'}>
+    <div className="fixed inset-0 z-[110] flex items-center justify-center p-6" dir={rtl ? 'rtl' : 'ltr'}>
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
       <div className="relative w-full max-w-lg rounded-2xl bg-white p-7 text-neutral-900 shadow-2xl">
         <button
@@ -195,7 +204,7 @@ function EditModal({
             value={text}
             onChange={(e) => setText(e.target.value)}
             rows={array ? 10 : 5}
-            dir={isHe ? 'rtl' : 'ltr'}
+            dir={rtl ? 'rtl' : 'ltr'}
             className="w-full resize-y rounded-lg border border-neutral-300 bg-white px-4 py-3 text-[15px] leading-relaxed outline-none focus:border-neutral-900"
           />
         ) : (
@@ -203,7 +212,7 @@ function EditModal({
             autoFocus
             value={text}
             onChange={(e) => setText(e.target.value)}
-            dir={isHe ? 'rtl' : 'ltr'}
+            dir={rtl ? 'rtl' : 'ltr'}
             className="w-full rounded-lg border border-neutral-300 bg-white px-4 py-3 text-[15px] outline-none focus:border-neutral-900"
           />
         )}

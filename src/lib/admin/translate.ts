@@ -7,8 +7,8 @@
 // The canonical authoring language for content.
 export const SOURCE_LANG = 'he';
 
-// Languages we currently translate into. Extend as locales are added (ar, ru).
-export const TARGET_LANGS = ['en'] as const;
+// Languages we translate the Hebrew source into.
+export const TARGET_LANGS = ['en', 'ar', 'ru'] as const;
 export type TargetLang = (typeof TARGET_LANGS)[number];
 
 // Every active site locale (source + targets). Used when an edit is applied to

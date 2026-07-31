@@ -12,6 +12,8 @@ export type ShopRegion = string;
 export interface LocalizedText {
   en: string;
   he: string;
+  ar?: string;
+  ru?: string;
 }
 
 export interface ShopColor {

@@ -1,3 +1,13 @@
-// Heading/display font stack, direction-aware: Rubik for Hebrew, Arimo for Latin.
-export const displayFont = (isHe: boolean) =>
-  isHe ? 'var(--font-rubik), sans-serif' : 'var(--font-arimo), sans-serif';
+// Heading/display font stack, per locale:
+//   he → Rubik, ar → Cairo, ru → Rubik (Cyrillic), en → Arimo.
+export const displayFont = (locale: string): string => {
+  switch (locale) {
+    case 'he':
+    case 'ru':
+      return 'var(--font-rubik), sans-serif';
+    case 'ar':
+      return 'var(--font-cairo), sans-serif';
+    default:
+      return 'var(--font-arimo), sans-serif';
+  }
+};

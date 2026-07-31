@@ -7,6 +7,8 @@
 export interface LocalizedText {
   en: string;
   he: string;
+  ar?: string;
+  ru?: string;
 }
 
 export interface Concert {

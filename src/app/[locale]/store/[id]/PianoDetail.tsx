@@ -16,6 +16,7 @@ import PianoEditor from '@/components/admin/PianoEditor';
 import { useAdmin } from '@/components/admin/AdminContext';
 import { EASE } from '@/lib/motion';
 import { displayFont } from '@/lib/fonts';
+import { pick, isRtl, type Locale } from '@/lib/i18n';
 
 // Diameter matches the color swatch, bumped by 5px of radius (i.e. +10px).
 const SPEC_ICON = 26;
@@ -47,9 +48,9 @@ export default function PianoDetail({
   colors?: ColorOption[];
 }) {
   const t = useTranslations('store');
-  const locale = useLocale() as 'en' | 'he';
-  const isHe = locale === 'he';
-  const titleFont = displayFont(isHe);
+  const locale = useLocale() as Locale;
+  const rtl = isRtl(locale);
+  const titleFont = displayFont(locale);
   const { editMode } = useAdmin();
 
   // Gallery images — every piano ships its own photo set (id-0 … id-N); the
@@ -60,20 +61,20 @@ export default function PianoDetail({
   // static so they don't re-animate ("slide up") while scrolling.
   const reveal = { initial: false } as const;
 
-  const BackArrow = isHe ? ChevronRight : ChevronLeft;
-  const FwdArrow = isHe ? ChevronLeft : ChevronRight;
+  const BackArrow = rtl ? ChevronRight : ChevronLeft;
+  const FwdArrow = rtl ? ChevronLeft : ChevronRight;
 
   const typePhrase = t(item.type === 'grand' ? 'type_grand' : 'type_upright');
   const priceText =
     item.price === 'contact' ? t('price_contact') : `₪${item.price.toLocaleString('en-US')}`;
   const description = item.description
-    ? item.description[locale]
+    ? pick(item.description, locale)
     : t('desc_fallback', { brand: item.brand, model: item.model, type: typePhrase });
 
   const brandRow = brands.find((b) => b.name.toLowerCase() === item.brand.toLowerCase());
   const brandLogo = brandRow?.logoUrl ?? null;
   const originRow = origins.find((o) => o.id === item.region);
-  const originLabel = originRow?.label[locale] || originRow?.label.en || item.region;
+  const originLabel = pick(originRow?.label, locale) || item.region;
   const originIcon = originRow?.flagUrl ?? null;
 
   // Descriptive facets; serial + price are rendered as a pair (below) so the
@@ -121,7 +122,7 @@ export default function PianoDetail({
             className="inline-block rounded-full border border-[var(--c-border)]"
             style={{ width: SPEC_ICON, height: SPEC_ICON, backgroundColor: item.color.hex }}
           />
-          {item.color.name[locale]}
+          {pick(item.color.name, locale)}
         </span>
       ),
     },
@@ -238,7 +239,7 @@ export default function PianoDetail({
             >
               <p className="text-base leading-relaxed text-[var(--c-text)]">{description}</p>
             </EditableText>
-            {(item.details?.[locale] || editMode) && (
+            {(pick(item.details, locale) || editMode) && (
               <EditableText
                 entity="piano"
                 id={item.id}
@@ -251,7 +252,7 @@ export default function PianoDetail({
                 className="mt-4"
               >
                 <p className="text-base leading-relaxed text-[var(--c-muted)]">
-                  {item.details?.[locale] || (editMode ? 'Add a second paragraph…' : '')}
+                  {pick(item.details, locale) || (editMode ? 'Add a second paragraph…' : '')}
                 </p>
               </EditableText>
             )}
@@ -294,7 +295,7 @@ export default function PianoDetail({
               <ImageCarousel
                 images={images}
                 alt={`${item.brand} ${item.model}`}
-                isHe={isHe}
+                isHe={rtl}
                 frameClassName="aspect-[4/5] md:aspect-square"
               />
             )}

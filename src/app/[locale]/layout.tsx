@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
-import { Arimo, Cormorant_Garamond, DM_Sans, EB_Garamond, Heebo, Rubik } from 'next/font/google';
+import { Arimo, Cairo, Cormorant_Garamond, DM_Sans, EB_Garamond, Heebo, Rubik } from 'next/font/google';
+import { dirOf } from '@/lib/i18n';
 import Navbar from '@/components/layout/Navbar';
 import Hero from '@/components/layout/Hero';
 import { GateProvider } from '@/components/layout/GateContext';
@@ -35,9 +36,17 @@ const heebo = Heebo({
 });
 
 const rubik = Rubik({
-  subsets: ['hebrew', 'latin'],
+  subsets: ['hebrew', 'latin', 'cyrillic'],
   weight: ['300', '400', '500'],
   variable: '--font-rubik',
+  display: 'swap',
+});
+
+// Arabic display/body font — geometric, pairs with Rubik.
+const cairo = Cairo({
+  subsets: ['arabic', 'latin'],
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-cairo',
   display: 'swap',
 });
 
@@ -83,8 +92,8 @@ export default async function LocaleLayout({
   return (
     <html
       lang={locale}
-      dir={locale === 'he' ? 'rtl' : 'ltr'}
-      className={`${cormorant.variable} ${dmSans.variable} ${heebo.variable} ${rubik.variable} ${arimo.variable} ${ebGaramond.variable}`}
+      dir={dirOf(locale)}
+      className={`${cormorant.variable} ${dmSans.variable} ${heebo.variable} ${rubik.variable} ${cairo.variable} ${arimo.variable} ${ebGaramond.variable}`}
       suppressHydrationWarning
     >
       <body>

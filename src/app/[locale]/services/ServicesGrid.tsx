@@ -11,6 +11,7 @@ import type { WorkshopCategory } from '@/data/workshopServices';
 import ContactCTA from '@/components/sections/ContactCTA';
 import { EASE } from '@/lib/motion';
 import { displayFont } from '@/lib/fonts';
+import { pick, LOCALES, type Locale, type Localized } from '@/lib/i18n';
 
 const MotionLink = motion(Link);
 
@@ -18,10 +19,9 @@ const norm = (s: string) => s.toLowerCase().trim();
 
 export default function ServicesGrid({ categories }: { categories: WorkshopCategory[] }) {
   const t = useTranslations('services');
-  const locale = useLocale() as 'en' | 'he';
-  const isHe = locale === 'he';
+  const locale = useLocale() as Locale;
   const router = useRouter();
-  const titleFont = displayFont(isHe);
+  const titleFont = displayFont(locale);
 
   // Free-text search over the individual fixes (both languages), narrowing the
   // grid to the categories that contain a matching fix.
@@ -30,8 +30,8 @@ export default function ServicesGrid({ categories }: { categories: WorkshopCateg
 
   // Match on fix names only (in either language) so the filtered categories
   // stay in sync with the autocomplete suggestions below.
-  const nameMatches = (s: { name: { en: string; he: string } }, q: string) =>
-    norm(s.name.en).includes(q) || norm(s.name.he).includes(q);
+  const nameMatches = (s: { name: Localized }, q: string) =>
+    LOCALES.some((l) => norm(s.name[l] ?? '').includes(q));
 
   const visible = useMemo(() => {
     const q = norm(query);
@@ -50,10 +50,10 @@ export default function ServicesGrid({ categories }: { categories: WorkshopCateg
     const seen = new Set<string>();
     for (const c of categories) {
       for (const s of c.services) {
-        const key = `${s.name[locale]}|${c.id}`;
+        const key = `${pick(s.name, locale)}|${c.id}`;
         if (nameMatches(s, q) && !seen.has(key)) {
           seen.add(key);
-          matches.push({ name: s.name[locale], catId: c.id, catName: c.name[locale] });
+          matches.push({ name: pick(s.name, locale), catId: c.id, catName: pick(c.name, locale) });
         }
       }
     }
@@ -162,7 +162,7 @@ export default function ServicesGrid({ categories }: { categories: WorkshopCateg
             >
               <Image
                 src={cat.image}
-                alt={cat.name[locale]}
+                alt={pick(cat.name, locale)}
                 fill
                 sizes="(max-width: 768px) 50vw, 25vw"
                 className="object-cover object-center"
@@ -179,13 +179,13 @@ export default function ServicesGrid({ categories }: { categories: WorkshopCateg
                   className="text-xl leading-tight tracking-tight text-white sm:text-2xl"
                   style={{ fontFamily: titleFont, fontWeight: 400 }}
                 >
-                  {cat.name[locale]}
+                  {pick(cat.name, locale)}
                 </h3>
 
                 {/* Desktop only: description + Learn More revealed on hover.
                     Mobile shows just the title (no hover gestures there). */}
                 <div className="hidden max-h-0 overflow-hidden opacity-0 transition-all duration-500 ease-out md:block md:group-hover:mt-3 md:group-hover:max-h-60 md:group-hover:opacity-100">
-                  <p className="text-sm leading-relaxed text-white/85">{cat.description[locale]}</p>
+                  <p className="text-sm leading-relaxed text-white/85">{pick(cat.description, locale)}</p>
                   <span
                     className="mt-4 inline-block bg-white px-5 py-2 text-[10px] uppercase tracking-[0.25em] text-black"
                     style={{ fontFamily: titleFont, fontWeight: 400 }}

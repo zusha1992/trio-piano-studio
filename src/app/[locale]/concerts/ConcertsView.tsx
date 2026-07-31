@@ -18,6 +18,7 @@ import PublishButton from '@/components/admin/PublishButton';
 import { useAdmin } from '@/components/admin/AdminContext';
 import { EASE } from '@/lib/motion';
 import { displayFont } from '@/lib/fonts';
+import { pick, isRtl, type Locale } from '@/lib/i18n';
 
 const EMAILJS_SERVICE_ID = 'service_52uluqq';
 const EMAILJS_TEMPLATE_ID = 'template_8ozp076';
@@ -31,10 +32,10 @@ export default function ConcertsView({
   galleryImages: EntityImage[];
 }) {
   const t = useTranslations('concerts');
-  const locale = useLocale() as 'en' | 'he';
+  const locale = useLocale() as Locale;
   const gallery = galleryImages.map((i) => i.url);
-  const isHe = locale === 'he';
-  const titleFont = displayFont(isHe);
+  const rtl = isRtl(locale);
+  const titleFont = displayFont(locale);
 
   const { editMode } = useAdmin();
   const router = useRouter();
@@ -182,7 +183,7 @@ export default function ConcertsView({
     ctx.strokeRect(22, 22, W - 44, H - 44);
 
     ctx.textAlign = 'center';
-    ctx.direction = isHe ? 'rtl' : 'ltr';
+    ctx.direction = rtl ? 'rtl' : 'ltr';
 
     // Logo (preserve aspect ratio).
     if (logo.width) {
@@ -193,14 +194,14 @@ export default function ConcertsView({
 
     ctx.fillStyle = '#111111';
     ctx.font = '600 42px Arial';
-    ctx.fillText(concert.name[locale], cx, 232);
+    ctx.fillText(pick(concert.name, locale), cx, 232);
 
     ctx.fillStyle = '#3a3a3c';
     ctx.font = '400 19px Arial';
     ctx.direction = 'ltr';
     ctx.fillText(`${fmtDate(concert.date)}  ·  ${concert.time}`, cx, 272);
-    ctx.direction = isHe ? 'rtl' : 'ltr';
-    ctx.fillText(concert.venue[locale], cx, 302);
+    ctx.direction = rtl ? 'rtl' : 'ltr';
+    ctx.fillText(pick(concert.venue, locale), cx, 302);
 
     // QR
     const qrSize = 300;
@@ -211,7 +212,7 @@ export default function ConcertsView({
     ctx.font = '500 20px monospace';
     ctx.direction = 'ltr';
     ctx.fillText(ticketId, cx, 340 + qrSize + 44);
-    ctx.direction = isHe ? 'rtl' : 'ltr';
+    ctx.direction = rtl ? 'rtl' : 'ltr';
 
     // Divider
     ctx.strokeStyle = '#ededed';
@@ -246,7 +247,7 @@ export default function ConcertsView({
   const reveal = { initial: false } as const;
 
   const fmtDate = (iso: string) =>
-    new Intl.DateTimeFormat(isHe ? 'he-IL' : 'en-GB', {
+    new Intl.DateTimeFormat(locale === 'en' ? 'en-GB' : locale, {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
@@ -283,7 +284,7 @@ export default function ConcertsView({
                 }`}
               >
                 <button type="button" onClick={() => setSelectedId(c.id)} className="flex items-center gap-2">
-                  <span>{c.name[locale] || 'Untitled'}</span>
+                  <span>{pick(c.name, locale) || 'Untitled'}</span>
                   <span className="opacity-60">{c.date}</span>
                   {c.published === false && (
                     <span className="rounded bg-amber-400 px-1.5 text-[9px] uppercase tracking-wide text-black">
@@ -327,7 +328,7 @@ export default function ConcertsView({
                     entity="concert"
                     id={concert.id}
                     column="name"
-                    value={concert.name[locale]}
+                    value={concert.name[locale] ?? ''}
                     label="Concert name"
                     wrapAs="div"
                   >
@@ -335,7 +336,7 @@ export default function ConcertsView({
                       className="text-3xl tracking-tight text-[var(--c-text)] sm:text-4xl"
                       style={{ fontFamily: titleFont, fontWeight: 400 }}
                     >
-                      {concert.name[locale]}
+                      {pick(concert.name, locale)}
                     </h2>
                   </EditableText>
                   <button
@@ -350,15 +351,15 @@ export default function ConcertsView({
                   entity="concert"
                   id={concert.id}
                   column="venue"
-                  value={concert.venue[locale]}
+                  value={concert.venue[locale] ?? ''}
                   label="Venue"
                   wrapAs="div"
                 >
                   <p className="mt-1.5 text-[11px] uppercase tracking-[0.25em] text-[var(--c-text)]">
-                    {concert.venue[locale]}
+                    {pick(concert.venue, locale)}
                   </p>
                 </EditableText>
-                {(concert.artists?.[locale] || editMode) && (
+                {(pick(concert.artists, locale) || editMode) && (
                   <EditableText
                     entity="concert"
                     id={concert.id}
@@ -368,13 +369,13 @@ export default function ConcertsView({
                     wrapAs="div"
                   >
                     <p className="mt-1.5 text-sm text-[var(--c-muted)]">
-                      {concert.artists?.[locale] || (editMode ? 'Add artists…' : '')}
+                      {pick(concert.artists, locale) || (editMode ? 'Add artists…' : '')}
                     </p>
                   </EditableText>
                 )}
               </div>
 
-              {(concert.description?.[locale] || editMode) && (
+              {(pick(concert.description, locale) || editMode) && (
                 <EditableText
                   entity="concert"
                   id={concert.id}
@@ -386,7 +387,7 @@ export default function ConcertsView({
                   className="mt-8 max-w-xl md:max-w-[30rem]"
                 >
                   <p className="text-base leading-relaxed text-[var(--c-muted)] sm:text-lg">
-                    {concert.description?.[locale] || (editMode ? 'Add a description…' : '')}
+                    {pick(concert.description, locale) || (editMode ? 'Add a description…' : '')}
                   </p>
                 </EditableText>
               )}
@@ -401,7 +402,7 @@ export default function ConcertsView({
                   {concert.poster && (
                     <Image
                       src={concert.poster}
-                      alt={concert.name[locale]}
+                      alt={pick(concert.name, locale)}
                       fill
                       className="object-cover"
                       sizes="(max-width: 768px) 100vw, 45vw"
@@ -417,8 +418,8 @@ export default function ConcertsView({
               ) : (
                 <ImageCarousel
                   images={[concert.poster]}
-                  alt={concert.name[locale]}
-                  isHe={isHe}
+                  alt={pick(concert.name, locale)}
+                  isHe={rtl}
                   frameClassName="aspect-square w-full"
                 />
               )}
@@ -431,7 +432,7 @@ export default function ConcertsView({
           {gallery.length > 0 && (
             <ImageCarousel
               images={gallery}
-              isHe={isHe}
+              isHe={rtl}
               frameClassName="aspect-[4/5] sm:aspect-[16/9] lg:aspect-[21/9]"
             />
           )}
