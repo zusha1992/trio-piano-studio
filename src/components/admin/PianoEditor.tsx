@@ -3,6 +3,7 @@
 import { useEffect, useState, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
+import { useLocale } from 'next-intl';
 import { Loader2, Trash2, X } from 'lucide-react';
 import type { ShopItem } from '@/data/shopItems';
 import type { BrandOption, OriginOption, ColorOption } from '@/lib/content';
@@ -25,6 +26,7 @@ export default function PianoEditor({
   colors: ColorOption[];
 }) {
   const router = useRouter();
+  const locale = useLocale();
 
   const [model, setModel] = useState(item.model);
   const [serial, setSerial] = useState(item.serial ?? '');
@@ -77,7 +79,7 @@ export default function PianoEditor({
     if (!window.confirm('Delete this piano? This cannot be undone.')) return;
     setDeleting(true);
     await fetch(`/api/admin/piano/${item.id}`, { method: 'DELETE' });
-    router.push('/store');
+    router.push(`/${locale}/${item.rental ? 'rental' : 'store'}`);
     router.refresh();
   };
 
@@ -227,30 +229,34 @@ export default function PianoEditor({
           </select>
         </label>
 
-        <div className={labelCls}>
-          Price ₪
-          <div className="flex items-center gap-2">
-            <input
-              type="number"
-              value={price}
-              disabled={contact}
-              onChange={(e) => setPrice(e.target.value)}
-              onBlur={() => !contact && saveScalar({ price_ils: price })}
-              className={`${inputCls} disabled:opacity-40`}
-            />
+        {/* Rentals are priced per client and occasion, so the rental page
+            shows no price at all — the field is hidden rather than ignored. */}
+        {!item.rental && (
+          <div className={labelCls}>
+            Price ₪
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                value={price}
+                disabled={contact}
+                onChange={(e) => setPrice(e.target.value)}
+                onBlur={() => !contact && saveScalar({ price_ils: price })}
+                className={`${inputCls} disabled:opacity-40`}
+              />
+            </div>
+            <label className="mt-1 flex items-center gap-1.5 text-[10px] normal-case tracking-normal text-neutral-500">
+              <input
+                type="checkbox"
+                checked={contact}
+                onChange={(e) => {
+                  setContact(e.target.checked);
+                  saveScalar({ price_ils: e.target.checked ? 'contact' : Number(price) || 0 });
+                }}
+              />
+              Price on request
+            </label>
           </div>
-          <label className="mt-1 flex items-center gap-1.5 text-[10px] normal-case tracking-normal text-neutral-500">
-            <input
-              type="checkbox"
-              checked={contact}
-              onChange={(e) => {
-                setContact(e.target.checked);
-                saveScalar({ price_ils: e.target.checked ? 'contact' : Number(price) || 0 });
-              }}
-            />
-            Price on request
-          </label>
-        </div>
+        )}
 
         <label className={labelCls}>
           Width (cm)
@@ -283,10 +289,24 @@ export default function PianoEditor({
           />
         </label>
 
-        <div className="flex items-end pb-2">
+        <div className="flex items-end gap-5 pb-2">
           <label className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-neutral-500">
             <input type="checkbox" checked={item.wip === true} onChange={(e) => saveScalar({ wip: e.target.checked })} />
             Restoration
+          </label>
+          {/* Moving a piano between the shop and the rental fleet changes the
+              section it lives in, so follow it to its new address. */}
+          <label className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-neutral-500">
+            <input
+              type="checkbox"
+              checked={item.rental === true}
+              onChange={async (e) => {
+                const rental = e.target.checked;
+                await saveScalar({ rental });
+                router.push(`/${locale}/${rental ? 'rental' : 'store'}/${item.id}`);
+              }}
+            />
+            Rental
           </label>
         </div>
       </div>

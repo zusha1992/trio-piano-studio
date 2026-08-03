@@ -40,14 +40,26 @@ const TYPE_LABEL: Record<ShopType, Localized> = {
 
 const TYPES: ShopType[] = ['grand', 'upright'];
 
-export default function StoreGallery({
+/**
+ * The piano grid, shared by the shop and the rental fleet. The two differ only
+ * in their heading copy, the intro paragraph the rental page carries, and the
+ * section a tile links into — the filters, tiles and admin affordances are the
+ * same, so they stay one component.
+ */
+export default function PianoGallery({
   pianos,
   origins = [],
+  variant = 'store',
 }: {
   pianos: ShopItem[];
   origins?: OriginOption[];
+  variant?: 'store' | 'rental';
 }) {
   const t = useTranslations('store');
+  // Heading copy comes from the section's own namespace ('store' | 'rental').
+  const tv = useTranslations(variant);
+  const isRental = variant === 'rental';
+  const base = isRental ? 'rental' : 'store';
   const locale = useLocale() as Locale;
 
   // Region filter facets come from the origins library, limited to those that
@@ -70,9 +82,13 @@ export default function StoreGallery({
   const addPiano = async () => {
     setAdding(true);
     try {
-      const res = await fetch('/api/admin/piano', { method: 'POST' });
+      const res = await fetch('/api/admin/piano', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ rental: isRental }),
+      });
       const data = (await res.json()) as { id?: string };
-      if (data.id) router.push(`/${locale}/store/${data.id}`);
+      if (data.id) router.push(`/${locale}/${base}/${data.id}`);
       else router.refresh();
     } finally {
       setAdding(false);
@@ -145,22 +161,10 @@ export default function StoreGallery({
     }));
   }, [items]);
 
-  return (
-    <>
-      <section className="mx-auto max-w-[100rem] px-6 pb-20 pt-32 sm:px-10 md:pt-44 lg:px-16 lg:pt-52">
-        {/* Title row — big heading (indented from the gallery edge), filters
-            bottom-aligned on the right */}
-        <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="ms-4 text-6xl leading-[0.95] tracking-tight text-[var(--c-text)] sm:ms-8 sm:text-7xl md:ms-14 lg:ms-24 lg:text-8xl"
-            style={{ fontFamily: titleFont, fontWeight: 500 }}
-          >
-            {t('hero_title')}
-          </motion.h1>
-
+  // The chips themselves — the shop hangs them off the title, the rental page
+  // off the bottom of its intro paragraph (see below), so they're built once
+  // and placed by variant.
+  const filters = (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -204,7 +208,44 @@ export default function StoreGallery({
               </button>
             ))}
           </motion.div>
+  );
+
+  return (
+    <>
+      <section className="mx-auto max-w-[100rem] px-6 pb-20 pt-32 sm:px-10 md:pt-44 lg:px-16 lg:pt-52">
+        {/* Title row — big heading (indented from the gallery edge). In the
+            shop the filters sit here, bottom-aligned with the heading. */}
+        <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="ms-4 text-6xl leading-[0.95] tracking-tight text-[var(--c-text)] sm:ms-8 sm:text-7xl md:ms-14 lg:ms-24 lg:text-8xl"
+            style={{ fontFamily: titleFont, fontWeight: 500 }}
+          >
+            {tv('hero_title')}
+          </motion.h1>
+
+          {!isRental && filters}
         </div>
+
+        {/* Rental only: what a rental includes, before the fleet itself. The
+            filters drop down to this row and sit on the paragraph's last line,
+            so the heading stays uncrowded. */}
+        {isRental && (
+          <div className="mt-10 flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
+            <motion.p
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.7, ease: EASE }}
+              className="ms-4 max-w-3xl text-base leading-relaxed text-[var(--c-text)] sm:ms-8 sm:text-lg md:ms-14 lg:ms-24"
+            >
+              {tv('intro')}
+            </motion.p>
+
+            {filters}
+          </div>
+        )}
 
         {/* Editorial asymmetric gallery — grands wide, uprights square */}
         <div className="mt-12 grid grid-cols-2 gap-3 [grid-auto-flow:dense] sm:gap-4 md:mt-16 md:grid-cols-3 md:auto-rows-[24rem] lg:auto-rows-[30rem]">
@@ -212,7 +253,7 @@ export default function StoreGallery({
             {tiles.map(({ item, cls }) => (
               <MotionLink
                 key={item.id}
-                href={`/${locale}/store/${item.id}`}
+                href={`/${locale}/${base}/${item.id}`}
                 layout
                 initial={false}
                 exit={{ opacity: 0 }}

@@ -16,6 +16,7 @@ import {
 } from '@/components/layout/heroShared';
 import { useTheme } from '@/components/layout/ThemeContext';
 import LanguageToggle from '@/components/layout/LanguageToggle';
+import { AccessibilityButton } from '@/components/a11y/AccessibilityMenu';
 import { EASE } from '@/lib/motion';
 import { pick, isRtl } from '@/lib/i18n';
 import { displayFont } from '@/lib/fonts';
@@ -163,8 +164,14 @@ export default function HeroGate() {
   const headingFont = displayFont(locale);
   const headingWeight = 400;
 
+  // While the curtain parts, the gate is aria-hidden — so its buttons must
+  // leave the tab order too, or a keyboard user can focus content that screen
+  // readers can't see (WCAG 4.1.2). React 18 only forwards `inert` when it's a
+  // string, hence the cast.
+  const inertWhileOpening = (opening ? { inert: '' } : {}) as React.HTMLAttributes<HTMLDivElement>;
+
   return (
-    <div className="fixed inset-0 z-[100] overflow-hidden" aria-hidden={opening}>
+    <div className="fixed inset-0 z-[100] overflow-hidden" aria-hidden={opening} {...inertWhileOpening}>
       {/* Intro logo — fades in while loading and stays on screen (behind the
           panels) until the two panels have closed over it on first load. It is
           strictly a first-load element: never shown while opening a category
@@ -263,6 +270,7 @@ export default function HeroGate() {
               >
                 {negative ? <Sun size={15} strokeWidth={1.5} /> : <Moon size={15} strokeWidth={1.5} />}
               </button>
+              <AccessibilityButton className={scheme.toggle} />
             </div>
 
             {/* Big category headers — vertically centered; hover swaps the image */}
@@ -270,7 +278,7 @@ export default function HeroGate() {
               dir={rtl ? 'rtl' : 'ltr'}
               className={`absolute inset-y-0 ${catHalfPos} flex flex-col items-start justify-center pb-[12vh] ps-[7vw] pe-[6vw]`}
             >
-              <ul onMouseLeave={() => setActive(null)} className="flex flex-col gap-12">
+              <ul onMouseLeave={() => setActive(null)} className="flex flex-col gap-8">
                 {CATEGORIES.map((c) => {
                   const isActive = active === c.key;
                   return (
@@ -302,9 +310,9 @@ export default function HeroGate() {
             </div>
 
             {/* Contact footer — one row centered within the categories half.
-                Kept compact (small text, tight gaps, no side padding) so the
-                four labels use the full 50% width and stay on a single line.
-                flex-wrap is only a graceful fallback for very narrow screens. */}
+                Gaps stay tight so the four labels use the full 50% width and
+                keep to a single line at the sizes below; flex-wrap is the
+                graceful fallback on narrower desktops. */}
             <div
               dir={rtl ? 'rtl' : 'ltr'}
               className={`absolute bottom-[5vh] ${catHalfPos} flex items-center justify-center gap-x-4 gap-y-2 flex-wrap px-4`}
@@ -314,9 +322,9 @@ export default function HeroGate() {
                   key={c.icon}
                   href={c.href}
                   {...(c.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-                  className={`flex items-center gap-1.5 text-xs ${scheme.sub} transition-colors duration-300`}
+                  className={`flex items-center gap-1.5 text-[13px] ${scheme.sub} transition-colors duration-300 xl:text-sm`}
                 >
-                  <ContactIcon src={`/assets/icons/${c.icon}`} size={13} />
+                  <ContactIcon src={`/assets/icons/${c.icon}`} size={15} />
                   <span className="whitespace-nowrap">{pick(c.label, locale)}</span>
                 </a>
               ))}

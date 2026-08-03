@@ -28,7 +28,7 @@ interface EntityDef {
 const ENTITIES: EntityDef[] = [
   { entity: 'piano', table: 'pianos', idCol: 'id', cols: ['color_name', 'description', 'details'] },
   { entity: 'concert', table: 'concerts', idCol: 'id', cols: ['name', 'venue', 'description', 'artists'] },
-  { entity: 'workshop_category', table: 'workshop_categories', idCol: 'id', cols: ['name', 'description'] },
+  { entity: 'workshop_category', table: 'workshop_categories', idCol: 'id', cols: ['name', 'description', 'intro'] },
   { entity: 'workshop_service', table: 'workshop_services', idCol: 'id', cols: ['name', 'description'] },
   { entity: 'about_section', table: 'about_sections', idCol: 'key', cols: ['title', 'body'], arrayCols: ['body'] },
   { entity: 'founder', table: 'founders', idCol: 'id', cols: ['name', 'bio'] },

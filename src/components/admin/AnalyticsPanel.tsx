@@ -25,9 +25,10 @@ const LANG_COLOR: Record<string, string> = { he: '#1b1b1d', en: '#9a8466', ar: '
 const DEVICE_LABEL: Record<string, string> = { desktop: 'Web', mobile: 'Mobile' };
 const DEVICE_COLOR: Record<string, string> = { desktop: '#1b1b1d', mobile: '#9a8466' };
 
+// 'home' is intentionally absent — the API drops it from the breakdown.
 const PAGE_LABEL: Record<string, string> = {
-  home: 'Home',
   shop: 'Shop',
+  rental: 'Rental',
   workshop: 'Workshop',
   about: 'About',
   contact: 'Contact',

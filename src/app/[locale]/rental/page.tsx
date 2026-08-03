@@ -15,16 +15,16 @@ export async function generateMetadata({
   const t = await getTranslations({ locale: params.locale, namespace: 'meta' });
   return pageMetadata({
     locale: params.locale,
-    path: '/store',
-    title: t('store_title'),
-    description: t('store_description'),
+    path: '/rental',
+    title: t('rental_title'),
+    description: t('rental_description'),
     siteName: t('site_name'),
   });
 }
 
-export default async function StorePage() {
+export default async function RentalPage() {
   // Admins see drafts too, so they can edit/publish unpublished pianos.
   const authed = await isAuthenticated();
-  const [pianos, origins] = await Promise.all([getPianos(authed), getOrigins()]);
-  return <PianoGallery pianos={pianos} origins={origins} />;
+  const [pianos, origins] = await Promise.all([getPianos(authed, 'rental'), getOrigins()]);
+  return <PianoGallery pianos={pianos} origins={origins} variant="rental" />;
 }

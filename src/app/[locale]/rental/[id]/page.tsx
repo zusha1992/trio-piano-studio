@@ -3,8 +3,8 @@ import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { getPianos, getBrands, getOrigins, getColors } from '@/lib/content';
 import { isAuthenticated } from '@/lib/auth';
-import { clamp, pageMetadata, SITE_URL } from '@/lib/seo';
-import { pick, type Locale } from '@/lib/i18n';
+import { pageMetadata, SITE_URL } from '@/lib/seo';
+import { type Locale } from '@/lib/i18n';
 import PianoDetail from '@/components/store/PianoDetail';
 
 export const dynamic = 'force-dynamic';
@@ -16,7 +16,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const locale = params.locale as Locale;
   const [pianos, t] = await Promise.all([
-    getPianos(),
+    getPianos(false, 'rental'),
     getTranslations({ locale, namespace: 'meta' }),
   ]);
   const item = pianos.find((p) => p.id === params.id);
@@ -24,25 +24,24 @@ export async function generateMetadata({
 
   const name = `${item.brand} ${item.model}`.trim();
   const type = t(item.type === 'grand' ? 'type_grand' : 'type_upright');
-  // The piano's own copy makes the better description; the template is the
-  // fallback for instruments that haven't been written up yet.
-  const own = item.description ? pick(item.description, locale) : '';
 
+  // Unlike the shop, the rental description stays on the rental terms rather
+  // than the instrument's own write-up — that's what the searcher is after.
   return pageMetadata({
     locale,
-    path: `/store/${item.id}`,
-    title: t('piano_title', { name, type }),
-    description: own ? clamp(own) : t('piano_description', { name, type }),
+    path: `/rental/${item.id}`,
+    title: t('rental_piano_title', { name, type }),
+    description: t('rental_piano_description', { name, type }),
     siteName: t('site_name'),
     image: item.image ? `${SITE_URL}${item.image}` : undefined,
     type: 'article',
   });
 }
 
-export default async function PianoPage({ params }: { params: { id: string } }) {
+export default async function RentalPianoPage({ params }: { params: { id: string } }) {
   const authed = await isAuthenticated();
   const [pianos, brands, origins, colors] = await Promise.all([
-    getPianos(authed),
+    getPianos(authed, 'rental'),
     getBrands(),
     getOrigins(),
     getColors(),
@@ -55,6 +54,14 @@ export default async function PianoPage({ params }: { params: { id: string } }) 
   const next = pianos[(index + 1) % pianos.length];
 
   return (
-    <PianoDetail item={item} prev={prev} next={next} brands={brands} origins={origins} colors={colors} />
+    <PianoDetail
+      item={item}
+      prev={prev}
+      next={next}
+      brands={brands}
+      origins={origins}
+      colors={colors}
+      variant="rental"
+    />
   );
 }

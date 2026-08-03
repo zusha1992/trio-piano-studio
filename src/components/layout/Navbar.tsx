@@ -8,6 +8,7 @@ import { Menu, Moon, Sun, X } from 'lucide-react';
 import Logo from '@/components/ui/Logo';
 import LanguageToggle from '@/components/layout/LanguageToggle';
 import { CATEGORIES } from '@/components/layout/heroShared';
+import { AccessibilityButton } from '@/components/a11y/AccessibilityMenu';
 import { useTheme } from '@/components/layout/ThemeContext';
 import { pick } from '@/lib/i18n';
 import { displayFont } from '@/lib/fonts';
@@ -20,8 +21,8 @@ const CONTACT_ITEM = {
   label: { he: 'צור קשר', en: 'Contact', ar: 'اتصل بنا', ru: 'Контакты' },
 };
 // Explicit toolbar order (reads left→right in LTR, mirrored in RTL):
-// About · The Store · The Workshop · Concerts · Contact.
-const NAV_ORDER = ['about', 'store', 'services', 'concerts'];
+// About · The Store · Rental · The Workshop · Concerts · Contact.
+const NAV_ORDER = ['about', 'store', 'rental', 'services', 'concerts'];
 const NAV_ITEMS = [
   ...NAV_ORDER.map((k) => CATEGORIES.find((c) => c.key === k)!),
   CONTACT_ITEM,
@@ -62,10 +63,11 @@ export default function Navbar() {
           {/* Logo */}
           <Logo />
 
-          {/* Everything else sits together on the reading-end side */}
-          <div className="flex items-center gap-12">
+          {/* Everything else sits together on the reading-end side. Gaps
+              tighten at lg so six links + the toggles still fit on one line. */}
+          <div className="flex items-center gap-6 xl:gap-12">
             {/* Desktop links — same categories, labels and order as the home screen */}
-            <ul className="hidden items-center gap-8 lg:flex">
+            <ul className="hidden items-center gap-5 lg:flex xl:gap-8">
               {NAV_ITEMS.map((c) => {
                 const active = pathname === navHref(c.href);
                 return (
@@ -99,6 +101,9 @@ export default function Navbar() {
             >
               {negative ? <Sun size={15} strokeWidth={1.5} /> : <Moon size={15} strokeWidth={1.5} />}
             </button>
+
+            {/* Accessibility menu */}
+            <AccessibilityButton className="text-[color:var(--c-cat)] hover:text-[color:var(--c-cat-active)]" />
 
             {/* Mobile hamburger */}
             <button

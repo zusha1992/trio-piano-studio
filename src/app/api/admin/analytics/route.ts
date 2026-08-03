@@ -18,6 +18,7 @@ function sectionOf(path: string): string {
     '': 'home',
     home: 'home',
     store: 'shop',
+    rental: 'rental',
     services: 'workshop',
     about: 'about',
     contact: 'contact',
@@ -60,10 +61,13 @@ export async function GET() {
       ).all<{ path: string; count: number }>(),
     ]);
 
-  // Roll raw paths up into site sections (home/shop/workshop/…).
+  // Roll raw paths up into site sections (shop/workshop/…). 'home' is dropped:
+  // it's the landing gate every visit passes through, so counting it says
+  // nothing and its share dwarfs the sections we actually want to compare.
   const sectionMap = new Map<string, number>();
   for (const row of topPages.results) {
     const key = sectionOf(row.path);
+    if (key === 'home') continue;
     sectionMap.set(key, (sectionMap.get(key) ?? 0) + row.count);
   }
   const pages: KeyCount[] = [...sectionMap.entries()]

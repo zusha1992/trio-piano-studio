@@ -500,36 +500,42 @@ export default function ConcertsView({
                       <div className="space-y-5">
                         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                           <div>
-                            <label className={label}>{t('form_name')} *</label>
+                            <label htmlFor="reg-name" className={label}>{t('form_name')} *</label>
                             <input
+                              id="reg-name"
                               value={name}
                               onChange={(e) => setName(e.target.value)}
+                              aria-required="true"
                               className={field}
                             />
                           </div>
                           <div>
-                            <label className={label}>{t('form_phone')} *</label>
+                            <label htmlFor="reg-phone" className={label}>{t('form_phone')} *</label>
                             <input
+                              id="reg-phone"
                               value={phone}
                               onChange={(e) => setPhone(e.target.value)}
                               type="tel"
                               dir="ltr"
+                              aria-required="true"
                               className={field}
                             />
                           </div>
                           <div>
-                            <label className={label}>{t('form_email')} *</label>
+                            <label htmlFor="reg-email" className={label}>{t('form_email')} *</label>
                             <input
+                              id="reg-email"
                               value={email}
                               onChange={(e) => setEmail(e.target.value)}
                               type="email"
                               dir="ltr"
+                              aria-required="true"
                               className={field}
                             />
                           </div>
                           <div>
-                            <label className={label}>{t('form_spots')}</label>
-                            <div className="flex flex-wrap gap-2.5">
+                            <p className={label} id="reg-spots-label">{t('form_spots')}</p>
+                            <div className="flex flex-wrap gap-2.5" role="group" aria-labelledby="reg-spots-label">
                               {[1, 2, 3, 4].map((n) => (
                                 <button
                                   type="button"
@@ -583,7 +589,9 @@ export default function ConcertsView({
                     </div>
 
                     {status === 'error' && (
-                      <p className="mt-6 text-center text-sm text-red-500">{t('err_general')}</p>
+                      <p role="alert" className="mt-6 text-center text-sm text-red-500">
+                        {t('err_general')}
+                      </p>
                     )}
 
                     {/* One register button, enabled only when the form is complete */}

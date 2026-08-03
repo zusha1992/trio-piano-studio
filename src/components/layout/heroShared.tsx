@@ -50,6 +50,12 @@ export const CATEGORIES: Category[] = [
     img: '/images/home/shop.webp',
   },
   {
+    key: 'rental',
+    href: 'rental',
+    label: { he: 'השכרה', en: 'Rental', ar: 'الإيجار', ru: 'Аренда' },
+    img: '/images/home/rental.webp',
+  },
+  {
     key: 'concerts',
     href: 'concerts',
     label: { he: 'קונצרטים', en: 'Concerts', ar: 'حفلات موسيقية', ru: 'Концерты' },
@@ -68,56 +74,11 @@ export const DEFAULT_IMG = '/images/home/home.webp';
 // All hero images, used to preload/decode up front for instant swaps.
 export const ALL_IMAGES = [DEFAULT_IMG, ...CATEGORIES.map((c) => c.img)];
 
-/* ── Contacts ──────────────────────────────────────────────────────── */
-export interface Contact {
-  icon: string;
-  label: Localized;
-  href: string;
-  external?: boolean;
-}
-
-export const MAPS_URL =
-  'https://www.google.com/maps/place/Yad+Harutsim+St+16,+Jerusalem/@31.7519227,35.2136965,17z/data=!3m1!4b1!4m6!3m5!1s0x1503281e479e1845:0x71df54fdd9c2bb4e!8m2!3d31.7519227!4d35.2162768!16s%2Fg%2F11ghfqf26s?entry=ttu';
-
-const PHONE_LABEL = { he: '054-3337-341', en: '054-3337-341', ar: '054-3337-341', ru: '054-3337-341' };
-const EMAIL_LABEL = {
-  he: 'trio.piano.studio@gmail.com',
-  en: 'trio.piano.studio@gmail.com',
-  ar: 'trio.piano.studio@gmail.com',
-  ru: 'trio.piano.studio@gmail.com',
-};
-const IG_LABEL = { he: 'trio.piano.studio', en: 'trio.piano.studio', ar: 'trio.piano.studio', ru: 'trio.piano.studio' };
-
-export const CONTACTS: Contact[] = [
-  {
-    icon: 'whatsapp.svg',
-    label: PHONE_LABEL,
-    href: 'https://wa.me/972543337341',
-    external: true,
-  },
-  {
-    icon: 'envelope-solid-full.svg',
-    label: EMAIL_LABEL,
-    href: 'mailto:trio.piano.studio@gmail.com',
-  },
-  {
-    icon: 'instagram-logo-fill-svgrepo-com.svg',
-    label: IG_LABEL,
-    href: 'https://www.instagram.com/trio.piano.studio?igsh=MTV6MnRjZjhzdmMzag%3D%3D',
-    external: true,
-  },
-  {
-    icon: 'location-dot-solid-full.svg',
-    label: {
-      he: 'יד חרוצים 16, ירושלים',
-      en: 'Yad Harutzim 16, Jerusalem',
-      ar: 'يد حروتسيم 16، القدس',
-      ru: 'Яд Харуцим 16, Иерусалим',
-    },
-    href: MAPS_URL,
-    external: true,
-  },
-];
+/* ── Contacts ─────────────────────────────────────────────────────────
+   Defined in @/data/contact (a non-client module) and re-exported here so the
+   existing import sites keep working. */
+export { CONTACTS, MAPS_URL } from '@/data/contact';
+export type { Contact } from '@/data/contact';
 
 // Renders a monochrome SVG icon tinted with the current text color, so it can
 // respond to hover/theme just like the label next to it.

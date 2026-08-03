@@ -158,3 +158,138 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--c-accent);
 }
+
+/* ── Accessibility preferences ────────────────────────────────────────────
+   Driven by data attributes on <html> (see AccessibilityContext). Everything
+   here is a real CSS adjustment to the page, not an overlay: the markup stays
+   semantic, so screen readers and keyboards work with the menu untouched.   */
+
+:root {
+  --a11y-font: 1;
+}
+
+/* Text scaling. Tailwind's rem-based sizes follow the root font-size, so this
+   one rule scales most of the site; the handful of hardcoded px sizes are
+   scaled explicitly below (they're the small labels that need it most). */
+html[data-a11y-scaled] {
+  font-size: calc(100% * var(--a11y-font));
+}
+html[data-a11y-scaled] .text-\[9px\]  { font-size: calc(9px  * var(--a11y-font)); }
+html[data-a11y-scaled] .text-\[10px\] { font-size: calc(10px * var(--a11y-font)); }
+html[data-a11y-scaled] .text-\[11px\] { font-size: calc(11px * var(--a11y-font)); }
+html[data-a11y-scaled] .text-\[12px\] { font-size: calc(12px * var(--a11y-font)); }
+html[data-a11y-scaled] .text-\[13px\] { font-size: calc(13px * var(--a11y-font)); }
+html[data-a11y-scaled] .text-\[15px\] { font-size: calc(15px * var(--a11y-font)); }
+/* Wide letter-spacing on tiny uppercase labels costs legibility once enlarged. */
+html[data-a11y-scaled] [class*="tracking-["] {
+  letter-spacing: 0.08em;
+}
+
+/* High contrast: pure black on white (or the inverse in dark mode), with every
+   muted grey promoted to full-strength text. Comfortably beyond the 4.5:1 that
+   WCAG 1.4.3 AA asks for. */
+html[data-a11y-contrast="high"] {
+  --c-bg: #ffffff;
+  --c-bg-alt: #f2f2f2;
+  --c-card: #ffffff;
+  --c-text: #000000;
+  --c-muted: #000000;
+  --c-dim: #1a1a1a;
+  --c-ultra-dim: #333333;
+  --c-border: #000000;
+  --c-border-lt: #000000;
+  --c-cat: #000000;
+  --c-cat-active: #000000;
+  --c-accent: #000000;
+  --c-nav-bg: #ffffff;
+  --c-overlay-bg: #ffffff;
+  --logo-filter: none;
+}
+html.dark[data-a11y-contrast="high"] {
+  --c-bg: #000000;
+  --c-bg-alt: #101010;
+  --c-card: #000000;
+  --c-text: #ffffff;
+  --c-muted: #ffffff;
+  --c-dim: #e6e6e6;
+  --c-ultra-dim: #cccccc;
+  --c-border: #ffffff;
+  --c-border-lt: #ffffff;
+  --c-cat: #ffffff;
+  --c-cat-active: #ffffff;
+  --c-accent: #ffffff;
+  --c-nav-bg: #000000;
+  --c-overlay-bg: #000000;
+  --logo-filter: brightness(0) invert(1);
+}
+
+/* Inverted colours — the whole page, photos included. */
+html[data-a11y-contrast="invert"] body {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+html[data-a11y-grayscale] body {
+  filter: grayscale(1);
+}
+/* Both at once still has to compose into a single filter. */
+html[data-a11y-grayscale][data-a11y-contrast="invert"] body {
+  filter: grayscale(1) invert(1) hue-rotate(180deg);
+}
+
+/* Links distinguishable by more than colour (WCAG 1.4.1). */
+html[data-a11y-links] a {
+  text-decoration: underline !important;
+  text-underline-offset: 3px;
+  outline: 1px dashed currentColor;
+  outline-offset: 2px;
+}
+
+/* A plain, high-legibility sans in place of the display faces. */
+html[data-a11y-font-readable],
+html[data-a11y-font-readable] body,
+html[data-a11y-font-readable] * {
+  font-family: Arial, "Helvetica Neue", Helvetica, sans-serif !important;
+  letter-spacing: normal !important;
+}
+
+/* Freeze motion — matches what prefers-reduced-motion users get. */
+html[data-a11y-no-motion] *,
+html[data-a11y-no-motion] *::before,
+html[data-a11y-no-motion] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
+html[data-a11y-cursor],
+html[data-a11y-cursor] * {
+  cursor:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24'%3E%3Cpath d='M5 2l14 11-6 .7 3.3 6.6-2.7 1.4L10.4 15 5 19z' fill='%23fff' stroke='%23000' stroke-width='1.2'/%3E%3C/svg%3E")
+      2 2,
+    auto !important;
+}
+
+/* Visible keyboard focus everywhere (WCAG 2.4.7). Pointer users never see it. */
+:focus-visible {
+  outline: 3px solid var(--c-accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Skip link: off-screen until focused, then pinned to the top-start corner. */
+.skip-link {
+  position: fixed;
+  inset-inline-start: 1rem;
+  top: -100px;
+  z-index: 300;
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.5rem;
+  background: var(--c-text);
+  color: var(--c-bg);
+  font-size: 0.9375rem;
+  transition: top 0.2s ease;
+}
+.skip-link:focus {
+  top: 1rem;
+}

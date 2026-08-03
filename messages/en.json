@@ -1,4 +1,29 @@
 {
+  "meta": {
+    "site_name": "Trio Piano Studio",
+    "type_grand": "Grand Piano",
+    "type_upright": "Upright Piano",
+    "home_title": "Piano Restoration, Sales & Rental in Jerusalem",
+    "home_description": "A Jerusalem workshop for piano restoration, tuning and regulation — with restored pianos for sale, instruments for rent, and live concerts under one roof.",
+    "store_title": "Pianos for Sale",
+    "store_description": "Restored grand and upright pianos from Japan, Europe and the USA — every instrument inspected, rebuilt and tuned by hand in our Jerusalem workshop.",
+    "rental_title": "Piano Rental",
+    "rental_description": "Rent a tuned, fully serviced piano for a concert, recording, event or a longer stay at home. Transport, placement and tuning after delivery included.",
+    "services_title": "The Workshop",
+    "services_description": "Restoration, tuning and maintenance, PTD regulation, voicing, climate control and consultation — piano craftsmanship in the heart of Jerusalem.",
+    "concerts_title": "Concerts",
+    "concerts_description": "Piano concerts and cultural evenings hosted at our Jerusalem studio. See the upcoming programme and reserve your seat.",
+    "about_title": "About the Studio",
+    "about_description": "Three musicians and piano technicians, trained at the Jerusalem Academy of Music, restoring, tuning and rebuilding pianos in a workshop they built themselves.",
+    "contact_title": "Contact",
+    "contact_description": "Trio Piano Studio, Yad Harutzim 16, Jerusalem. Call, message or email us about restoring, tuning, buying or renting a piano.",
+    "piano_title": "{name} — {type} for Sale",
+    "piano_description": "{name}, a {type} inspected, restored and tuned in our Jerusalem workshop. Photos, dimensions, finish and price.",
+    "rental_piano_title": "{name} — {type} for Rent",
+    "rental_piano_description": "Rent the {name}, a {type} from our Jerusalem workshop — tuned, serviced and delivered for concerts, recordings, events or longer periods.",
+    "category_title": "{name}",
+    "category_description": "{name} at Trio Piano Studio — piano craftsmanship in our Jerusalem workshop."
+  },
   "cta_banner": {
     "title": "Visit our workshop in Jerusalem",
     "cta": "Contact Us"
@@ -101,6 +126,12 @@
     "next": "Next",
     "desc_fallback": "The {brand} {model} is a {type} that has been fully inspected, restored, and prepared in our Jerusalem workshop. From the soundboard and action to the finish of its cabinet, every component has been brought back to life so the instrument plays and looks its very best. It is tuned, regulated, and ready to find its place in a new home — whether a concert hall, a recording studio, or a living room."
   },
+  "rental": {
+    "hero_title": "Pianos for Rent",
+    "back": "Piano Rental",
+    "intro": "Every piano leaves our workshop tuned, regulated and cleaned, and reaches you with professional transport and placement in the room you choose. We rent for single occasions — concerts, recordings, festivals, weddings and private events — and for longer periods at home, in a studio or in a classroom, including tuning after delivery and care throughout the rental. Tell us what you need and for how long, and we'll match you with the right instrument and a price that suits the occasion.",
+    "desc_fallback": "The {brand} {model} is a {type} maintained in our Jerusalem workshop and kept ready to travel. It is tuned, regulated and fully serviced before every rental, and we take care of transport, placement and tuning on arrival — whether for a single evening on stage or a longer stay at home."
+  },
   "contact": {
     "hero_label": "Get in Touch",
     "hero_title": "Contact",
@@ -115,5 +146,41 @@
     "form_success": "Thank you! We'll be in touch shortly.",
     "form_error": "Something went wrong. Please try again or call us directly.",
     "info_hours": "Sun–Thu: 10:00–18:00\nFri: 10:00–13:00"
+  },
+  "a11y": {
+    "menu_title": "Accessibility",
+    "open": "Accessibility options",
+    "font_size": "Text size",
+    "increase": "Larger text",
+    "decrease": "Smaller text",
+    "contrast": "Contrast",
+    "contrast_off": "Normal",
+    "contrast_high": "High contrast",
+    "contrast_invert": "Inverted",
+    "grayscale": "Grayscale",
+    "highlight_links": "Highlight links",
+    "readable_font": "Readable font",
+    "stop_animations": "Stop animations",
+    "big_cursor": "Large cursor",
+    "reset": "Reset settings",
+    "statement": "Accessibility statement",
+    "close": "Close",
+    "skip": "Skip to main content"
+  },
+  "accessibility": {
+    "title": "Accessibility Statement",
+    "intro": "Trio Piano Studio sees accessibility as part of the service it offers, and works to make this website usable by as many people as possible, including people with disabilities.",
+    "compliance_title": "Level of accessibility",
+    "compliance": "This site aims to comply with Israeli Standard IS 5568, which adopts the international WCAG 2.0 guidelines at level AA, as required by the Equal Rights for Persons with Disabilities (Service Accessibility Adjustments) Regulations, 2013.",
+    "measures_title": "What has been done",
+    "measures": "Semantic HTML structure with headings and landmarks; full keyboard navigation with a visible focus indicator; a skip-to-content link; text alternatives for images; colour contrast checked against the AA thresholds; support for text enlargement up to 160%; and an accessibility menu offering text size, high contrast, inverted and grayscale colour, link highlighting, a readable font, reduced motion and a large cursor.",
+    "tested_title": "Testing",
+    "tested": "The site has been tested with current versions of Chrome, Safari, Edge and Firefox, on desktop and mobile, with keyboard navigation.",
+    "limits_title": "Known limitations",
+    "limits": "Despite our efforts, some parts of the site may not yet be fully accessible. We continue to improve them, and would be glad to hear from you.",
+    "contact_title": "Accessibility coordinator",
+    "contact": "If you encounter an accessibility problem, or need an accommodation in order to use the site, please contact our accessibility coordinator. We will respond as quickly as we can.",
+    "coordinator": "Accessibility coordinator",
+    "updated": "Statement last updated"
   }
 }

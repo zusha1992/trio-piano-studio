@@ -26,6 +26,7 @@ const ENTITIES: Record<string, { table: string; idCol: string; cols: string[] }>
     cols: [
       'name_en', 'name_he', 'name_ar', 'name_ru',
       'description_en', 'description_he', 'description_ar', 'description_ru',
+      'intro_en', 'intro_he', 'intro_ar', 'intro_ru',
     ],
   },
   workshop_service: {

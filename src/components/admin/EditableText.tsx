@@ -56,7 +56,19 @@ export default function EditableText({
   const { editMode } = useAdmin();
   const [open, setOpen] = useState(false);
 
-  if (!editMode) return <>{children}</>;
+  // Read mode renders the content as-is — but a className passed here is
+  // layout (spacing, width), not typography, so it has to survive outside edit
+  // mode too. Dropping it left paragraphs sitting flush against whatever came
+  // before them on the public page while looking correct in the editor.
+  if (!editMode) {
+    if (!className) return <>{children}</>;
+    const ReadWrapper = wrapAs;
+    return (
+      <ReadWrapper className={`${wrapAs === 'span' ? 'inline-block' : 'block'} ${className}`}>
+        {children}
+      </ReadWrapper>
+    );
+  }
 
   const Wrapper = wrapAs;
 

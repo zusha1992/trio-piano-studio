@@ -21,8 +21,10 @@ export interface WorkshopService {
 export interface WorkshopCategory {
   id: string;
   name: LocalizedText;
-  /** General description of the category. */
+  /** Short tagline shown under the title. */
   description: LocalizedText;
+  /** Optional longer introductory paragraph shown above the fixes list. */
+  intro?: LocalizedText;
   /** Primary image (tile + gallery fallback). */
   image: string;
   /** Optional extra images for the detail-page gallery/carousel. */

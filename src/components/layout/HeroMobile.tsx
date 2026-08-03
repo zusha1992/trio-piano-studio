@@ -14,6 +14,8 @@ import {
 } from '@/components/layout/heroShared';
 import { useGate } from '@/components/layout/GateContext';
 import LanguageToggle from '@/components/layout/LanguageToggle';
+import { AccessibilityButton } from '@/components/a11y/AccessibilityMenu';
+import { useReducedMotion } from '@/components/a11y/useReducedMotion';
 import { EASE } from '@/lib/motion';
 import { pick, isRtl } from '@/lib/i18n';
 import { displayFont } from '@/lib/fonts';
@@ -42,8 +44,12 @@ const TOP_VARIANTS: Variants = { closed: { y: '0%' }, open: { y: '-100%' } };
 const BOTTOM_VARIANTS: Variants = { closed: { y: '0%' }, open: { y: '100%' } };
 
 /**
- * One curtain half. It clips a full-viewport-tall image to its 50vh window
- * (anchored top or bottom) so the two halves together form one seamless photo.
+ * One curtain half. It clips a full-container-tall image to its half-height
+ * window (anchored top or bottom) so the two halves together form one seamless
+ * photo. The inner image is sized to 200% of the half (i.e. the full container
+ * height) rather than 100vh, so it tracks the *actual* visible viewport — on
+ * mobile 100vh is the large viewport behind the browser toolbars, which would
+ * offset the two halves at the seam.
  *
  * Ambient cross-fade: the last settled image stays fully opaque as a base while
  * the incoming image fades in on top of it; once the fade completes the incoming
@@ -55,7 +61,7 @@ function CurtainHalf({ anchor, currentImg }: { anchor: 'top' | 'bottom'; current
   const edge = anchor === 'top' ? 'top-0' : 'bottom-0';
   const [base, setBase] = useState(currentImg);
   return (
-    <div className={`absolute inset-x-0 ${edge} h-screen`}>
+    <div className={`absolute inset-x-0 ${edge} h-[200%]`}>
       <Image src={base} alt="" fill priority sizes="100vw" className="object-cover" />
       <AnimatePresence>
         {currentImg !== base && (
@@ -94,6 +100,7 @@ export default function HeroMobile() {
   const homeClosing = gate?.homeClosing ?? false;
 
   const headingFont = displayFont(locale);
+  const reducedMotion = useReducedMotion();
 
   // Skip the intro on remounts within the same runtime (e.g. locale switch).
   const [skipIntro] = useState(mobileIntroPlayed);
@@ -145,12 +152,13 @@ export default function HeroMobile() {
     };
   }, [ready]);
 
-  // Ambient background cycle — only once the landing has settled.
+  // Ambient background cycle — only once the landing has settled, and never
+  // when the visitor asked for reduced motion (WCAG 2.2.2).
   useEffect(() => {
-    if (!revealChrome || !isHome) return;
+    if (reducedMotion || !revealChrome || !isHome) return;
     const t = setInterval(() => setImgIndex((i) => (i + 1) % ALL_IMAGES.length), CYCLE_MS);
     return () => clearInterval(t);
-  }, [revealChrome, isHome]);
+  }, [reducedMotion, revealChrome, isHome]);
 
   // Returning home from a subpage: keep the chrome hidden until the curtain has
   // fully shut over the page, so the titles/contacts reveal exactly like the
@@ -277,12 +285,13 @@ export default function HeroMobile() {
               transition={{ duration: 0.4, ease: EASE, delay: revealChrome ? 0.2 : 0 }}
             >
               <LanguageToggle triggerClassName="" align="end" />
+              <AccessibilityButton />
             </motion.div>
 
             {/* Category list — revealed top-to-bottom */}
             <motion.ul
               dir={rtl ? 'rtl' : 'ltr'}
-              className="pointer-events-none absolute inset-y-0 flex flex-col items-start justify-center gap-7 ps-[10vw] pe-[8vw]"
+              className="pointer-events-none absolute inset-y-0 flex flex-col items-start justify-center gap-5 ps-[10vw] pe-[8vw]"
               style={{ insetInlineStart: 0 }}
               initial={false}
               animate={revealChrome ? 'show' : 'hidden'}

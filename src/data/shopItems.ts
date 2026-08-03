@@ -62,4 +62,7 @@ export interface ShopItem {
   wip?: boolean;
   /** Draft flag — hidden from the public store when false. */
   published?: boolean;
+  /** Rental fleet member — listed on /rental instead of /store, and priceless
+   *  by design (the rate depends on the client and the occasion). */
+  rental?: boolean;
 }

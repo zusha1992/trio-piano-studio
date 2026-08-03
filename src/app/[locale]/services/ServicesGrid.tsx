@@ -4,14 +4,16 @@ import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
 import { motion } from 'framer-motion';
-import { Search, X } from 'lucide-react';
+import { ArrowRight, Search, X } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { WorkshopCategory } from '@/data/workshopServices';
 import ContactCTA from '@/components/sections/ContactCTA';
+import EditableText from '@/components/admin/EditableText';
+import { useAdmin } from '@/components/admin/AdminContext';
 import { EASE } from '@/lib/motion';
 import { displayFont } from '@/lib/fonts';
-import { pick, LOCALES, type Locale, type Localized } from '@/lib/i18n';
+import { pick, isRtl, LOCALES, type Locale, type Localized } from '@/lib/i18n';
 
 const MotionLink = motion(Link);
 
@@ -22,6 +24,8 @@ export default function ServicesGrid({ categories }: { categories: WorkshopCateg
   const locale = useLocale() as Locale;
   const router = useRouter();
   const titleFont = displayFont(locale);
+  const rtl = isRtl(locale);
+  const { editMode } = useAdmin();
 
   // Free-text search over the individual fixes (both languages), narrowing the
   // grid to the categories that contain a matching fix.
@@ -153,49 +157,108 @@ export default function ServicesGrid({ categories }: { categories: WorkshopCateg
         {/* 3×2 grid of category tiles — square image + title, description
             revealed on hover. Clicking will open a full category page later. */}
         <div className="mt-16 grid grid-cols-2 gap-3 sm:gap-4 md:mt-24 md:grid-cols-3">
-          {visible.map((cat) => (
-            <MotionLink
-              key={cat.id}
-              href={`/${locale}/services/${cat.id}`}
-              initial={false}
-              className="group relative aspect-square cursor-pointer overflow-hidden rounded-2xl bg-[var(--c-bg-alt)] text-start"
-            >
-              <Image
-                src={cat.image}
-                alt={pick(cat.name, locale)}
-                fill
-                sizes="(max-width: 768px) 50vw, 25vw"
-                className="object-cover object-center"
-              />
+          {visible.map((cat) => {
+            const tileBody = (
+              <>
+                <Image
+                  src={cat.image}
+                  alt={pick(cat.name, locale)}
+                  fill
+                  sizes="(max-width: 768px) 50vw, 25vw"
+                  className="object-cover object-center"
+                />
 
-              {/* Base scrim keeps the title readable. A second bottom gradient
-                  fades in on hover (desktop only) to cover the revealed text —
-                  only the lower area, not the whole square. */}
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent" />
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-transparent opacity-0 transition-opacity duration-500 md:group-hover:opacity-100" />
+                {/* Base scrim keeps the title readable. A second bottom gradient
+                    fades in on hover (desktop only) to cover the revealed text —
+                    only the lower area, not the whole square. */}
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent" />
+                {!editMode && (
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-transparent opacity-0 transition-opacity duration-500 lg:group-hover:opacity-100" />
+                )}
 
-              <div className="absolute inset-x-0 bottom-0 p-5 md:p-6">
-                <h3
-                  className="text-xl leading-tight tracking-tight text-white sm:text-2xl"
-                  style={{ fontFamily: titleFont, fontWeight: 400 }}
-                >
-                  {pick(cat.name, locale)}
-                </h3>
-
-                {/* Desktop only: description + Learn More revealed on hover.
-                    Mobile shows just the title (no hover gestures there). */}
-                <div className="hidden max-h-0 overflow-hidden opacity-0 transition-all duration-500 ease-out md:block md:group-hover:mt-3 md:group-hover:max-h-60 md:group-hover:opacity-100">
-                  <p className="text-sm leading-relaxed text-white/85">{pick(cat.description, locale)}</p>
-                  <span
-                    className="mt-4 inline-block bg-white px-5 py-2 text-[10px] uppercase tracking-[0.25em] text-black"
-                    style={{ fontFamily: titleFont, fontWeight: 400 }}
+                {/* In edit mode the tile itself isn't a link (the pencils have
+                    to be clickable), so navigation gets its own affordance. */}
+                {editMode && (
+                  <Link
+                    href={`/${locale}/services/${cat.id}`}
+                    className="absolute end-3 top-3 z-10 inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1.5 text-[10px] uppercase tracking-[0.2em] text-black shadow transition-opacity hover:opacity-90"
                   >
-                    {t('learn_more')}
-                  </span>
+                    Open
+                    <ArrowRight size={12} className={rtl ? 'rotate-180' : undefined} />
+                  </Link>
+                )}
+
+                <div className="absolute inset-x-0 bottom-0 p-5 md:p-6">
+                  <EditableText
+                    entity="workshop_category"
+                    id={cat.id}
+                    column="name"
+                    value={cat.name[locale] ?? ''}
+                    label="Category name"
+                    wrapAs="div"
+                  >
+                    <h3
+                      className="text-xl leading-tight tracking-tight text-white sm:text-2xl"
+                      style={{ fontFamily: titleFont, fontWeight: 400 }}
+                    >
+                      {pick(cat.name, locale)}
+                    </h3>
+                  </EditableText>
+
+                  {editMode ? (
+                    // In edit mode the tagline is always shown (and editable);
+                    // the tile is not a link, so the pencils are clickable.
+                    <EditableText
+                      entity="workshop_category"
+                      id={cat.id}
+                      column="description"
+                      value={cat.description[locale] ?? ''}
+                      multiline
+                      label="Category tagline"
+                      wrapAs="div"
+                      className="mt-2"
+                    >
+                      <p className="text-sm leading-relaxed text-white/85">
+                        {pick(cat.description, locale) || 'Add a tagline…'}
+                      </p>
+                    </EditableText>
+                  ) : (
+                    // Desktop only (lg+, the same line `useIsMobile` draws):
+                    // tagline + Learn More revealed on hover. Phones and
+                    // portrait tablets show just the title — no hover there,
+                    // and the tile is too small for a second line of text.
+                    <div className="hidden max-h-0 overflow-hidden opacity-0 transition-all duration-500 ease-out lg:block lg:group-hover:mt-3 lg:group-hover:max-h-60 lg:group-hover:opacity-100">
+                      <p className="text-sm leading-relaxed text-white/85">{pick(cat.description, locale)}</p>
+                      <span
+                        className="mt-4 inline-block bg-white px-5 py-2 text-[10px] uppercase tracking-[0.25em] text-black"
+                        style={{ fontFamily: titleFont, fontWeight: 400 }}
+                      >
+                        {t('learn_more')}
+                      </span>
+                    </div>
+                  )}
                 </div>
+              </>
+            );
+
+            return editMode ? (
+              <div
+                key={cat.id}
+                className="group relative aspect-square overflow-hidden rounded-2xl bg-[var(--c-bg-alt)] text-start"
+              >
+                {tileBody}
               </div>
-            </MotionLink>
-          ))}
+            ) : (
+              <MotionLink
+                key={cat.id}
+                href={`/${locale}/services/${cat.id}`}
+                initial={false}
+                className="group relative aspect-square cursor-pointer overflow-hidden rounded-2xl bg-[var(--c-bg-alt)] text-start"
+              >
+                {tileBody}
+              </MotionLink>
+            );
+          })}
         </div>
 
         {visible.length === 0 && (

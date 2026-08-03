@@ -21,17 +21,62 @@ import { pick, isRtl, type Locale } from '@/lib/i18n';
 // Diameter matches the color swatch, bumped by 5px of radius (i.e. +10px).
 const SPEC_ICON = 26;
 
-// Overlay positions (in % of the illustration box) for the width / height / depth
-// labels, tuned to the current placeholder art. When the un-labelled artwork is
-// dropped in these just sit where the measurements are drawn.
-// Both illustrations share the same three measurements in the same spots
-// (upright is the reference layout).
-const DIM_POS: Record<'width' | 'height' | 'depth', { top: string; left: string }> = {
-  width: { top: '15%', left: '55%' },
-  height: { top: '50%', left: '92%' },
-  depth: { top: '86%', left: '80%' },
+// Two illustrations per piano type, shown side by side below the description.
+// Each drawing carries the dimension labels it depicts; the overlay chips sit
+// on top of the baked-in numbers (positions are % of the illustration box,
+// tuned to the current placeholder art) and use the page background so they
+// mask the hardcoded values. When the un-labelled artwork is dropped in, the
+// chips just sit where the measurement lines are drawn.
+type DimKey = 'width' | 'height' | 'depth';
+interface DimOverlay {
+  key: DimKey;
+  top: string;
+  left: string;
+  /** Left-hand measurements are drawn vertically, so rotate the chip to match. */
+  vertical?: boolean;
+}
+interface Illustration {
+  src: string;
+  overlays: DimOverlay[];
+}
+
+const ILLUSTRATIONS: Record<'grand' | 'upright', Illustration[]> = {
+  grand: [
+    {
+      src: '/images/shop/grand_widthxdepth.webp',
+      overlays: [
+        { key: 'width', top: '13%', left: '53%' },
+        { key: 'depth', top: '50%', left: '8%', vertical: true },
+      ],
+    },
+    {
+      src: '/images/shop/grand_height.webp',
+      overlays: [{ key: 'height', top: '48%', left: '7%', vertical: true }],
+    },
+  ],
+  upright: [
+    {
+      src: '/images/shop/upright_widthxheight.webp',
+      overlays: [
+        { key: 'width', top: '10%', left: '57%' },
+        { key: 'height', top: '57%', left: '7%', vertical: true },
+      ],
+    },
+    {
+      src: '/images/shop/upright_heightxdepth.webp',
+      overlays: [
+        { key: 'depth', top: '9%', left: '65%' },
+        { key: 'height', top: '55%', left: '30%', vertical: true },
+      ],
+    },
+  ],
 };
 
+/**
+ * A single piano, shared by the shop and the rental fleet. Rentals differ only
+ * in where the page links back to and in carrying no price — the rate depends
+ * on the client and the occasion, so it's a conversation, not a spec.
+ */
 export default function PianoDetail({
   item,
   prev,
@@ -39,6 +84,7 @@ export default function PianoDetail({
   brands = [],
   origins = [],
   colors = [],
+  variant = 'store',
 }: {
   item: ShopItem;
   prev: ShopItem;
@@ -46,8 +92,12 @@ export default function PianoDetail({
   brands?: BrandOption[];
   origins?: OriginOption[];
   colors?: ColorOption[];
+  variant?: 'store' | 'rental';
 }) {
   const t = useTranslations('store');
+  const tv = useTranslations(variant);
+  const isRental = variant === 'rental';
+  const base = isRental ? 'rental' : 'store';
   const locale = useLocale() as Locale;
   const rtl = isRtl(locale);
   const titleFont = displayFont(locale);
@@ -69,7 +119,7 @@ export default function PianoDetail({
     item.price === 'contact' ? t('price_contact') : `₪${item.price.toLocaleString('en-US')}`;
   const description = item.description
     ? pick(item.description, locale)
-    : t('desc_fallback', { brand: item.brand, model: item.model, type: typePhrase });
+    : tv('desc_fallback', { brand: item.brand, model: item.model, type: typePhrase });
 
   const brandRow = brands.find((b) => b.name.toLowerCase() === item.brand.toLowerCase());
   const brandLogo = brandRow?.logoUrl ?? null;
@@ -130,11 +180,12 @@ export default function PianoDetail({
       ? [{ label: t('spec_year'), value: <span dir="ltr">{item.year}</span> }]
       : []),
   ];
-  const priceSpec = { label: t('spec_price'), value: priceText };
+  // Rentals carry no price — the rate depends on the client and the occasion.
+  const priceSpec = isRental ? null : { label: t('spec_price'), value: priceText };
 
-  // One row when everything fits: the base specs plus either the serial+price
-  // pair or price alone. Static classes so Tailwind keeps them.
-  const specColCount = baseSpecs.length + (item.serial ? 2 : 1);
+  // One row when everything fits: the base specs plus the serial and/or price.
+  // Static classes so Tailwind keeps them.
+  const specColCount = baseSpecs.length + (item.serial ? 1 : 0) + (priceSpec ? 1 : 0);
   const specColsCls =
     specColCount >= 6 ? 'sm:grid-cols-6' : specColCount === 5 ? 'sm:grid-cols-5' : 'sm:grid-cols-4';
 
@@ -147,12 +198,6 @@ export default function PianoDetail({
     </div>
   );
 
-  const dims: { key: 'width' | 'height' | 'depth'; value: number }[] = [
-    { key: 'width', value: item.dimensions.width },
-    { key: 'height', value: item.dimensions.height },
-    { key: 'depth', value: item.dimensions.depth },
-  ];
-
   return (
     <>
       <section className="mx-auto max-w-[100rem] px-6 pb-24 pt-32 sm:px-10 md:pt-44 lg:px-16 lg:pt-52">
@@ -164,11 +209,11 @@ export default function PianoDetail({
           className="ms-4 sm:ms-8 md:ms-14 lg:ms-24"
         >
           <Link
-            href={`/${locale}/store`}
+            href={`/${locale}/${base}`}
             className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.25em] text-[color:var(--c-cat)] transition-colors hover:text-[color:var(--c-cat-active)]"
           >
             <BackArrow size={15} />
-            {t('back')}
+            {tv('back')}
           </Link>
         </motion.div>
 
@@ -205,14 +250,17 @@ export default function PianoDetail({
           className={`ms-4 mt-5 grid grid-cols-2 gap-x-8 gap-y-8 sm:ms-8 md:ms-14 lg:ms-24 ${specColsCls}`}
         >
           {baseSpecs.map((s, i) => renderSpec(s, i))}
-          {item.serial ? (
+          {item.serial && priceSpec ? (
             // Keep serial + price side by side on one line (never split).
             <div className="col-span-2 grid grid-cols-2 gap-x-8">
               {renderSpec({ label: t('spec_serial'), value: item.serial }, 'serial')}
               {renderSpec(priceSpec, 'price')}
             </div>
           ) : (
-            renderSpec(priceSpec, 'price')
+            <>
+              {item.serial && renderSpec({ label: t('spec_serial'), value: item.serial }, 'serial')}
+              {priceSpec && renderSpec(priceSpec, 'price')}
+            </>
           )}
         </motion.div>
 
@@ -257,36 +305,41 @@ export default function PianoDetail({
               </EditableText>
             )}
 
-            {/* Size illustration with overlaid values */}
-            <div className="relative mt-10 aspect-[928/1131] w-full max-w-[15rem] mx-auto md:mx-0">
-                <Image
-                  src={item.type === 'grand' ? '/images/shop/Grand.webp' : '/images/shop/Upright.webp'}
-                  alt=""
-                  fill
-                  sizes="19rem"
-                  className="object-contain"
-                  style={{ filter: 'var(--logo-filter)' }}
-                />
-                {dims.map((d) => {
-                  const pos = DIM_POS[d.key];
-                  // Fine-tune nudge (px) applied on top of the percentage anchor.
-                  const nudgeX = 20;
-                  return (
+            {/* Size illustrations — two views side by side, with the real
+                dimension values overlaid on the drawn measurements. The line
+                art is inverted in dark mode via --logo-filter. */}
+            <div
+              className={`mt-10 grid grid-cols-2 ${
+                item.type === 'grand' ? 'gap-10 sm:gap-14' : 'gap-4 sm:gap-6'
+              }`}
+            >
+              {ILLUSTRATIONS[item.type === 'grand' ? 'grand' : 'upright'].map((ill) => (
+                <div key={ill.src} className="relative aspect-[910/828] w-full">
+                  <Image
+                    src={ill.src}
+                    alt=""
+                    fill
+                    sizes="(max-width: 768px) 45vw, 12rem"
+                    className="object-contain"
+                    style={{ filter: 'var(--logo-filter)' }}
+                  />
+                  {ill.overlays.map((o) => (
                     <span
-                      key={d.key}
+                      key={o.key}
                       dir="ltr"
                       style={{
-                        top: pos.top,
-                        left: pos.left,
-                        transform: `translate(calc(-50% + ${nudgeX}px), -50%)`,
+                        top: o.top,
+                        left: o.left,
+                        transform: `translate(-50%, -50%)${o.vertical ? ' rotate(-90deg)' : ''}`,
                       }}
-                      className="absolute whitespace-nowrap rounded bg-[var(--c-bg)] px-1.5 py-0.5 text-xs font-medium text-[var(--c-text)] sm:text-sm"
+                      className="absolute whitespace-nowrap rounded bg-[var(--c-bg)] px-2 py-0.5 text-sm font-semibold text-[var(--c-text)] sm:text-base"
                     >
-                      {d.value} cm
+                      {item.dimensions[o.key]} cm
                     </span>
-                  );
-                })}
-              </div>
+                  ))}
+                </div>
+              ))}
+            </div>
           </motion.div>
 
           {/* Right column — carousel (click for fullscreen) */}
@@ -311,7 +364,7 @@ export default function PianoDetail({
         {/* Prev / next piano navigation */}
         <div className="mt-20 flex items-stretch justify-between gap-4 md:mt-28">
           <Link
-            href={`/${locale}/store/${prev.id}`}
+            href={`/${locale}/${base}/${prev.id}`}
             className="group flex items-center gap-2 text-[color:var(--c-cat)] transition-colors hover:text-[color:var(--c-cat-active)]"
           >
             <BackArrow size={18} className="shrink-0" />
@@ -321,7 +374,7 @@ export default function PianoDetail({
           </Link>
 
           <Link
-            href={`/${locale}/store/${next.id}`}
+            href={`/${locale}/${base}/${next.id}`}
             className="group flex items-center gap-2 text-end text-[color:var(--c-cat)] transition-colors hover:text-[color:var(--c-cat-active)]"
           >
             <span className="text-sm tracking-tight sm:text-base" style={{ fontFamily: titleFont, fontWeight: 400 }}>

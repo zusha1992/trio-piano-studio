@@ -62,6 +62,9 @@ export default function CategoryView({
   // Gallery images for the carousel (first is the tile/main image).
   const images = cat.images ?? [];
 
+  // Optional longer intro paragraph (shown above the fixes list).
+  const introText = cat.intro ? pick(cat.intro, locale) : '';
+
   // Break the fixes into two columns once a single column would run taller
   // than the (square) image beside it.
   const twoCols = cat.services.length > 4;
@@ -93,7 +96,9 @@ export default function CategoryView({
           </Link>
         </motion.div>
 
-        {/* Title (label) */}
+        {/* Title (label). Margins live on the heading itself — EditableText
+            drops its own className outside edit mode, so keeping the indent on
+            the wrapper would leave the title flush-left in the public view. */}
         <EditableText
           entity="workshop_category"
           id={cat.id}
@@ -101,50 +106,50 @@ export default function CategoryView({
           value={cat.name[locale] ?? ''}
           label="Category name"
           wrapAs="div"
-          className="ms-4 mt-4 sm:ms-8 md:ms-14 lg:ms-24"
         >
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1, duration: 0.7, ease: EASE }}
-            className="text-5xl leading-[0.98] tracking-tight text-[var(--c-text)] sm:text-6xl lg:text-7xl"
+            className="ms-4 mt-4 text-5xl leading-[0.98] tracking-tight text-[var(--c-text)] sm:ms-8 sm:text-6xl md:ms-14 lg:ms-24 lg:text-7xl"
             style={{ fontFamily: titleFont, fontWeight: 500 }}
           >
             {pick(cat.name, locale)}
           </motion.h1>
         </EditableText>
 
-        {/* One row — text (description + fixes) on one side, the image on the
-            other; both columns start at the same top so the paragraph sits
-            level with the top of the image. */}
+        {/* One row — intro paragraph + fixes on one side, the image on the
+            other; both columns start at the same top so the text sits level
+            with the top of the image. */}
         <div className="mt-12 grid grid-cols-1 gap-x-12 gap-y-10 md:mt-16 md:grid-cols-2 md:items-start">
-          {/* Text column — sub-paragraph on top, fixes list below it */}
+          {/* Text column — optional intro paragraph on top, fixes list below */}
           <div className="order-2 ms-4 sm:ms-8 md:order-1 md:ms-14 lg:ms-24">
-            {/* One-liner description */}
-            <EditableText
-              entity="workshop_category"
-              id={cat.id}
-              column="description"
-              value={cat.description[locale] ?? ''}
-              multiline
-              label="Category description"
-              wrapAs="div"
-              className="max-w-xl"
-            >
-              <motion.p
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2, duration: 0.7, ease: EASE }}
-                className="text-lg leading-relaxed text-[var(--c-dim)]"
+            {/* Longer description / intro (optional) */}
+            {(introText || editMode) && (
+              <EditableText
+                entity="workshop_category"
+                id={cat.id}
+                column="intro"
+                value={cat.intro?.[locale] ?? ''}
+                multiline
+                label="Description"
+                wrapAs="div"
               >
-                {pick(cat.description, locale)}
-              </motion.p>
-            </EditableText>
+                <motion.p
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2, duration: 0.7, ease: EASE }}
+                className="max-w-xl text-lg leading-relaxed text-[var(--c-text)]"
+              >
+                {introText || (editMode ? 'Add a description…' : '')}
+                </motion.p>
+              </EditableText>
+            )}
 
             {/* Fixes list */}
             <motion.ul
               {...reveal}
-              className={`mt-10 gap-x-8 gap-y-7 ${
+              className={`gap-x-8 gap-y-7 ${introText || editMode ? 'mt-10' : ''} ${
                 twoCols ? 'grid grid-cols-1 sm:grid-cols-2' : 'flex flex-col'
               }`}
             >

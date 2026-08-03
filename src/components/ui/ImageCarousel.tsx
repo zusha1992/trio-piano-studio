@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { AnimatePresence, motion, type PanInfo } from 'framer-motion';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { useReducedMotion } from '@/components/a11y/useReducedMotion';
 import { EASE } from '@/lib/motion';
 
 const FRAME_SWIPE_THRESHOLD = 40;
@@ -44,6 +45,7 @@ export default function ImageCarousel({
   const [[slide, dir], setSlide] = useState<[number, number]>([0, 0]);
   const [paused, setPaused] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
+  const reducedMotion = useReducedMotion();
   const many = images.length > 1;
 
   // Frames adjacent to the current one, pre-fetched (hidden) so the next/prev
@@ -84,12 +86,13 @@ export default function ImageCarousel({
     openFullscreen();
   };
 
-  // Auto-advance stops for good once the visitor takes manual control.
+  // Auto-advance stops for good once the visitor takes manual control, and
+  // never starts when the visitor asked for reduced motion (WCAG 2.2.2).
   useEffect(() => {
-    if (paused || fullscreen || !many || autoAdvanceMs <= 0) return;
+    if (reducedMotion || paused || fullscreen || !many || autoAdvanceMs <= 0) return;
     const id = setInterval(() => setSlide(([s]) => [(s + 1) % images.length, 1]), autoAdvanceMs);
     return () => clearInterval(id);
-  }, [paused, fullscreen, many, autoAdvanceMs, images.length]);
+  }, [reducedMotion, paused, fullscreen, many, autoAdvanceMs, images.length]);
 
   // Guards against firing history.back() twice for a single close (e.g. the X
   // button click also bubbling to the backdrop), which would pop an extra
@@ -226,6 +229,9 @@ export default function ImageCarousel({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            role="dialog"
+            aria-modal="true"
+            aria-label={alt}
             className="fixed inset-0 z-[120] flex items-center justify-center bg-black/95 p-4 backdrop-blur-sm"
             onClick={closeFullscreen}
           >

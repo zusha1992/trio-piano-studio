@@ -112,15 +112,25 @@ interface PianoRow {
   details_ru: string | null;
   wip: number;
   published: number;
+  rental: number;
 }
 
-export async function getPianos(includeUnpublished = false): Promise<ShopItem[]> {
+/**
+ * Shop inventory (`kind: 'store'`) or the rental fleet (`kind: 'rental'`) —
+ * both live in the `pianos` table, split by the `rental` flag.
+ */
+export async function getPianos(
+  includeUnpublished = false,
+  kind: 'store' | 'rental' = 'store',
+): Promise<ShopItem[]> {
+  const rental = kind === 'rental' ? 1 : 0;
   const { results } = await db()
     .prepare(
       includeUnpublished
-        ? 'SELECT * FROM pianos ORDER BY sort_order'
-        : 'SELECT * FROM pianos WHERE published = 1 ORDER BY sort_order',
+        ? 'SELECT * FROM pianos WHERE rental = ? ORDER BY sort_order'
+        : 'SELECT * FROM pianos WHERE rental = ? AND published = 1 ORDER BY sort_order',
     )
+    .bind(rental)
     .all<PianoRow>();
   const images = await imagesByEntity('piano');
   return results.map((r) => {
@@ -151,6 +161,7 @@ export async function getPianos(includeUnpublished = false): Promise<ShopItem[]>
       details: optLoc(r.details_en, r.details_he, r.details_ar, r.details_ru),
       wip: r.wip === 1,
       published: r.published === 1,
+      rental: r.rental === 1,
     };
   });
 }
@@ -279,6 +290,10 @@ interface CategoryRow {
   description_he: string | null;
   description_ar: string | null;
   description_ru: string | null;
+  intro_en: string | null;
+  intro_he: string | null;
+  intro_ar: string | null;
+  intro_ru: string | null;
 }
 interface ServiceRow {
   id: string;
@@ -320,6 +335,7 @@ export async function getWorkshopCategories(): Promise<WorkshopCategory[]> {
       id: c.id,
       name: loc(c.name_en, c.name_he, c.name_ar, c.name_ru),
       description: loc(c.description_en, c.description_he, c.description_ar, c.description_ru),
+      intro: optLoc(c.intro_en, c.intro_he, c.intro_ar, c.intro_ru),
       image: catImgs[0]?.url ?? '',
       images: catImgs.map((i) => i.url),
       imageId: catImgs[0]?.id,
@@ -402,4 +418,96 @@ export async function getFounders(): Promise<Founder[]> {
       imageId: lead?.id,
     };
   });
+}
+
+// ── Last-modified timestamps (sitemap) ──────────────────────────────────────
+//
+// Every admin write bumps its row's `updated_at`, so the sitemap can report a
+// truthful <lastmod> per URL instead of "now". Photo changes don't touch the
+// parent row, so an entity's stamp also takes the newest image attached to it.
+
+export interface ContentTimestamps {
+  /** Piano id → last change (shop and rental alike). */
+  pianos: Map<string, Date>;
+  /** Workshop category id → last change (own row, its fixes, or its photos). */
+  categories: Map<string, Date>;
+  /** Newest change within each listing page's content. */
+  sections: Record<'store' | 'rental' | 'services' | 'concerts' | 'about', Date | undefined>;
+  /** Newest change anywhere — used for the pages with no content of their own. */
+  site: Date | undefined;
+}
+
+// D1 stores 'YYYY-MM-DD HH:MM:SS' in UTC.
+const toDate = (s: string | null | undefined): Date | undefined => {
+  if (!s) return undefined;
+  const d = new Date(`${s.replace(' ', 'T')}Z`);
+  return Number.isNaN(d.getTime()) ? undefined : d;
+};
+
+const newest = (...dates: (Date | undefined)[]): Date | undefined =>
+  dates.reduce<Date | undefined>((a, b) => (b && (!a || b > a) ? b : a), undefined);
+
+const maxOf = (map: Map<string, Date>) => newest(...map.values());
+
+export async function getContentTimestamps(): Promise<ContentTimestamps> {
+  const [pianoRows, catRows, svcRows, imgRows, concertRow, aboutRow, founderRow] = await Promise.all([
+    db()
+      .prepare('SELECT id, rental, updated_at FROM pianos WHERE published = 1')
+      .all<{ id: string; rental: number; updated_at: string }>(),
+    db()
+      .prepare('SELECT id, updated_at FROM workshop_categories WHERE published = 1')
+      .all<{ id: string; updated_at: string }>(),
+    db()
+      .prepare('SELECT category_id, MAX(updated_at) AS updated_at FROM workshop_services GROUP BY category_id')
+      .all<{ category_id: string; updated_at: string }>(),
+    db()
+      .prepare(
+        "SELECT entity_type, entity_id, MAX(created_at) AS created_at FROM images WHERE entity_type IN ('piano','workshop_category') GROUP BY entity_type, entity_id",
+      )
+      .all<{ entity_type: string; entity_id: string; created_at: string }>(),
+    db()
+      .prepare('SELECT MAX(updated_at) AS updated_at FROM concerts WHERE published = 1')
+      .first<{ updated_at: string | null }>(),
+    db().prepare('SELECT MAX(updated_at) AS updated_at FROM about_sections').first<{ updated_at: string | null }>(),
+    db().prepare('SELECT MAX(updated_at) AS updated_at FROM founders').first<{ updated_at: string | null }>(),
+  ]);
+
+  const pianos = new Map<string, Date>();
+  const categories = new Map<string, Date>();
+  const store = new Map<string, Date>();
+  const rental = new Map<string, Date>();
+
+  const bump = (map: Map<string, Date>, id: string, d: Date | undefined) => {
+    if (!d) return;
+    const current = map.get(id);
+    if (!current || d > current) map.set(id, d);
+  };
+
+  for (const r of pianoRows.results) {
+    const d = toDate(r.updated_at);
+    bump(pianos, r.id, d);
+    bump(r.rental === 1 ? rental : store, r.id, d);
+  }
+  for (const r of catRows.results) bump(categories, r.id, toDate(r.updated_at));
+  for (const r of svcRows.results) bump(categories, r.category_id, toDate(r.updated_at));
+  for (const r of imgRows.results) {
+    const d = toDate(r.created_at);
+    if (r.entity_type === 'piano') {
+      bump(pianos, r.entity_id, d);
+      if (rental.has(r.entity_id)) bump(rental, r.entity_id, d);
+      else if (store.has(r.entity_id)) bump(store, r.entity_id, d);
+    } else {
+      bump(categories, r.entity_id, d);
+    }
+  }
+
+  const sections = {
+    store: maxOf(store),
+    rental: maxOf(rental),
+    services: maxOf(categories),
+    concerts: toDate(concertRow?.updated_at),
+    about: newest(toDate(aboutRow?.updated_at), toDate(founderRow?.updated_at)),
+  };
+
+  return { pianos, categories, sections, site: newest(...Object.values(sections)) };
 }
