@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { motion, type Variants } from 'framer-motion';
 import { Moon, Sun } from 'lucide-react';
 import Image from 'next/image';
@@ -39,6 +39,7 @@ const SWAP_DURATION = 0.6;
 
 export default function HeroGate() {
   const locale = useLocale();
+  const t = useTranslations('meta');
   const rtl = isRtl(locale);
   const pathname = usePathname();
   const router = useRouter();
@@ -189,7 +190,7 @@ export default function HeroGate() {
           >
             <Image
               src="/images/logo.png"
-              alt="Trio Piano Workshop"
+              alt={t('site_name')}
               width={1512}
               height={531}
               style={{

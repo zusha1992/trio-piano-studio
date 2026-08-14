@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations } from 'next-intl/server';
-import { SITE_URL } from '@/lib/seo';
+import { SITE_URL, localBusinessJsonLd } from '@/lib/seo';
 import { Arimo, Cairo, Cormorant_Garamond, DM_Sans, EB_Garamond, Heebo, Rubik } from 'next/font/google';
 import { dirOf } from '@/lib/i18n';
 import Navbar from '@/components/layout/Navbar';
@@ -114,6 +114,12 @@ export default async function LocaleLayout({
 }) {
   const { locale } = params;
   const messages = await getMessages();
+  const t = await getTranslations({ locale, namespace: 'meta' });
+  const jsonLd = localBusinessJsonLd({
+    locale,
+    name: t('site_name'),
+    description: t('home_description'),
+  });
 
   return (
     <html
@@ -123,6 +129,10 @@ export default async function LocaleLayout({
       suppressHydrationWarning
     >
       <body>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         {/* Runs before hydration/paint so a dark preference doesn't flash light.
             Kept in <body> (not a manual <head>) so it doesn't interfere with
             Next's automatic next/font stylesheet injection. */}

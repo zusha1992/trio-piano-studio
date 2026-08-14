@@ -3,9 +3,10 @@ import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { getPianos, getBrands, getOrigins, getColors } from '@/lib/content';
 import { isAuthenticated } from '@/lib/auth';
-import { pageMetadata, SITE_URL } from '@/lib/seo';
+import { pageMetadata, pianoJsonLd, SITE_URL } from '@/lib/seo';
 import { type Locale } from '@/lib/i18n';
 import PianoDetail from '@/components/store/PianoDetail';
+import JsonLd from '@/components/seo/JsonLd';
 
 export const dynamic = 'force-dynamic';
 
@@ -38,13 +39,15 @@ export async function generateMetadata({
   });
 }
 
-export default async function RentalPianoPage({ params }: { params: { id: string } }) {
+export default async function RentalPianoPage({ params }: { params: { locale: string; id: string } }) {
   const authed = await isAuthenticated();
-  const [pianos, brands, origins, colors] = await Promise.all([
+  const locale = params.locale as Locale;
+  const [pianos, brands, origins, colors, t] = await Promise.all([
     getPianos(authed, 'rental'),
     getBrands(),
     getOrigins(),
     getColors(),
+    getTranslations({ locale, namespace: 'meta' }),
   ]);
   const index = pianos.findIndex((p) => p.id === params.id);
   if (index === -1) notFound();
@@ -52,16 +55,33 @@ export default async function RentalPianoPage({ params }: { params: { id: string
   const item = pianos[index];
   const prev = pianos[(index - 1 + pianos.length) % pianos.length];
   const next = pianos[(index + 1) % pianos.length];
+  const name = `${item.brand} ${item.model}`.trim();
+  const type = t(item.type === 'grand' ? 'type_grand' : 'type_upright');
 
   return (
-    <PianoDetail
-      item={item}
-      prev={prev}
-      next={next}
-      brands={brands}
-      origins={origins}
-      colors={colors}
-      variant="rental"
-    />
+    <>
+      <JsonLd
+        data={pianoJsonLd({
+          locale,
+          path: `/rental/${item.id}`,
+          name,
+          description: t('rental_piano_description', { name, type }),
+          image: item.image,
+          brand: item.brand,
+          sku: item.serial,
+          price: item.price,
+          rental: true,
+        })}
+      />
+      <PianoDetail
+        item={item}
+        prev={prev}
+        next={next}
+        brands={brands}
+        origins={origins}
+        colors={colors}
+        variant="rental"
+      />
+    </>
   );
 }

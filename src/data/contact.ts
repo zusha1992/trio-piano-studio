@@ -13,8 +13,10 @@ export interface Contact {
   external?: boolean;
 }
 
-export const MAPS_URL =
-  'https://www.google.com/maps/place/Yad+Harutsim+St+16,+Jerusalem/@31.7519227,35.2136965,17z/data=!3m1!4b1!4m6!3m5!1s0x1503281e479e1845:0x71df54fdd9c2bb4e!8m2!3d31.7519227!4d35.2162768!16s%2Fg%2F11ghfqf26s?entry=ttu';
+export const MAPS_URL = 'https://maps.app.goo.gl/mwWRDsGqgV65Yykb6';
+
+/** Street coordinates for structured data (the listing pin, not the short URL). */
+export const STUDIO_GEO = { latitude: 31.7519227, longitude: 35.2162768 };
 
 const PHONE_LABEL = { he: '054-333-7341', en: '054-333-7341', ar: '054-333-7341', ru: '054-333-7341' };
 const EMAIL_LABEL = {

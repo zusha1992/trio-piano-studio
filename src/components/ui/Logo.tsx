@@ -3,7 +3,7 @@
 import { useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
 import { useGate } from '@/components/layout/GateContext';
 import { useAdmin } from '@/components/admin/AdminContext';
@@ -18,6 +18,7 @@ const LONG_PRESS_MS = 1500;
 
 export default function Logo({ className = '' }: LogoProps) {
   const locale = useLocale();
+  const t = useTranslations('meta');
   const pathname = usePathname();
   const gate = useGate();
   const admin = useAdmin();
@@ -73,7 +74,7 @@ export default function Logo({ className = '' }: LogoProps) {
     >
       <Image
         src="/images/logo-toolbar.png"
-        alt="Trio Piano Workshop"
+        alt={t('site_name')}
         width={1933}
         height={544}
         draggable={false}

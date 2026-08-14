@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { AnimatePresence, motion, type Variants } from 'framer-motion';
 import Image from 'next/image';
 import {
@@ -90,6 +90,7 @@ function CurtainHalf({ anchor, currentImg }: { anchor: 'top' | 'bottom'; current
  */
 export default function HeroMobile() {
   const locale = useLocale();
+  const t = useTranslations('meta');
   const rtl = isRtl(locale);
   const pathname = usePathname();
   const router = useRouter();
@@ -213,7 +214,7 @@ export default function HeroMobile() {
           >
             <Image
               src="/images/logo.png"
-              alt="Trio Piano Workshop"
+              alt={t('site_name')}
               width={1512}
               height={531}
               priority
