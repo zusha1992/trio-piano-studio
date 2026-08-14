@@ -152,7 +152,16 @@ export default function PianoEditor({
           Type
           <select
             value={item.type}
-            onChange={(e) => saveScalar({ type: e.target.value })}
+            onChange={(e) => {
+              const type = e.target.value;
+              // Grands share a closed-lid height of 100 cm.
+              if (type === 'grand') {
+                setHeight('100');
+                saveScalar({ type, dim_height: 100 });
+              } else {
+                saveScalar({ type });
+              }
+            }}
             className={selectCls}
             style={selectStyle}
           >

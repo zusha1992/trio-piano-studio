@@ -44,9 +44,12 @@ const ILLUSTRATIONS: Record<'grand' | 'upright', Illustration[]> = {
   grand: [
     {
       src: '/images/shop/grand_widthxdepth.webp',
+      // Top-down: keyboard on the left, tail to the right. The vertical
+      // line across the keys is width; the horizontal line along the body
+      // is depth (overall length).
       overlays: [
-        { key: 'width', top: '13%', left: '53%' },
-        { key: 'depth', top: '50%', left: '8%', vertical: true },
+        { key: 'depth', top: '13%', left: '53%' },
+        { key: 'width', top: '50%', left: '8%', vertical: true },
       ],
     },
     {
