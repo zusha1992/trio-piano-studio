@@ -237,7 +237,6 @@ export default function HeroGate() {
                 <Image src={src} alt="" fill priority sizes="50vw" className="object-cover" />
               </motion.div>
             ))}
-            <div className="absolute inset-0 bg-black/20" />
           </motion.div>
 
           {/* ── Categories panel ────────────────────────────── */}

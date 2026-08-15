@@ -8,6 +8,7 @@ import { CONTACTS, ContactIcon } from '@/components/layout/heroShared';
 import { EASE } from '@/lib/motion';
 import { displayFont } from '@/lib/fonts';
 import { pick, isRtl } from '@/lib/i18n';
+import { reportFormConversion } from '@/components/seo/GoogleAdsTag';
 
 const EMAILJS_SERVICE_ID = 'service_52uluqq';
 const EMAILJS_TEMPLATE_ID = 'template_8ozp076';
@@ -50,6 +51,7 @@ export default function ContactView() {
       });
       setStatus('success');
       form.reset();
+      reportFormConversion();
     } catch (err) {
       console.error('EmailJS error:', err);
       setStatus('error');

@@ -136,7 +136,7 @@ export function localBusinessJsonLd({
     sameAs: ['https://www.instagram.com/trio.piano.studio', MAPS_URL],
     areaServed: { '@type': 'City', name: 'Jerusalem' },
     makesOffer: [
-      { '@type': 'Offer', itemOffered: { '@type': 'Product', name: offers.sale, url: `${SITE_URL}/${locale}/store` } },
+      { '@type': 'Offer', itemOffered: { '@type': 'Service', name: offers.sale, url: `${SITE_URL}/${locale}/store` } },
       { '@type': 'Offer', itemOffered: { '@type': 'Service', name: offers.workshop, url: `${SITE_URL}/${locale}/services` } },
       { '@type': 'Offer', itemOffered: { '@type': 'Service', name: offers.rental, url: `${SITE_URL}/${locale}/rental` } },
     ],

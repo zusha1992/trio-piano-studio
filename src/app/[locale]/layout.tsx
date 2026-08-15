@@ -10,6 +10,7 @@ import { GateProvider } from '@/components/layout/GateContext';
 import { ThemeProvider } from '@/components/layout/ThemeContext';
 import AdminProvider from '@/components/admin/AdminProvider';
 import AnalyticsTracker from '@/components/admin/AnalyticsTracker';
+import GoogleAdsTag from '@/components/seo/GoogleAdsTag';
 import { AccessibilityProvider } from '@/components/a11y/AccessibilityContext';
 import { AccessibilityPanel } from '@/components/a11y/AccessibilityMenu';
 import SkipLink from '@/components/a11y/SkipLink';
@@ -142,6 +143,7 @@ export default async function LocaleLayout({
         <script dangerouslySetInnerHTML={{ __html: A11Y_INIT }} />
         <NextIntlClientProvider messages={messages}>
           <AdminProvider>
+            <GoogleAdsTag />
             <AnalyticsTracker />
             <ThemeProvider>
               <AccessibilityProvider>
