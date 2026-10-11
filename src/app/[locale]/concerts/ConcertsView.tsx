@@ -16,9 +16,10 @@ import AdminImageOverlay from '@/components/admin/AdminImageOverlay';
 import EditableText from '@/components/admin/EditableText';
 import PublishButton from '@/components/admin/PublishButton';
 import { useAdmin } from '@/components/admin/AdminContext';
+import { CONTACTS, ContactIcon } from '@/components/layout/heroShared';
 import { EASE } from '@/lib/motion';
 import { displayFont } from '@/lib/fonts';
-import { pick, isRtl, type Locale } from '@/lib/i18n';
+import { pick, pickArray, isRtl, type Locale } from '@/lib/i18n';
 
 const EMAILJS_SERVICE_ID = 'service_52uluqq';
 const EMAILJS_TEMPLATE_ID = 'template_8ozp076';
@@ -27,9 +28,13 @@ const EMAILJS_PUBLIC_KEY = 'FsgqljsX-d4Ea9-Ai';
 export default function ConcertsView({
   concerts,
   galleryImages,
+  teaser,
+  comingSoon: comingSoonInit,
 }: {
   concerts: Concert[];
   galleryImages: EntityImage[];
+  teaser: Record<'en' | 'he' | 'ar' | 'ru', string[]>;
+  comingSoon: boolean;
 }) {
   const t = useTranslations('concerts');
   const locale = useLocale() as Locale;
@@ -40,14 +45,39 @@ export default function ConcertsView({
   const { editMode } = useAdmin();
   const router = useRouter();
 
-  // Public view shows the soonest published concert. In edit mode the admin can
-  // select any concert (drafts included) to edit.
+  // "Coming soon" teaser toggle (site setting). The public sees the teaser
+  // instead of the concert list while enabled; admins always see the full
+  // manager so they can build the first event and flip it off.
+  const [comingSoon, setComingSoon] = useState(comingSoonInit);
+  useEffect(() => setComingSoon(comingSoonInit), [comingSoonInit]);
+  const setTeaserMode = async (next: boolean) => {
+    setComingSoon(next);
+    await fetch('/api/admin/settings', {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ key: 'concerts_coming_soon', value: next ? '1' : '0' }),
+    });
+    router.refresh();
+  };
+
+  // Featured concert: the soonest still-upcoming one, otherwise the most recent
+  // past concert (so its poster/details stay on show). In edit mode the admin
+  // can select any concert — drafts included — to edit.
+  const todayISO = new Date().toISOString().slice(0, 10);
   const published = concerts.filter((c) => c.published !== false);
+  const byDate = [...published].sort((a, b) => (a.date < b.date ? -1 : 1));
+  const featured = byDate.find((c) => c.date >= todayISO) ?? byDate[byDate.length - 1];
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const activeId = selectedId ?? published[0]?.id ?? concerts[0]?.id ?? null;
+  const activeId = selectedId ?? featured?.id ?? concerts[0]?.id ?? null;
   const concert = editMode
-    ? concerts.find((c) => c.id === activeId) ?? published[0] ?? concerts[0]
-    : published[0];
+    ? concerts.find((c) => c.id === activeId) ?? featured ?? concerts[0]
+    : featured;
+  const isPast = concert ? concert.date < todayISO : false;
+
+  // Public visitors see the teaser only while the flag is on. Admins keep the
+  // full page (plus a teaser editor) so nothing is ever hidden from them.
+  const showTeaserPublic = !editMode && comingSoon;
+  const teaserParagraphs = pickArray(teaser, locale);
 
   const addConcert = async () => {
     const res = await fetch('/api/admin/concert', { method: 'POST' });
@@ -312,10 +342,71 @@ export default function ConcertsView({
           </div>
         )}
 
+        {/* Admin: coming-soon teaser control + live preview of the editable copy.
+            Shown alongside the concert manager so nothing is hidden in admin. */}
+        {editMode && (
+          <div className="ms-4 mt-8 rounded-2xl border border-dashed border-neutral-300 p-5 sm:ms-8 md:ms-14 lg:ms-24">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-[11px] uppercase tracking-[0.2em] text-neutral-500">Coming-soon teaser</p>
+                <p className="mt-1 text-xs text-neutral-400">
+                  {comingSoon
+                    ? 'Visitors see the teaser below instead of the concert list.'
+                    : 'Visitors see the concert list. The teaser is hidden.'}
+                </p>
+              </div>
+              <div className="inline-flex rounded-full bg-neutral-100 p-1 text-[11px]">
+                <button
+                  type="button"
+                  onClick={() => setTeaserMode(true)}
+                  className={`rounded-full px-3.5 py-1.5 transition-colors ${
+                    comingSoon ? 'bg-neutral-900 text-white' : 'text-neutral-500 hover:text-neutral-900'
+                  }`}
+                >
+                  Coming soon
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTeaserMode(false)}
+                  className={`rounded-full px-3.5 py-1.5 transition-colors ${
+                    !comingSoon ? 'bg-neutral-900 text-white' : 'text-neutral-500 hover:text-neutral-900'
+                  }`}
+                >
+                  Live concerts
+                </button>
+              </div>
+            </div>
+            <div className="mt-4 border-t border-neutral-200 pt-2">
+              <Teaser
+                paragraphs={teaserParagraphs}
+                teaser={teaser}
+                locale={locale}
+                titleFont={titleFont}
+                comingSoon={t('coming_soon')}
+                invite={t('teaser_invite')}
+                className="mt-2"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Public teaser — replaces the concert list while "coming soon" is on. */}
+        {showTeaserPublic && (
+          <Teaser
+            paragraphs={teaserParagraphs}
+            teaser={teaser}
+            locale={locale}
+            titleFont={titleFont}
+            comingSoon={t('coming_soon')}
+            invite={t('teaser_invite')}
+            className="mt-16 md:mt-24"
+          />
+        )}
+
         {/* Featured concert: details (one side) beside the poster (the other).
             The square poster sets the row height and the details column is
             centered to match it. */}
-        {concert && (
+        {!showTeaserPublic && concert && (
           <div className="mt-16 grid grid-cols-1 gap-x-14 gap-y-10 md:mt-20 md:grid-cols-2 md:items-stretch">
             {/* Details — concert row + tempting artist description */}
             <motion.div {...reveal} className="order-2 flex flex-col md:order-1 md:justify-center">
@@ -339,13 +430,22 @@ export default function ConcertsView({
                       {pick(concert.name, locale)}
                     </h2>
                   </EditableText>
-                  <button
-                    onClick={revealForm}
-                    className="shrink-0 cursor-pointer rounded-full bg-[color:var(--c-cat)] px-6 py-2.5 text-[11px] uppercase tracking-[0.2em] text-[var(--c-bg)] transition-colors duration-300 hover:bg-[color:var(--c-cat-active)]"
-                    style={{ fontFamily: titleFont, fontWeight: 400 }}
-                  >
-                    {t('register')}
-                  </button>
+                  {isPast ? (
+                    <span
+                      className="shrink-0 rounded-full border border-[var(--c-border)] px-6 py-2.5 text-[11px] uppercase tracking-[0.2em] text-[var(--c-muted)]"
+                      style={{ fontFamily: titleFont, fontWeight: 400 }}
+                    >
+                      {t('ended')}
+                    </span>
+                  ) : (
+                    <button
+                      onClick={revealForm}
+                      className="shrink-0 cursor-pointer rounded-full bg-[color:var(--c-cat)] px-6 py-2.5 text-[11px] uppercase tracking-[0.2em] text-[var(--c-bg)] transition-colors duration-300 hover:bg-[color:var(--c-cat-active)]"
+                      style={{ fontFamily: titleFont, fontWeight: 400 }}
+                    >
+                      {t('register')}
+                    </button>
+                  )}
                 </div>
                 <EditableText
                   entity="concert"
@@ -428,24 +528,26 @@ export default function ConcertsView({
         )}
 
         {/* Photo gallery from past concerts */}
-        <motion.div {...reveal} className="mt-16 md:mt-24">
-          {gallery.length > 0 && (
-            <ImageCarousel
-              images={gallery}
-              isHe={rtl}
-              frameClassName="aspect-[4/5] sm:aspect-[16/9] lg:aspect-[21/9]"
+        {!showTeaserPublic && (
+          <motion.div {...reveal} className="mt-16 md:mt-24">
+            {gallery.length > 0 && (
+              <ImageCarousel
+                images={gallery}
+                isHe={rtl}
+                frameClassName="aspect-[4/5] sm:aspect-[16/9] lg:aspect-[21/9]"
+              />
+            )}
+            <AdminGalleryEditor
+              entityType="gallery"
+              entityId="concerts"
+              images={galleryImages}
+              label="Past concerts gallery"
             />
-          )}
-          <AdminGalleryEditor
-            entityType="gallery"
-            entityId="concerts"
-            images={galleryImages}
-            label="Past concerts gallery"
-          />
-        </motion.div>
+          </motion.div>
+        )}
 
         {/* Registration — revealed below on demand */}
-        {concert && (
+        {!showTeaserPublic && concert && (
         <AnimatePresence initial={false}>
           {showForm && (
             <motion.div
@@ -676,6 +778,74 @@ function ConcertSettings({
           published={concert.published !== false}
           onChange={(next) => onSave(concert.id, { published: next })}
         />
+      </div>
+    </div>
+  );
+}
+
+// Coming-soon teaser: a big "Coming Soon" headline, an editable inviting
+// paragraph (stored under about_sections/'concerts_teaser'), and the studio
+// contact shortcuts so interest still converts. Rendered read-only to the
+// public and, in edit mode, with inline pencils for the paragraph.
+function Teaser({
+  paragraphs,
+  teaser,
+  locale,
+  titleFont,
+  comingSoon,
+  invite,
+  className = '',
+}: {
+  paragraphs: string[];
+  teaser: Record<'en' | 'he' | 'ar' | 'ru', string[]>;
+  locale: Locale;
+  titleFont: string;
+  comingSoon: string;
+  invite: string;
+  className?: string;
+}) {
+  return (
+    <div className={`mx-auto flex max-w-2xl flex-col items-center text-center ${className}`}>
+      <h2
+        className="text-5xl leading-[0.95] tracking-tight text-[var(--c-text)] sm:text-6xl lg:text-7xl"
+        style={{ fontFamily: titleFont, fontWeight: 500 }}
+      >
+        {comingSoon}
+      </h2>
+
+      <EditableText
+        entity="about_section"
+        id="concerts_teaser"
+        column="body"
+        value={teaser[locale] ?? teaser.en}
+        array
+        label="Coming-soon paragraph"
+        wrapAs="div"
+        className="mt-8 max-w-xl"
+      >
+        <div className="space-y-4">
+          {paragraphs.map((p, i) => (
+            <p key={i} className="text-base leading-relaxed text-[var(--c-muted)] sm:text-lg">
+              {p}
+            </p>
+          ))}
+        </div>
+      </EditableText>
+
+      <p className="mt-10 text-[12px] uppercase tracking-[0.25em] text-[var(--c-text)]">{invite}</p>
+      <div className="mt-5 flex items-center justify-center gap-5">
+        {CONTACTS.map((c) => (
+          <a
+            key={c.icon}
+            href={c.href}
+            target={c.external ? '_blank' : undefined}
+            rel={c.external ? 'noopener noreferrer' : undefined}
+            aria-label={pick(c.label, locale)}
+            className="text-[color:var(--c-cat)] transition-colors duration-300 hover:text-[color:var(--c-cat-active)]"
+          >
+            <ContactIcon src={`/assets/icons/${c.icon}`} size={22} />
+          </a>
+        ))}
       </div>
     </div>
   );

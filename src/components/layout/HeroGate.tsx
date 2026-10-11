@@ -13,6 +13,7 @@ import {
   CONTACTS,
   ContactIcon,
   DEFAULT_IMG,
+  homeImagePosition,
 } from '@/components/layout/heroShared';
 import { useTheme } from '@/components/layout/ThemeContext';
 import LanguageToggle from '@/components/layout/LanguageToggle';
@@ -189,10 +190,10 @@ export default function HeroGate() {
             transition={{ duration: 1.6, ease: EASE }}
           >
             <Image
-              src="/images/logo.png"
+              src="/images/logo.webp"
               alt={t('site_name')}
-              width={1512}
-              height={531}
+              width={1281}
+              height={570}
               style={{
                 height: '190px',
                 width: 'auto',
@@ -225,6 +226,7 @@ export default function HeroGate() {
               priority
               sizes="50vw"
               className="object-cover"
+              style={{ objectPosition: homeImagePosition(currentImg) }}
             />
             {ALL_IMAGES.map((src) => (
               <motion.div
@@ -234,7 +236,15 @@ export default function HeroGate() {
                 animate={{ opacity: src === currentImg ? 1 : 0 }}
                 transition={{ duration: SWAP_DURATION, ease: EASE }}
               >
-                <Image src={src} alt="" fill priority sizes="50vw" className="object-cover" />
+                <Image
+                  src={src}
+                  alt=""
+                  fill
+                  priority
+                  sizes="50vw"
+                  className="object-cover"
+                  style={{ objectPosition: homeImagePosition(src) }}
+                />
               </motion.div>
             ))}
           </motion.div>

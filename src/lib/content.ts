@@ -279,6 +279,32 @@ export async function getConcertGallery(): Promise<EntityImage[]> {
   return images.get('concerts') ?? [];
 }
 
+/** Editable "coming soon" teaser paragraph(s), one array per language. Stored
+ *  in about_sections under the 'concerts_teaser' key so it reuses the inline
+ *  editor + auto-translation pipeline. */
+export async function getConcertTeaser(): Promise<Record<'en' | 'he' | 'ar' | 'ru', string[]>> {
+  const row = await db()
+    .prepare('SELECT body_en, body_he, body_ar, body_ru FROM about_sections WHERE key = ?')
+    .bind('concerts_teaser')
+    .first<{ body_en: string | null; body_he: string | null; body_ar: string | null; body_ru: string | null }>();
+  return {
+    en: parseBody(row?.body_en ?? null),
+    he: parseBody(row?.body_he ?? null),
+    ar: parseBody(row?.body_ar ?? null),
+    ru: parseBody(row?.body_ru ?? null),
+  };
+}
+
+// ── Site settings (KV) ──────────────────────────────────────────────────────
+/** Read a single site setting; null when unset. */
+export async function getSetting(key: string): Promise<string | null> {
+  const row = await db()
+    .prepare('SELECT value FROM site_settings WHERE key = ?')
+    .bind(key)
+    .first<{ value: string }>();
+  return row?.value ?? null;
+}
+
 // ── Workshop categories + services ──────────────────────────────────────────
 interface CategoryRow {
   id: string;

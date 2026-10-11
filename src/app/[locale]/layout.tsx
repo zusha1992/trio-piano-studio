@@ -14,6 +14,7 @@ import GoogleAdsTag from '@/components/seo/GoogleAdsTag';
 import { AccessibilityProvider } from '@/components/a11y/AccessibilityContext';
 import { AccessibilityPanel } from '@/components/a11y/AccessibilityMenu';
 import SkipLink from '@/components/a11y/SkipLink';
+import WhatsAppButton from '@/components/layout/WhatsAppButton';
 import '../globals.css';
 
 // Set the theme class before paint so a dark preference doesn't flash light.
@@ -154,6 +155,7 @@ export default async function LocaleLayout({
                     {children}
                   </main>
                   <Hero />
+                  <WhatsAppButton />
                   <AccessibilityPanel />
                 </GateProvider>
               </AccessibilityProvider>

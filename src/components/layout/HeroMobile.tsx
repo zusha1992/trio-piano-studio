@@ -11,6 +11,7 @@ import {
   CONTACTS,
   ContactIcon,
   DEFAULT_IMG,
+  homeImagePosition,
 } from '@/components/layout/heroShared';
 import { useGate } from '@/components/layout/GateContext';
 import LanguageToggle from '@/components/layout/LanguageToggle';
@@ -62,7 +63,15 @@ function CurtainHalf({ anchor, currentImg }: { anchor: 'top' | 'bottom'; current
   const [base, setBase] = useState(currentImg);
   return (
     <div className={`absolute inset-x-0 ${edge} h-[200%]`}>
-      <Image src={base} alt="" fill priority sizes="100vw" className="object-cover" />
+      <Image
+        src={base}
+        alt=""
+        fill
+        priority
+        sizes="100vw"
+        className="object-cover"
+        style={{ objectPosition: homeImagePosition(base) }}
+      />
       <AnimatePresence>
         {currentImg !== base && (
           <motion.div
@@ -73,7 +82,15 @@ function CurtainHalf({ anchor, currentImg }: { anchor: 'top' | 'bottom'; current
             transition={{ duration: SWAP_DURATION, ease: EASE }}
             onAnimationComplete={() => setBase(currentImg)}
           >
-            <Image src={currentImg} alt="" fill priority sizes="100vw" className="object-cover" />
+            <Image
+              src={currentImg}
+              alt=""
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover"
+              style={{ objectPosition: homeImagePosition(currentImg) }}
+            />
           </motion.div>
         )}
       </AnimatePresence>
@@ -213,10 +230,10 @@ export default function HeroMobile() {
             transition={{ duration: 1.4, ease: EASE }}
           >
             <Image
-              src="/images/logo.png"
+              src="/images/logo.webp"
               alt={t('site_name')}
-              width={1512}
-              height={531}
+              width={1281}
+              height={570}
               priority
               style={{ height: 120, width: 'auto', filter: 'none' }}
             />

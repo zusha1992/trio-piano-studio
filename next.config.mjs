@@ -19,4 +19,10 @@ export default withNextIntl(nextConfig);
 
 // Makes Cloudflare bindings (D1, R2, env) available during `next dev`.
 // No-ops outside local development.
-initOpenNextCloudflareForDev();
+// wrangler.local.jsonc has only D1 and R2. The full config's AI and service
+// bindings open a remote preview session, and when that login is rejected the
+// context is never created — every database page then crashes.
+initOpenNextCloudflareForDev({
+  configPath: './wrangler.local.jsonc',
+  remoteBindings: false,
+});

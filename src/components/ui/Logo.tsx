@@ -73,10 +73,10 @@ export default function Logo({ className = '' }: LogoProps) {
       style={{ touchAction: 'manipulation' }}
     >
       <Image
-        src="/images/logo-toolbar.png"
+        src="/images/logo-toolbar.webp"
         alt={t('site_name')}
-        width={1933}
-        height={544}
+        width={342}
+        height={120}
         draggable={false}
         style={{
           height: '30px',

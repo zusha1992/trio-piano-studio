@@ -51,7 +51,10 @@
     "done_title": "Registration confirmed",
     "done_desc": "Save this barcode as your confirmation for the day of the event",
     "done_email": "A confirmation was sent to",
-    "download": "Download barcode"
+    "download": "Download barcode",
+    "coming_soon": "Coming Soon",
+    "teaser_invite": "Want to be the first to know?",
+    "ended": "This concert has ended"
   },
   "about": {
     "hero_title": "About",

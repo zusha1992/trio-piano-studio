@@ -71,6 +71,11 @@ export const CATEGORIES: Category[] = [
 
 export const DEFAULT_IMG = '/images/home/home.webp';
 
+// The home photo is a tall storefront. `object-cover` centers it and crops the
+// sign. 1% keeps the framing at the top of the picture.
+export const homeImagePosition = (src: string) =>
+  src === DEFAULT_IMG ? 'center 1%' : 'center';
+
 // All hero images, used to preload/decode up front for instant swaps.
 export const ALL_IMAGES = [DEFAULT_IMG, ...CATEGORIES.map((c) => c.img)];
 

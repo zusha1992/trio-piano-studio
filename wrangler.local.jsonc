@@ -1,0 +1,24 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "main": ".open-next/worker.js",
+  "name": "web",
+  "compatibility_date": "2024-12-30",
+  "compatibility_flags": [
+    "nodejs_compat",
+    "global_fetch_strictly_public"
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "trio-piano-studio",
+      "database_id": "54f54938-7d4f-46a1-bb55-f9dc12a506ad",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "MEDIA",
+      "bucket_name": "trio-piano-studio-media"
+    }
+  ]
+}
